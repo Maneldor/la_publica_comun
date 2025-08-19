@@ -1,0 +1,55 @@
+# =====================================
+# CRONTAB PARA BACKUPS AUTOMÁTICOS
+# La Pública - Sistema de Mensajería
+# =====================================
+
+# Variables de entorno para los scripts
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=admin@lapublica.es
+
+# Configuración de backups
+BACKUP_DIR=/app/backups
+DB_PASSWORD=your_secure_password
+REDIS_PASSWORD=your_redis_password
+S3_BUCKET=lapublica-backups
+RETENTION_DAYS=7
+KEEP_LOCAL_BACKUP=false
+
+# =====================================
+# BACKUPS PROGRAMADOS
+# =====================================
+
+# Backup completo diario a las 2:00 AM
+0 2 * * * /app/scripts/backup-database.sh >> /app/logs/backup.log 2>&1
+
+# Backup incremental cada 6 horas (6:00, 12:00, 18:00)
+0 6,12,18 * * * /app/scripts/backup-database.sh >> /app/logs/backup-incremental.log 2>&1
+
+# Limpieza de logs antiguos cada domingo a las 3:00 AM
+0 3 * * 0 find /app/logs -name "*.log" -mtime +30 -delete
+
+# Verificación de integridad de backups cada lunes a las 4:00 AM
+0 4 * * 1 /app/scripts/verify-backups.sh >> /app/logs/backup-verify.log 2>&1
+
+# Limpieza de sesiones expiradas cada hora
+0 * * * * docker exec la_publica_postgres psql -U la_publica_user -d la_publica_prod -c "SELECT cleanup_old_sessions();" >> /app/logs/cleanup.log 2>&1
+
+# Métricas del sistema cada 15 minutos
+*/15 * * * * curl -X POST http://localhost:3001/api/internal/record-metrics --silent >> /app/logs/metrics.log 2>&1
+
+# =====================================
+# EJEMPLOS DE INSTALACIÓN
+# =====================================
+
+# Para instalar este crontab:
+# 1. Copiar este archivo al servidor
+# 2. Ajustar las variables de entorno según tu configuración
+# 3. Instalar: crontab crontab-backup
+# 4. Verificar: crontab -l
+
+# Para backups más frecuentes (cada hora):
+# 0 * * * * /app/scripts/backup-database.sh >> /app/logs/backup-hourly.log 2>&1
+
+# Para backup semanal completo (domingos a la 1:00 AM):
+# 0 1 * * 0 BACKUP_TYPE=full /app/scripts/backup-database.sh >> /app/logs/backup-weekly.log 2>&1

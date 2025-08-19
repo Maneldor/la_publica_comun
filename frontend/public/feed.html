@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Pública - Feed Social</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo y búsqueda -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold bg-blue-500">
+                            LP
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">La pública</div>
+                            <div class="text-xs text-gray-500">Comunitat Social</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative ml-8">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Buscar membres, grups, activitats..."
+                            class="w-80 pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        />
+                    </div>
+                </div>
+
+                <!-- Acciones del header -->
+                <div class="flex items-center space-x-4">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-600">
+                        <span>+</span>
+                        <span>Crear Post</span>
+                    </button>
+                    
+                    <div class="flex items-center space-x-2">
+                        <div class="relative">
+                            <button class="p-2 hover:bg-gray-100 rounded-full">
+                                🔔
+                            </button>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        </div>
+                        
+                        <div class="relative">
+                            <button class="p-2 hover:bg-gray-100 rounded-full">
+                                💬
+                            </button>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">7</span>
+                        </div>
+
+                        <div class="flex items-center space-x-2 ml-4">
+                            <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                MA
+                            </div>
+                            <span class="text-sm font-medium">MA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout principal de 3 columnas -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-12 gap-6">
+            
+            <!-- COLUMNA IZQUIERDA - Navegación -->
+            <div class="col-span-3">
+                <div class="sticky top-24 space-y-6">
+                    
+                    <!-- Seguint section -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-4 border-b border-gray-100">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-green-600">👥</span>
+                                <h3 class="font-semibold text-gray-900">Seguint</h3>
+                            </div>
+                            
+                            <!-- Tabs -->
+                            <div class="flex space-x-1 mb-4">
+                                <button class="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                    ACTIUS
+                                </button>
+                                <button class="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900">
+                                    RECENTS
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3">
+                            <!-- Usuario Roberto -->
+                            <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
+                                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    RJ
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">Roberto Jiménez</div>
+                                    <div class="text-xs text-gray-500">@roberto_marketing</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Usuario Carmen -->
+                            <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    CR
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">Carmen Ruiz</div>
+                                    <div class="text-xs text-gray-500">@carmen_designer</div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3 pt-3 border-t border-gray-100">
+                                <button class="text-xs text-gray-600 hover:underline">VEURE TOT</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grups section -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-4 border-b border-gray-100">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-blue-600">👥</span>
+                                <h3 class="font-semibold text-gray-900">Grups</h3>
+                            </div>
+                            
+                            <!-- Tabs -->
+                            <div class="flex space-x-1 mb-4">
+                                <button class="px-3 py-1 text-xs font-medium text-gray-600">
+                                    NOUS
+                                </button>
+                                <button class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                    ACTIUS
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3">
+                            <!-- Grupo Sevilla -->
+                            <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
+                                <div class="w-8 h-8 rounded-lg overflow-hidden bg-orange-300">
+                                    <div class="w-full h-full flex items-center justify-center text-white text-sm font-medium">
+                                        SG
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">Sevilla Gastronomí...</div>
+                                    <div class="text-xs text-gray-500">1 membres</div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3 pt-3 border-t border-gray-100">
+                                <button class="text-xs text-gray-600 hover:underline">VEURE TOT</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anuncis section -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-4 border-b border-gray-100">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-5 h-5 bg-green-500 rounded flex items-center justify-center">
+                                    <span class="text-white text-xs">📄</span>
+                                </div>
+                                <h3 class="font-semibold text-gray-900">Anuncis</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA CENTRAL - Feed -->
+            <div class="col-span-6">
+                <div class="space-y-6">
+                    
+                    <!-- Header de Activitat -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-6">
+                            <h1 class="text-xl font-semibold text-gray-900 mb-4">Activitat</h1>
+                            
+                            <!-- Filtros -->
+                            <div class="flex space-x-1 mb-6">
+                                <button class="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white">
+                                    Mostrar todo
+                                </button>
+                                <span class="text-gray-400 self-center">-</span>
+                                <button class="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-100">
+                                    por nuevos posts
+                                </button>
+                            </div>
+
+                            <!-- Input para crear post -->
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    MA
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Què estàs pensant, Manel?"
+                                    class="flex-1 p-3 bg-gray-100 rounded-full focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Posts -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-4">
+                            <!-- Header del post -->
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                        GE
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">Gestor Empresa</div>
+                                        <div class="text-sm text-gray-500">5 ago 2025</div>
+                                    </div>
+                                </div>
+                                <button class="p-1 hover:bg-gray-100 rounded-full">
+                                    <span class="text-gray-400">⋯</span>
+                                </button>
+                            </div>
+
+                            <!-- Contenido -->
+                            <div class="mb-3">
+                                <p class="text-gray-900">Haciendo pruebas con archivos</p>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                                    <span>❤️</span>
+                                    <span class="text-sm">Me gusta</span>
+                                </button>
+                                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                                    <span>💬</span>
+                                    <span class="text-sm">Comentar</span>
+                                </button>
+                                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                                    <span>↗️</span>
+                                    <span class="text-sm">Compartir</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Segundo post -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-4">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                        GE
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">Gestor Empresa</div>
+                                        <div class="text-sm text-gray-500">5 ago 2025</div>
+                                    </div>
+                                </div>
+                                <button class="p-1 hover:bg-gray-100 rounded-full">
+                                    <span class="text-gray-400">⋯</span>
+                                </button>
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="text-gray-900">Haciendo pruebas😊</p>
+                                <div class="mt-3">
+                                    <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <span class="text-gray-500">Imagen del post</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                                    <span>❤️</span>
+                                    <span class="text-sm">Me gusta</span>
+                                </button>
+                                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                                    <span>💬</span>
+                                    <span class="text-sm">Comentar</span>
+                                </button>
+                                <button class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                                    <span>↗️</span>
+                                    <span class="text-sm">Compartir</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA - Widgets -->
+            <div class="col-span-3">
+                <div class="sticky top-24 space-y-6">
+                    
+                    <!-- Completar perfil -->
+                    <div class="bg-white rounded-lg shadow-sm border p-4">
+                        <h3 class="font-semibold text-gray-900 mb-4">Completa el teu Perfil</h3>
+                        
+                        <!-- Progreso circular -->
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="relative w-16 h-16">
+                                <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                                    <path
+                                        class="text-gray-200"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        fill="none"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    />
+                                    <path
+                                        class="text-green-500"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-dasharray="20, 100"
+                                        stroke-linecap="round"
+                                        fill="none"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    />
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-sm font-semibold text-green-600">20%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <button class="text-sm font-medium text-blue-600 hover:underline">
+                                Completar Perfil
+                            </button>
+                        </div>
+
+                        <!-- Lista de tareas -->
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 rounded-full border-2 border-green-500 bg-green-500 flex items-center justify-center">
+                                        <div class="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                    <span class="text-green-600">Informació general</span>
+                                </div>
+                                <span class="text-green-600 font-medium">5/6</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                                    <span class="text-gray-600">Experiència laboral</span>
+                                </div>
+                                <span class="text-gray-500 font-medium">0/3</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                                    <span class="text-gray-600">Foto de perfil</span>
+                                </div>
+                                <span class="text-gray-500 font-medium">0/1</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                                    <span class="text-gray-600">Foto de portada</span>
+                                </div>
+                                <span class="text-gray-500 font-medium">0/1</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                                    <span class="text-gray-600">Xarxes socials</span>
+                                </div>
+                                <span class="text-gray-500 font-medium">0/1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget de Empresas -->
+                    <div class="bg-white rounded-lg shadow-sm border p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-gray-900">Empreses</h3>
+                            <button class="text-sm text-blue-600 hover:underline">Ver totes</button>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xs font-medium">
+                                    8
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">Consultoria Empr...</div>
+                                    <div class="text-xs text-gray-500">
+                                        15 empleats • Sevilla
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xs font-medium">
+                                    9
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">Marketing Digital ...</div>
+                                    <div class="text-xs text-gray-500">
+                                        25 empleats • Barcelona
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xs font-medium">
+                                    8
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">TechSolutions S.A.</div>
+                                    <div class="text-xs text-gray-500">
+                                        75 empleats • Madrid
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

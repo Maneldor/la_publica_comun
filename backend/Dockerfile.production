@@ -1,0 +1,115 @@
+# =====================================
+# DOCKERFILE PARA PRODUCCIÓN
+# La Pública - Sistema de Mensajería
+# =====================================
+
+# Usar Node.js 18 LTS Alpine para tamaño mínimo
+FROM node:18-alpine AS base
+
+# Instalar dependencias del sistema necesarias
+RUN apk add --no-cache \
+    dumb-init \
+    postgresql-client \
+    curl \
+    tzdata \
+    && rm -rf /var/cache/apk/*
+
+# Configurar timezone
+ENV TZ=Europe/Madrid
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Crear usuario no-root para seguridad
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S lapublica -u 1001 -G nodejs
+
+# =====================================
+# STAGE: DEPENDENCIES
+# =====================================
+FROM base AS dependencies
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+COPY prisma ./prisma
+
+# Instalar dependencias de producción
+RUN npm ci --only=production --no-audit --no-fund && \
+    npm cache clean --force
+
+# Generar cliente de Prisma
+RUN npx prisma generate
+
+# =====================================
+# STAGE: BUILD
+# =====================================
+FROM dependencies AS build
+
+# Instalar dependencias de desarrollo para el build
+RUN npm ci --no-audit --no-fund
+
+# Copiar código fuente
+COPY . .
+
+# Construir aplicación (si hay proceso de build)
+# RUN npm run build
+
+# Limpiar dependencias de desarrollo
+RUN npm prune --production
+
+# =====================================
+# STAGE: PRODUCTION
+# =====================================
+FROM base AS production
+
+# Configurar variables de entorno
+ENV NODE_ENV=production \
+    PORT=3001 \
+    NPM_CONFIG_CACHE=/tmp/.npm \
+    NODE_OPTIONS="--max-old-space-size=1024"
+
+WORKDIR /app
+
+# Copiar dependencias instaladas
+COPY --from=build --chown=lapublica:nodejs /app/node_modules ./node_modules
+COPY --from=build --chown=lapublica:nodejs /app/package*.json ./
+
+# Copiar código de aplicación
+COPY --chown=lapublica:nodejs . .
+
+# Crear directorios necesarios
+RUN mkdir -p /app/logs /app/uploads /app/tmp && \
+    chown -R lapublica:nodejs /app/logs /app/uploads /app/tmp
+
+# Configurar permisos
+RUN chmod +x /app/scripts/*.js
+
+# Exponer puerto
+EXPOSE 3001 9090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:3001/health || exit 1
+
+# Cambiar a usuario no-root
+USER lapublica
+
+# Usar dumb-init para manejo de señales
+ENTRYPOINT ["dumb-init", "--"]
+
+# Comando por defecto
+CMD ["node", "auth-server-simple.js"]
+
+# =====================================
+# LABELS para metadatos
+# =====================================
+LABEL maintainer="La Pública Team <admin@lapublica.es>" \
+      version="1.0.0" \
+      description="Sistema de mensajería para empleados del sector público español" \
+      org.opencontainers.image.title="La Pública API" \
+      org.opencontainers.image.description="API backend para la red social La Pública" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.vendor="La Pública" \
+      org.opencontainers.image.url="https://lapublica.es" \
+      org.opencontainers.image.source="https://github.com/lapublica/backend" \
+      org.opencontainers.image.licenses="MIT"

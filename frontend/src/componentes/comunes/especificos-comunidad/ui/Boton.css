@@ -1,0 +1,44 @@
+/* src/componentes/ui/Boton.css */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.875rem; /* 14px */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+/* Variante Primaria (color sólido) */
+.btn--primario {
+  background-color: var(--color-primario);
+  color: white;
+  border-color: var(--color-primario);
+}
+.btn--primario:hover {
+  opacity: 0.9;
+}
+
+/* Variante Secundaria (borde) */
+.btn--secundario {
+  background-color: transparent;
+  color: var(--foreground);
+  border-color: var(--border-color);
+}
+.btn--secundario:hover {
+  background-color: var(--background);
+  border-color: var(--foreground);
+}
+
+/* Variante de Texto (sin borde ni fondo) */
+.btn--texto {
+  background-color: transparent;
+  color: var(--color-primario);
+}
+.btn--texto:hover {
+  background-color: color-mix(in srgb, var(--color-primario) 10%, transparent);
+}

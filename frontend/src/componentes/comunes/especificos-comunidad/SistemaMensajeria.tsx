@@ -1,0 +1,909 @@
+'use client';
+
+import {
+  Building,
+  Check,
+  CheckCheck,
+  Circle,
+  Image,
+  Maximize2,
+  MessageCircle,
+  Minimize2,
+  MoreHorizontal,
+  Paperclip,
+  Phone,
+  Plus,
+  Search,
+  Send,
+  Shield,
+  Smile,
+  Users,
+  Video,
+  X,
+} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Conversacion, Mensaje, TipoUsuario, Usuario } from '../../../../tipos/redSocial';
+import { Boton } from './ui/Boton';
+
+interface PropiedadesSistemaMensajeria {
+  usuario: Usuario;
+  conversaciones: Conversacion[];
+  onEnviarMensaje: (conversacionId: string, contenido: string, archivos?: File[]) => Promise<void>;
+  onCrearConversacion: (participantesIds: string[]) => Promise<Conversacion>;
+  onMarcarLeido: (conversacionId: string) => Promise<void>;
+  onArchivarConversacion: (conversacionId: string) => Promise<void>;
+  onEliminarConversacion: (conversacionId: string) => Promise<void>;
+  onBuscarUsuarios: (query: string) => Promise<Usuario[]>;
+  abierto: boolean;
+  onCerrar: () => void;
+  minimizado?: boolean;
+  onToggleMinimizar?: () => void;
+}
+
+interface PropiedadesListaConversaciones {
+  conversaciones: Conversacion[];
+  conversacionActiva?: string;
+  onSeleccionarConversacion: (id: string) => void;
+  onCrearNuevaConversacion: () => void;
+  usuario: Usuario;
+}
+
+interface PropiedadesChatVentana {
+  conversacion: Conversacion;
+  usuario: Usuario;
+  onEnviarMensaje: (contenido: string, archivos?: File[]) => Promise<void>;
+  onCerrarChat: () => void;
+  mensajes: Mensaje[];
+}
+
+interface PropiedadesNuevaConversacion {
+  abierto: boolean;
+  onCerrar: () => void;
+  onCrear: (participantesIds: string[]) => Promise<void>;
+  usuario: Usuario;
+  onBuscarUsuarios: (query: string) => Promise<Usuario[]>;
+}
+
+interface UsuarioBasico {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  avatar?: string;
+  tipo: TipoUsuario;
+  online?: boolean;
+  ultimaConexion?: Date;
+}
+
+// Función auxiliar para obtener un usuario básico desde un ID de participante
+const obtenerUsuarioBasico = (participanteId: string): UsuarioBasico => ({
+  id: participanteId,
+  nombre: 'Usuario',
+  apellidos: 'Ejemplo',
+  avatar: '',
+  tipo: 'miembro' as TipoUsuario,
+  online: false,
+  ultimaConexion: new Date(),
+});
+
+// Componente para mostrar estado de conexión
+const EstadoConexion: React.FC<{ online: boolean; ultimaVez?: Date }> = ({ online, ultimaVez }) => {
+  const formatearUltimaVez = (fecha: Date) => {
+    const ahora = new Date();
+    const diff = ahora.getTime() - fecha.getTime();
+    const minutos = Math.floor(diff / 60000);
+    const horas = Math.floor(diff / 3600000);
+    const dias = Math.floor(diff / 86400000);
+
+    if (minutos < 1) return 'Ahora';
+    if (minutos < 60) return `Hace ${minutos}m`;
+    if (horas < 24) return `Hace ${horas}h`;
+    if (dias < 7) return `Hace ${dias}d`;
+    return 'Hace tiempo';
+  };
+
+  return (
+    <div className="flex items-center space-x-1 text-xs text-gray-500">
+      <Circle size={8} className={`${online ? 'text-green-500 fill-current' : 'text-gray-400'}`} />
+      <span>
+        {online ? 'En línea' : ultimaVez ? formatearUltimaVez(ultimaVez) : 'Desconectado'}
+      </span>
+    </div>
+  );
+};
+
+// Lista de conversaciones
+const ListaConversaciones: React.FC<PropiedadesListaConversaciones> = ({
+  conversaciones,
+  conversacionActiva,
+  onSeleccionarConversacion,
+  onCrearNuevaConversacion,
+  usuario,
+}) => {
+  const [busqueda, setBusqueda] = useState('');
+  const [filtro, setFiltro] = useState<'todas' | 'no-leidas' | 'archivadas'>('todas');
+
+  const conversacionesFiltradas = conversaciones.filter((conv) => {
+    // Filtro por búsqueda
+    if (busqueda) {
+      const otroParticipanteId = conv.participantes.find((p) => p !== usuario.id);
+      const coincideBusqueda =
+        otroParticipanteId?.toLowerCase().includes(busqueda.toLowerCase()) ||
+        conv.ultimoMensaje?.contenido.toLowerCase().includes(busqueda.toLowerCase());
+      if (!coincideBusqueda) return false;
+    }
+
+    // Filtro por estado
+    switch (filtro) {
+      case 'no-leidas':
+        return conv.ultimoMensaje && !conv.ultimoMensaje.fechaLectura;
+      case 'archivadas':
+        return conv.archivada;
+      default:
+        return !conv.archivada;
+    }
+  });
+
+  const formatearTiempo = (fecha: Date) => {
+    const ahora = new Date();
+    const esHoy = fecha.toDateString() === ahora.toDateString();
+    const esAyer = new Date(ahora.getTime() - 86400000).toDateString() === fecha.toDateString();
+
+    if (esHoy) {
+      return fecha.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    } else if (esAyer) {
+      return 'Ayer';
+    } else {
+      return fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+    }
+  };
+
+  const obtenerIconoTipoUsuario = (tipo: TipoUsuario) => {
+    switch (tipo) {
+      case 'empresa':
+      case 'administracion':
+        return <Building size={12} className="text-blue-500" />;
+      case 'admin-web':
+      case 'gestor-empresas':
+      case 'gestor-administraciones':
+        return <Shield size={12} className="text-purple-500" />;
+      case 'sindicato':
+        return <Users size={12} className="text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Mensajes</h2>
+          <button
+            onClick={onCrearNuevaConversacion}
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            title="Nueva conversación"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
+
+        {/* Búsqueda */}
+        <div className="relative mb-3">
+          <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar conversaciones..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* Filtros */}
+        <div className="flex space-x-2">
+          {[
+            { key: 'todas', label: 'Todas' },
+            { key: 'no-leidas', label: 'No leídas' },
+            { key: 'archivadas', label: 'Archivadas' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setFiltro(key as any)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                filtro === key ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Lista de conversaciones */}
+      <div className="flex-1 overflow-y-auto">
+        {conversacionesFiltradas.length === 0 ? (
+          <div className="p-8 text-center">
+            <MessageCircle size={48} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500">
+              {busqueda ? 'No se encontraron conversaciones' : 'No tienes conversaciones'}
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {conversacionesFiltradas.map((conversacion) => {
+              const otroParticipanteId = conversacion.participantes.find((p) => p !== usuario.id);
+              if (!otroParticipanteId) return null;
+
+              const otroParticipante = obtenerUsuarioBasico(otroParticipanteId);
+
+              return (
+                <button
+                  key={conversacion.id}
+                  onClick={() => onSeleccionarConversacion(conversacion.id)}
+                  className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                    conversacionActiva === conversacion.id
+                      ? 'bg-blue-50 border-r-4 border-r-blue-500'
+                      : ''
+                  }`}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="relative">
+                      <img
+                        src={
+                          otroParticipante.avatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(otroParticipante.nombre + ' ' + otroParticipante.apellidos)}&background=random`
+                        }
+                        alt={`${otroParticipante.nombre} ${otroParticipante.apellidos}`}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      {otroParticipante.online && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {otroParticipante.nombre} {otroParticipante.apellidos}
+                          </p>
+                          {obtenerIconoTipoUsuario(otroParticipante.tipo)}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {conversacion.ultimoMensaje && (
+                            <span className="text-xs text-gray-500">
+                              {formatearTiempo(conversacion.ultimoMensaje.fechaEnvio)}
+                            </span>
+                          )}
+                          {conversacion.ultimoMensaje &&
+                            !conversacion.ultimoMensaje.fechaLectura && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            )}
+                        </div>
+                      </div>
+                      {conversacion.ultimoMensaje && (
+                        <p className="text-sm text-gray-600 truncate mt-1">
+                          {conversacion.ultimoMensaje.emisorId === usuario.id && 'Tú: '}
+                          {conversacion.ultimoMensaje.contenido}
+                        </p>
+                      )}
+                      <EstadoConexion
+                        online={otroParticipante.online || false}
+                        ultimaVez={otroParticipante.ultimaConexion}
+                      />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Ventana de chat
+const VentanaChat: React.FC<PropiedadesChatVentana> = ({
+  conversacion,
+  usuario,
+  onEnviarMensaje,
+  onCerrarChat,
+  mensajes,
+}) => {
+  const [nuevoMensaje, setNuevoMensaje] = useState('');
+  const [archivos, setArchivos] = useState<File[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const otroParticipanteId = conversacion.participantes.find((p) => p !== usuario.id);
+  const otroParticipante = otroParticipanteId ? obtenerUsuarioBasico(otroParticipanteId) : null;
+
+  // Scroll automático al final
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [mensajes]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+    }
+  }, [nuevoMensaje]);
+
+  const manejarEnvio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoMensaje.trim() && archivos.length === 0) return;
+
+    try {
+      await onEnviarMensaje(nuevoMensaje, archivos);
+      setNuevoMensaje('');
+      setArchivos([]);
+    } catch (error) {
+      console.error('Error enviando mensaje:', error);
+    }
+  };
+
+  const manejarSeleccionArchivos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nuevosArchivos = Array.from(e.target.files || []);
+    setArchivos((prev) => [...prev, ...nuevosArchivos].slice(0, 5)); // Máximo 5 archivos
+  };
+
+  const eliminarArchivo = (indice: number) => {
+    setArchivos((prev) => prev.filter((_, i) => i !== indice));
+  };
+
+  const obtenerIconoEstado = (mensaje: Mensaje) => {
+    if (!mensaje.fechaLectura) {
+      return <Check size={14} className="text-gray-400" />;
+    } else {
+      return <CheckCheck size={14} className="text-blue-500" />;
+    }
+  };
+
+  const formatearHora = (fecha: Date) => {
+    return fecha.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  if (!otroParticipante) return null;
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header del chat */}
+      <div className="p-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <img
+              src={
+                otroParticipante.avatar ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(otroParticipante.nombre + ' ' + otroParticipante.apellidos)}&background=random`
+              }
+              alt={`${otroParticipante.nombre} ${otroParticipante.apellidos}`}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <h3 className="font-medium text-gray-900">
+                {otroParticipante.nombre} {otroParticipante.apellidos}
+              </h3>
+              <EstadoConexion
+                online={otroParticipante.online || false}
+                ultimaVez={otroParticipante.ultimaConexion}
+              />
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="p-2 hover:bg-gray-100 rounded-full" title="Llamada de voz">
+              <Phone size={18} />
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-full" title="Videollamada">
+              <Video size={18} />
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-full" title="Más opciones">
+              <MoreHorizontal size={18} />
+            </button>
+            <button
+              onClick={onCerrarChat}
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="Cerrar chat"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mensajes */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {mensajes.length === 0 ? (
+          <div className="text-center py-8">
+            <MessageCircle size={48} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500">Inicia una conversación con {otroParticipante.nombre}</p>
+          </div>
+        ) : (
+          mensajes.map((mensaje, indice) => {
+            const esMio = mensaje.emisorId === usuario.id;
+            const siguienteMensajeMio = mensajes[indice + 1]?.emisorId === usuario.id;
+            const anteriorMensajeMio = mensajes[indice - 1]?.emisorId === usuario.id;
+
+            return (
+              <div key={mensaje.id} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs lg:max-w-md ${esMio ? 'order-1' : 'order-2'}`}>
+                  {!anteriorMensajeMio && !esMio && otroParticipante && (
+                    <div className="flex items-center space-x-2 mb-1">
+                      <img
+                        src={
+                          otroParticipante.avatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(otroParticipante.nombre + ' ' + otroParticipante.apellidos)}&background=random`
+                        }
+                        alt={otroParticipante.nombre}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <span className="text-xs text-gray-500">{otroParticipante.nombre}</span>
+                    </div>
+                  )}
+
+                  <div
+                    className={`px-4 py-2 rounded-lg ${
+                      esMio ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'
+                    } ${
+                      !siguienteMensajeMio && !anteriorMensajeMio
+                        ? 'rounded-lg'
+                        : esMio
+                          ? anteriorMensajeMio && !siguienteMensajeMio
+                            ? 'rounded-br-sm'
+                            : !anteriorMensajeMio && siguienteMensajeMio
+                              ? 'rounded-tr-sm'
+                              : 'rounded-r-sm'
+                          : anteriorMensajeMio && !siguienteMensajeMio
+                            ? 'rounded-bl-sm'
+                            : !anteriorMensajeMio && siguienteMensajeMio
+                              ? 'rounded-tl-sm'
+                              : 'rounded-l-sm'
+                    }`}
+                  >
+                    {mensaje.contenido && <p className="break-words">{mensaje.contenido}</p>}
+
+                    {mensaje.multimedia && (
+                      <div className="mt-2 space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Paperclip size={14} />
+                          <span className="text-sm underline cursor-pointer">
+                            {mensaje.multimedia.nombre || 'Archivo adjunto'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    className={`flex items-center mt-1 space-x-1 text-xs text-gray-500 ${
+                      esMio ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <span>{formatearHora(mensaje.fechaEnvio)}</span>
+                    {esMio && obtenerIconoEstado(mensaje)}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Archivos seleccionados */}
+      {archivos.length > 0 && (
+        <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
+          <div className="flex flex-wrap gap-2">
+            {archivos.map((archivo, indice) => (
+              <div
+                key={indice}
+                className="flex items-center space-x-2 bg-white rounded-lg px-3 py-2 border"
+              >
+                <Paperclip size={14} />
+                <span className="text-sm truncate max-w-32">{archivo.name}</span>
+                <button
+                  onClick={() => eliminarArchivo(indice)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Input de mensaje */}
+      <form onSubmit={manejarEnvio} className="p-4 border-t border-gray-200 bg-white">
+        <div className="flex items-end space-x-3">
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="Adjuntar archivo"
+            >
+              <Paperclip size={18} />
+            </button>
+            <button
+              type="button"
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="Insertar imagen"
+            >
+              <Image size={18} />
+            </button>
+            <button
+              type="button"
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="Insertar emoji"
+            >
+              <Smile size={18} />
+            </button>
+          </div>
+
+          <div className="flex-1">
+            <textarea
+              ref={textareaRef}
+              value={nuevoMensaje}
+              onChange={(e) => setNuevoMensaje(e.target.value)}
+              placeholder="Escribe un mensaje..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  manejarEnvio(e);
+                }
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={!nuevoMensaje.trim() && archivos.length === 0}
+            className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Send size={18} />
+          </button>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={manejarSeleccionArchivos}
+        />
+      </form>
+    </div>
+  );
+};
+
+// Modal para nueva conversación
+const NuevaConversacion: React.FC<PropiedadesNuevaConversacion> = ({
+  abierto,
+  onCerrar,
+  onCrear,
+  usuario,
+  onBuscarUsuarios,
+}) => {
+  const [busqueda, setBusqueda] = useState('');
+  const [seleccionados, setSeleccionados] = useState<string[]>([]);
+  const [cargando, setCargando] = useState(false);
+  const [usuariosEncontrados, setUsuariosEncontrados] = useState<Usuario[]>([]);
+  const [buscando, setBuscando] = useState(false);
+
+  // Buscar usuarios cuando cambia la búsqueda
+  React.useEffect(() => {
+    if (busqueda.length >= 2) {
+      setBuscando(true);
+      onBuscarUsuarios(busqueda)
+        .then(usuarios => {
+          setUsuariosEncontrados(usuarios.filter(u => u.id !== usuario.id));
+        })
+        .catch(console.error)
+        .finally(() => setBuscando(false));
+    } else {
+      setUsuariosEncontrados([]);
+    }
+  }, [busqueda, onBuscarUsuarios, usuario.id]);
+
+  const usuariosFiltrados = usuariosEncontrados;
+
+  const toggleSeleccion = (usuarioId: string) => {
+    setSeleccionados((prev) =>
+      prev.includes(usuarioId) ? prev.filter((id) => id !== usuarioId) : [...prev, usuarioId],
+    );
+  };
+
+  const manejarCrear = async () => {
+    if (seleccionados.length === 0) return;
+
+    setCargando(true);
+    try {
+      await onCrear([...seleccionados, usuario.id]);
+      onCerrar();
+      setSeleccionados([]);
+      setBusqueda('');
+    } catch (error) {
+      console.error('Error creando conversación:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  if (!abierto) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">Nueva conversación</h2>
+            <button onClick={onCerrar} className="p-2 hover:bg-gray-100 rounded-full">
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="relative mb-4">
+            <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar usuarios..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="max-h-80 overflow-y-auto space-y-2">
+            {buscando ? (
+              <div className="text-center py-4">
+                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <p className="text-sm text-gray-500">Buscando usuarios...</p>
+              </div>
+            ) : busqueda.length < 2 ? (
+              <div className="text-center py-8">
+                <Search size={32} className="mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Escribe al menos 2 caracteres para buscar usuarios</p>
+              </div>
+            ) : usuariosFiltrados.length === 0 ? (
+              <div className="text-center py-8">
+                <Users size={32} className="mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">No se encontraron usuarios</p>
+                <p className="text-xs text-gray-400 mt-1">Intenta con otro término de búsqueda</p>
+              </div>
+            ) : (
+              usuariosFiltrados.map((usuarioSugerido) => (
+              <div
+                key={usuarioSugerido.id}
+                onClick={() => toggleSeleccion(usuarioSugerido.id)}
+                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  seleccionados.includes(usuarioSugerido.id)
+                    ? 'bg-blue-50 border-2 border-blue-500'
+                    : 'hover:bg-gray-50 border-2 border-transparent'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={
+                      usuarioSugerido.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(usuarioSugerido.nombre + ' ' + (usuarioSugerido.apellidos || ''))}&background=random`
+                    }
+                    alt={`${usuarioSugerido.nombre} ${usuarioSugerido.apellidos || ''}`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      {usuarioSugerido.nombre} {usuarioSugerido.apellidos || ''}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {usuarioSugerido.email}
+                    </p>
+                  </div>
+                  {seleccionados.includes(usuarioSugerido.id) && (
+                    <Check size={20} className="text-blue-500" />
+                  )}
+                </div>
+              </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <Boton variante="secundario" onClick={onCerrar}>
+              Cancelar
+            </Boton>
+            <Boton
+              variante="primario"
+              onClick={manejarCrear}
+              disabled={seleccionados.length === 0 || cargando}
+              cargando={cargando}
+            >
+              Crear conversación
+            </Boton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Componente principal del sistema de mensajería
+export const SistemaMensajeria: React.FC<PropiedadesSistemaMensajeria> = ({
+  usuario,
+  conversaciones,
+  onEnviarMensaje,
+  onCrearConversacion,
+  onMarcarLeido,
+  onBuscarUsuarios,
+  abierto,
+  onCerrar,
+  minimizado = false,
+  onToggleMinimizar,
+}) => {
+  const [conversacionActiva, setConversacionActiva] = useState<string | undefined>();
+  const [nuevaConversacionAbierta, setNuevaConversacionAbierta] = useState(false);
+  // Usuarios mock data removido - ahora usa búsqueda real desde la API
+
+  const conversacionSeleccionada = conversaciones.find((c) => c.id === conversacionActiva);
+
+  // Mensajes de ejemplo para la conversación activa
+  const mensajesConversacion: Mensaje[] = conversacionSeleccionada
+    ? [
+        {
+          id: 'msg1',
+          conversacionId: conversacionSeleccionada.id,
+          emisorId: conversacionSeleccionada.participantes.find((p) => p !== usuario.id) || '',
+          contenido: '¡Hola! He visto tu perfil y me gustaría conectar contigo.',
+          tipo: 'texto',
+          fechaEnvio: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          fechaLectura: new Date(Date.now() - 1 * 60 * 60 * 1000),
+          editado: false,
+        },
+        {
+          id: 'msg2',
+          conversacionId: conversacionSeleccionada.id,
+          emisorId: usuario.id,
+          contenido: '¡Hola! Por supuesto, es un placer conectar.',
+          tipo: 'texto',
+          fechaEnvio: new Date(Date.now() - 1 * 60 * 60 * 1000),
+          fechaLectura: new Date(Date.now() - 30 * 60 * 1000),
+          editado: false,
+        },
+      ]
+    : [];
+
+  const manejarSeleccionarConversacion = (id: string) => {
+    setConversacionActiva(id);
+    onMarcarLeido(id);
+  };
+
+  const manejarEnviarMensaje = async (contenido: string, archivos?: File[]) => {
+    if (!conversacionActiva) return;
+    await onEnviarMensaje(conversacionActiva, contenido, archivos);
+  };
+
+  const manejarCrearConversacion = async (participantesIds: string[]) => {
+    const nuevaConversacion = await onCrearConversacion(participantesIds);
+    setConversacionActiva(nuevaConversacion.id);
+    setNuevaConversacionAbierta(false);
+  };
+
+  if (!abierto) return null;
+
+  return (
+    <>
+      {/* Ventana principal de mensajería */}
+      <div
+        className={`fixed bottom-4 right-4 bg-white border border-gray-200 rounded-xl shadow-2xl transition-all duration-300 ${
+          minimizado ? 'w-80 h-16' : 'w-4/5 max-w-5xl h-4/5 max-h-[600px]'
+        }`}
+      >
+        {minimizado ? (
+          // Vista minimizada
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center space-x-3">
+              <MessageCircle size={20} className="text-gray-600" />
+              <span className="font-medium text-gray-900">Mensajes</span>
+              {conversaciones.filter((c) => c.ultimoMensaje && !c.ultimoMensaje.fechaLectura)
+                .length > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {
+                    conversaciones.filter((c) => c.ultimoMensaje && !c.ultimoMensaje.fechaLectura)
+                      .length
+                  }
+                </span>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              {onToggleMinimizar && (
+                <button onClick={onToggleMinimizar} className="p-1 hover:bg-gray-100 rounded">
+                  <Maximize2 size={16} />
+                </button>
+              )}
+              <button onClick={onCerrar} className="p-1 hover:bg-gray-100 rounded">
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Vista completa
+          <div className="flex h-full">
+            {/* Lista de conversaciones */}
+            <div className="w-1/3 border-r border-gray-200">
+              <ListaConversaciones
+                conversaciones={conversaciones}
+                conversacionActiva={conversacionActiva}
+                onSeleccionarConversacion={manejarSeleccionarConversacion}
+                onCrearNuevaConversacion={() => setNuevaConversacionAbierta(true)}
+                usuario={usuario}
+              />
+            </div>
+
+            {/* Chat activo */}
+            <div className="flex-1">
+              {conversacionSeleccionada ? (
+                <VentanaChat
+                  conversacion={conversacionSeleccionada}
+                  usuario={usuario}
+                  onEnviarMensaje={manejarEnviarMensaje}
+                  onCerrarChat={() => setConversacionActiva(undefined)}
+                  mensajes={mensajesConversacion}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <MessageCircle size={64} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Selecciona una conversación
+                    </h3>
+                    <p className="text-gray-600">
+                      Elige una conversación de la lista para empezar a chatear
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Botones de control */}
+            <div className="absolute top-4 right-4 flex items-center space-x-2">
+              {onToggleMinimizar && (
+                <button
+                  onClick={onToggleMinimizar}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                  title="Minimizar"
+                >
+                  <Minimize2 size={16} />
+                </button>
+              )}
+              <button
+                onClick={onCerrar}
+                className="p-2 hover:bg-gray-100 rounded-full"
+                title="Cerrar"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal nueva conversación */}
+      <NuevaConversacion
+        abierto={nuevaConversacionAbierta}
+        onCerrar={() => setNuevaConversacionAbierta(false)}
+        onCrear={manejarCrearConversacion}
+        usuario={usuario}
+        onBuscarUsuarios={onBuscarUsuarios}
+      />
+    </>
+  );
+};
+
+export default SistemaMensajeria;

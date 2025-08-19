@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Enums básicos
+enum UserRole {
+  ADMIN
+  GESTOR_EMPRESAS
+  AGENTE_IA
+  EMPLEADO_PUBLICO
+  EMPRESA
+  ADMINISTRACION_PUBLICA
+  SINDICATO
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum CommunityCode {
+  ANDALUCIA
+  ARAGON
+  ASTURIAS
+  BALEARES
+  CANARIAS
+  CANTABRIA
+  CASTILLA_LA_MANCHA
+  CASTILLA_Y_LEON
+  CATALUNYA
+  CEUTA
+  EXTREMADURA
+  GALICIA
+  LA_RIOJA
+  MADRID
+  MELILLA
+  MURCIA
+  NAVARRA
+  PAIS_VASCO
+  VALENCIA
+}
+
+// Modelo de usuario principal
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  password               String
+  role                   UserRole  @default(EMPLEADO_PUBLICO)
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  refreshToken           String?
+  lastLogin              DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Relations
+  employee          Employee?
+  company           Company?
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// Modelo de empleado público
+model Employee {
+  id               String        @id @default(cuid())
+  userId           String        @unique
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Personal info
+  firstName        String
+  lastName         String
+  dni              String?       @unique
+  birthDate        DateTime?
+  
+  // Professional info
+  jobTitle         String?
+  department       String?
+  organization     String?
+  organizationType String?       // Ayuntamiento, Generalitat, etc.
+  
+  // Location
+  community        CommunityCode
+  province         String?
+  city             String?
+  
+  // Employment details
+  startDate        DateTime?
+  employeeCategory String?       // A1, A2, B, C1, C2
+  contractType     String?       // Funcionario, Interino, Laboral
+  
+  // Profile
+  avatar           String?
+  bio              String?
+  
+  // Privacy settings
+  isProfilePublic  Boolean       @default(true)
+  showEmail        Boolean       @default(false)
+  showPhone        Boolean       @default(false)
+  
+  // Status
+  isActive         Boolean       @default(true)
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([community])
+  @@index([province])
+  @@index([organizationType])
+}
+
+// Modelo básico de empresa
+model Company {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  name         String
+  description  String?
+  sector       String
+  website      String?
+  email        String
+  phone        String?
+  
+  // Address
+  address      String?
+  city         String?
+  province     String?
+  postalCode   String?
+  country      String   @default("España")
+  
+  // Business info
+  cif          String   @unique
+  employeeCount String?
+  foundedYear  Int?
+  
+  // Profile
+  logo         String?
+  coverImage   String?
+  
+  // Status
+  isActive     Boolean  @default(true)
+  verifiedAt   DateTime?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sector])
+  @@index([province])
+}
+
+// Modelo de mensajes
+model Message {
+  id          String        @id @default(cuid())
+  senderId    String
+  sender      User          @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  
+  subject     String
+  content     String
+  
+  status      MessageStatus @default(SENT)
+  readAt      DateTime?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+// Modelo de notificaciones
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // message_received, etc.
+  title     String
+  message   String
+  dataJson  String?  // JSON as string for metadata
+  
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// Modelo de suscripciones push
+model PushSubscription {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Web Push API subscription details
+  endpoint    String   @unique
+  p256dh      String   // Public key for encryption
+  auth        String   // Authentication secret
+  
+  // Device/Browser info
+  userAgent   String?
+  deviceType  String?  // mobile, desktop, tablet
+  browser     String?  // chrome, firefox, safari, edge
+  
+  // Status
+  isActive    Boolean  @default(true)
+  lastUsed    DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}

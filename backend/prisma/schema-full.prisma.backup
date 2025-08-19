@@ -1,0 +1,1025 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  GESTOR_EMPRESAS
+  AGENTE_IA
+  EMPLEADO_PUBLICO
+  EMPRESA
+  ADMINISTRACION_PUBLICA
+  SINDICATO
+}
+
+enum AgentLevel {
+  BASICO      // Nivel 1
+  AVANZADO    // Nivel 2
+  EXPERTO     // Nivel 3
+}
+
+enum AgentType {
+  COMERCIAL
+  RRHH
+  DISENADOR
+  ANALISTA
+  SOPORTE
+  MARKETING
+}
+
+enum CompanyStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum CommunityCode {
+  ANDALUCIA
+  ARAGON
+  ASTURIAS
+  BALEARES
+  CANARIAS
+  CANTABRIA
+  CASTILLA_LA_MANCHA
+  CASTILLA_Y_LEON
+  CATALUNYA
+  CEUTA
+  EXTREMADURA
+  GALICIA
+  LA_RIOJA
+  MADRID
+  MELILLA
+  MURCIA
+  NAVARRA
+  PAIS_VASCO
+  VALENCIA
+}
+
+// Models
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  role              UserRole  @default(EMPLEADO_PUBLICO)
+  isEmailVerified   Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  refreshToken      String?
+  lastLogin         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  company           Company?
+  employee          Employee?
+  aiAgent           AIAgent?
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+  posts             Post[]
+  analytics         Analytics[]
+  notifications     Notification[]
+  favorites         Favorite[]
+  pushSubscriptions PushSubscription[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Company {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  name              String
+  description       String?
+  sector            String
+  website           String?
+  email             String
+  phone             String?
+  
+  // Address
+  address           String?
+  city              String?
+  province          String?
+  postalCode        String?
+  country           String         @default("España")
+  
+  // Business info
+  cif               String         @unique
+  employeeCount     String?
+  foundedYear       Int?
+  
+  // Profile
+  logo              String?
+  coverImage        String?
+  
+  // Status
+  status            CompanyStatus  @default(PENDING)
+  verifiedAt        DateTime?
+  
+  // Subscription (for future use)
+  subscriptionPlan  String         @default("free")
+  subscriptionEndsAt DateTime?
+  
+  // Metadata
+  aiCredits         Int            @default(0)
+  monthlyEmailsSent Int            @default(0)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relations
+  posts             Post[]
+  campaigns         Campaign[]
+  templates         EmailTemplate[]
+  leads             Lead[]
+  analytics         Analytics[]
+  aiAgents          AIAgent[]
+  chatSessions      ChatSession[]
+  profiles          CompanyProfile?
+  jobOffers         JobOffer[]
+  competitiveAnalyses CompetitiveAnalysis[]
+  leadEngagements   LeadEngagement[]
+  emailTriggers     EmailTrigger[]
+  emailTriggerQueue EmailTriggerQueue[]
+  emailCampaigns    EmailCampaign[]
+  emailLogs         EmailLog[]
+  emailABTests      EmailABTest[]
+  automatedReports  AutomatedReport[]
+  analyticsEvents   AnalyticsEvent[]
+  aiConfiguration   AIConfiguration?
+
+  @@index([status])
+  @@index([sector])
+  @@index([province])
+}
+
+model Employee {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Personal info
+  firstName         String
+  lastName          String
+  dni               String?        @unique
+  birthDate         DateTime?
+  
+  // Professional info
+  jobTitle          String?
+  department        String?
+  organization      String?
+  organizationType  String?        // Ayuntamiento, Generalitat, etc.
+  
+  // Location
+  community         CommunityCode
+  province          String?
+  city              String?
+  
+  // Employment details
+  startDate         DateTime?
+  employeeCategory  String?        // A1, A2, B, C1, C2
+  salaryRange       String?        // 20k-30k, 30k-40k, etc.
+  contractType      String?        // Funcionario, Interino, Laboral
+  
+  // Profile
+  avatar            String?
+  bio               String?
+  skills            String[]
+  interests         String[]
+  
+  // Privacy settings
+  isProfilePublic   Boolean        @default(true)
+  showEmail         Boolean        @default(false)
+  showPhone         Boolean        @default(false)
+  
+  // Status
+  status            EmployeeStatus @default(ACTIVE)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relations
+  leads             Lead[]
+  messagesSent      Message[]      @relation("EmployeeMessagesSent")
+  favorites         Favorite[]
+  leadEngagements   LeadEngagement[]
+  emailTriggerQueue EmailTriggerQueue[]
+  emailCampaignRecipients EmailCampaignRecipient[]
+  emailABTestRecipients EmailABTestRecipient[]
+  analyticsEvents   AnalyticsEvent[]
+
+  @@index([community])
+  @@index([province])
+  @@index([organizationType])
+  @@index([employeeCategory])
+}
+
+model AIAgent {
+  id                String      @id @default(cuid())
+  userId            String      @unique
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Agent Info
+  name              String
+  description       String?
+  type              AgentType
+  level             AgentLevel  @default(BASICO)
+  
+  // Company Association
+  companyId         String?
+  company           Company?    @relation(fields: [companyId], references: [id])
+  
+  // Configuration
+  isActive          Boolean     @default(true)
+  maxDailyTasks     Int         @default(100)
+  allowedMissions   String[]    // Array of mission IDs
+  
+  // AI Configuration
+  model             String      @default("gpt-3.5-turbo")
+  temperature       Float       @default(0.7)
+  systemPrompt      String?
+  
+  // Performance Metrics
+  tasksCompleted    Int         @default(0)
+  tasksSuccessful   Int         @default(0)
+  lastActiveAt      DateTime?
+  
+  // Billing
+  tokensUsed        Int         @default(0)
+  monthlyTokenLimit Int         @default(10000)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  tasks             AgentTask[]
+  missions          AgentMission[]
+  chatSessions      ChatSession[]
+  jobOffers         JobOffer[]
+  leadEngagements   LeadEngagement[]
+  analyticsEvents   AnalyticsEvent[]
+
+  @@index([companyId])
+  @@index([type])
+  @@index([level])
+  @@index([isActive])
+}
+
+model AgentMission {
+  id                String      @id @default(cuid())
+  
+  // Mission Info
+  name              String
+  description       String
+  category          String      // comercial, rrhh, diseño, etc.
+  requiredLevel     AgentLevel  
+  
+  // Execution Details
+  prompt            String      // Prompt específico para esta misión
+  parameters        Json?       // Parámetros configurables
+  
+  // Restrictions
+  dailyLimit        Int         @default(-1) // -1 = unlimited
+  requiresApproval  Boolean     @default(false)
+  
+  // Status
+  isActive          Boolean     @default(true)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  agents            AIAgent[]
+  tasks             AgentTask[]
+
+  @@index([category])
+  @@index([requiredLevel])
+  @@index([isActive])
+}
+
+model AgentTask {
+  id                String         @id @default(cuid())
+  
+  // Task Info
+  agentId           String
+  agent             AIAgent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  missionId         String
+  mission           AgentMission   @relation(fields: [missionId], references: [id])
+  
+  // Execution
+  input             Json           // Input data for the task
+  output            Json?          // Result of the task
+  status            String         @default("pending") // pending, running, completed, failed
+  
+  // Timing
+  startedAt         DateTime?
+  completedAt       DateTime?
+  duration          Int?           // Duration in milliseconds
+  
+  // AI Metrics
+  tokensUsed        Int            @default(0)
+  cost              Float          @default(0)
+  
+  // Error handling
+  errorMessage      String?
+  retryCount        Int            @default(0)
+  maxRetries        Int            @default(3)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([agentId])
+  @@index([missionId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Post {
+  id                String      @id @default(cuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  authorId          String
+  author            User        @relation(fields: [authorId], references: [id])
+  
+  // Content
+  title             String
+  slug              String      @unique
+  content           String
+  excerpt           String?
+  featuredImage     String?
+  
+  // Categorization
+  category          String
+  tags              String[]
+  
+  // SEO
+  metaTitle         String?
+  metaDescription   String?
+  
+  // Status
+  status            PostStatus  @default(DRAFT)
+  publishedAt       DateTime?
+  
+  // Stats
+  viewCount         Int         @default(0)
+  shareCount        Int         @default(0)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  favorites         Favorite[]
+  analytics         Analytics[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
+}
+
+model Campaign {
+  id                String      @id @default(cuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Campaign info
+  name              String
+  description       String?
+  
+  // Targeting
+  targetCommunities CommunityCode[]
+  targetProvinces   String[]
+  targetCategories  String[]
+  targetDepartments String[]
+  targetSalaryRanges String[]
+  
+  // Content
+  subject           String
+  content           String
+  templateId        String?
+  template          EmailTemplate? @relation(fields: [templateId], references: [id])
+  
+  // Schedule
+  scheduledAt       DateTime?
+  sentAt            DateTime?
+  
+  // Stats
+  recipientCount    Int         @default(0)
+  sentCount         Int         @default(0)
+  openCount         Int         @default(0)
+  clickCount        Int         @default(0)
+  
+  // Status
+  isActive          Boolean     @default(true)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  messages          Message[]
+  analytics         Analytics[]
+
+  @@index([companyId])
+  @@index([scheduledAt])
+}
+
+model EmailTemplate {
+  id                String      @id @default(cuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  name              String
+  subject           String
+  content           String      // HTML content
+  variables         String[]    // Available variables like {{firstName}}, {{company}}
+  
+  isActive          Boolean     @default(true)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  campaigns         Campaign[]
+
+  @@index([companyId])
+}
+
+model Message {
+  id                String         @id @default(cuid())
+  campaignId        String?
+  campaign          Campaign?      @relation(fields: [campaignId], references: [id])
+  
+  senderId          String
+  sender            User           @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId       String
+  recipient         User           @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  
+  // For tracking employee sender
+  employeeSenderId  String?
+  employeeSender    Employee?      @relation("EmployeeMessagesSent", fields: [employeeSenderId], references: [id])
+  
+  subject           String
+  content           String
+  
+  status            MessageStatus  @default(SENT)
+  readAt            DateTime?
+  
+  // Tracking
+  opens             Int            @default(0)
+  clicks            Int            @default(0)
+  lastOpenedAt      DateTime?
+  lastClickedAt     DateTime?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([campaignId])
+  @@index([status])
+}
+
+model Lead {
+  id                String      @id @default(cuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId        String
+  employee          Employee    @relation(fields: [employeeId], references: [id])
+  
+  // Lead scoring
+  score             Int         @default(0)
+  status            String      @default("new") // new, contacted, qualified, converted
+  
+  // Interaction tracking
+  emailOpens        Int         @default(0)
+  linkClicks        Int         @default(0)
+  postViews         Int         @default(0)
+  lastInteraction   DateTime?
+  
+  // Notes
+  notes             String?
+  
+  // Conversion
+  convertedAt       DateTime?
+  conversionValue   Float?
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([companyId, employeeId])
+  @@index([companyId])
+  @@index([employeeId])
+  @@index([score])
+  @@index([status])
+}
+
+model Analytics {
+  id                String      @id @default(cuid())
+  
+  // Polymorphic association
+  userId            String?
+  user              User?       @relation(fields: [userId], references: [id])
+  companyId         String?
+  company           Company?    @relation(fields: [companyId], references: [id])
+  postId            String?
+  post              Post?       @relation(fields: [postId], references: [id])
+  campaignId        String?
+  campaign          Campaign?   @relation(fields: [campaignId], references: [id])
+  
+  // Event data
+  event             String      // page_view, post_view, email_open, link_click, etc.
+  properties        Json?       // Additional event properties
+  
+  // Session info
+  sessionId         String?
+  ip                String?
+  userAgent         String?
+  referrer          String?
+  
+  // Geographic info
+  country           String?
+  region            String?
+  city              String?
+  
+  createdAt         DateTime    @default(now())
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([event])
+  @@index([createdAt])
+}
+
+model Notification {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type              String      // email_received, post_published, lead_converted, etc.
+  title             String
+  message           String
+  data              Json?       // Additional notification data
+  
+  isRead            Boolean     @default(false)
+  readAt            DateTime?
+  
+  createdAt         DateTime    @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model Favorite {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId        String?
+  employee          Employee?   @relation(fields: [employeeId], references: [id])
+  postId            String
+  post              Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime    @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+}
+
+// === NUEVOS MODELOS PARA IA AVANZADA ===
+
+// Chat Sistema Empresa-Agente
+model ChatSession {
+  id              String       @id @default(cuid())
+  companyId       String
+  company         Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  agentId         String
+  agent           AIAgent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  status          String       @default("active") // active, waiting, completed
+  context         String       // JSON context
+  currentTask     String?
+  createdAt       DateTime     @default(now())
+  lastInteraction DateTime     @default(now())
+  
+  messages        ChatMessage[]
+  taskExecutions  TaskExecution[]
+
+  @@index([companyId])
+  @@index([agentId])
+  @@index([status])
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type      String      // user, agent, system
+  content   String
+  metadata  Json?       // Metadata adicional
+  timestamp DateTime    @default(now())
+
+  @@index([sessionId])
+  @@index([timestamp])
+}
+
+model TaskExecution {
+  id               String      @id @default(cuid())
+  sessionId        String
+  session          ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  taskType         String
+  status           String      @default("pending") // pending, in_progress, awaiting_approval, completed, failed
+  input            Json
+  output           Json?
+  approvalRequired Boolean     @default(false)
+  approvedAt       DateTime?
+  createdAt        DateTime    @default(now())
+  completedAt      DateTime?
+
+  @@index([sessionId])
+  @@index([status])
+}
+
+// Perfiles de Empresa Generados por IA
+model CompanyProfile {
+  id          String                 @id @default(cuid())
+  companyId   String                 @unique
+  company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  data        Json                   // Datos del perfil
+  status      String                 @default("draft") // draft, review, published
+  createdBy   String                 @default("ai") // ai, user
+  versions    CompanyProfileVersion[]
+  publishedAt DateTime?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([status])
+}
+
+model CompanyProfileVersion {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   CompanyProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  version   Int
+  data      Json
+  changes   String[]
+  createdAt DateTime       @default(now())
+
+  @@index([profileId])
+}
+
+// Ofertas de Trabajo Optimizadas por IA
+model JobOffer {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  agentId        String?
+  agent          AIAgent? @relation(fields: [agentId], references: [id])
+  title          String
+  description    String
+  requirements   String[]
+  benefits       String[]
+  salary         Json?
+  location       String
+  remote         Boolean  @default(false)
+  type           String   @default("full_time")
+  targetAudience Json?
+  status         String   @default("draft") // draft, review, published, expired
+  analytics      Json     @default("{}")
+  createdAt      DateTime @default(now())
+  publishedAt    DateTime?
+  expiresAt      DateTime?
+
+  @@index([companyId])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+// Análisis Competitivo
+model CompetitiveAnalysis {
+  id           String            @id @default(cuid())
+  companyId    String
+  company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  targetSector String
+  competitors  Json              // Array de datos de competidores
+  insights     Json              // Insights generados
+  lastUpdated  DateTime          @default(now())
+  nextUpdate   DateTime
+  
+  @@index([companyId])
+  @@index([targetSector])
+}
+
+model ScrapedCompetitor {
+  id          String   @id @default(cuid())
+  domain      String   @unique
+  title       String?
+  description String?
+  keywords    String?
+  services    String[]
+  contact     Json?
+  pricing     Json?
+  scrapedAt   DateTime @default(now())
+  lastScraped DateTime @default(now())
+
+  @@index([domain])
+  @@index([lastScraped])
+}
+
+// Engagement con Leads
+model LeadEngagement {
+  id           String             @id @default(cuid())
+  companyId    String
+  company      Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  agentId      String
+  agent        AIAgent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  interactions LeadInteraction[]
+  score        Int                @default(0)
+  status       String             @default("cold") // cold, warm, hot, converted
+  lastContact  DateTime?
+  nextAction   Json?
+  createdAt    DateTime           @default(now())
+
+  @@unique([companyId, employeeId])
+  @@index([score])
+  @@index([status])
+}
+
+model LeadInteraction {
+  id         String          @id @default(cuid())
+  leadId     String
+  lead       LeadEngagement  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type       String          // message, email, call, meeting
+  content    String
+  response   String?
+  engagement String          // positive, neutral, negative
+  timestamp  DateTime        @default(now())
+
+  @@index([leadId])
+  @@index([timestamp])
+}
+
+// Sistema de Email Automation
+model EmailTrigger {
+  id           String   @id @default(cuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  event        String   // profile_view, offer_save, etc.
+  templateType String
+  delayMinutes Int      @default(0)
+  conditions   Json     @default("{}")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  queueItems EmailTriggerQueue[]
+
+  @@index([companyId])
+  @@index([event])
+}
+
+model EmailTriggerQueue {
+  id          String       @id @default(cuid())
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  triggerId   String
+  trigger     EmailTrigger @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime
+  status      String       @default("pending") // pending, completed, failed
+  processedAt DateTime?
+  errorMessage String?
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model EmailCampaign {
+  id             String                   @id @default(cuid())
+  companyId      String
+  company        Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name           String
+  subject        String
+  content        String
+  targetAudience Json
+  scheduledAt    DateTime
+  startedAt      DateTime?
+  completedAt    DateTime?
+  recipientCount Int                      @default(0)
+  sentCount      Int                      @default(0)
+  failedCount    Int                      @default(0)
+  status         String                   @default("scheduled") // scheduled, sending, completed
+  createdAt      DateTime                 @default(now())
+
+  recipients EmailCampaignRecipient[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model EmailCampaignRecipient {
+  id         String        @id @default(cuid())
+  campaignId String
+  campaign   EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  status     String        @default("pending") // pending, sent, failed
+  sentAt     DateTime?
+  errorMessage String?
+
+  @@index([campaignId])
+  @@index([status])
+}
+
+model EmailTracking {
+  id          String   @id @default(cuid())
+  messageId   String
+  recipientId String
+  event       String   // open, click, bounce, unsubscribe
+  metadata    Json?
+  timestamp   DateTime @default(now())
+
+  @@index([messageId])
+  @@index([recipientId])
+  @@index([event])
+}
+
+model EmailLog {
+  id           String   @id @default(cuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  recipientId  String
+  templateType String
+  messageId    String
+  status       String   // sent, delivered, failed, bounced
+  sentAt       DateTime @default(now())
+  errorMessage String?
+
+  @@index([companyId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+model EmailABTest {
+  id             String                 @id @default(cuid())
+  companyId      String
+  company        Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name           String
+  variants       Json                   // Array de variantes
+  targetAudience Json
+  testDuration   Int                    // horas
+  status         String                 @default("running") // running, completed
+  startedAt      DateTime               @default(now())
+  completedAt    DateTime?
+  winnerId       String?
+
+  recipients EmailABTestRecipient[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model EmailABTestRecipient {
+  id           String       @id @default(cuid())
+  testId       String
+  test         EmailABTest  @relation(fields: [testId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  variantIndex Int
+  status       String       @default("pending")
+  sentAt       DateTime?
+  opened       Boolean      @default(false)
+  clicked      Boolean      @default(false)
+
+  @@index([testId])
+  @@index([variantIndex])
+}
+
+// Reportes Automáticos
+model AutomatedReport {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type        String   // weekly, monthly, competitive, performance
+  data        Json     // Datos del reporte
+  generatedAt DateTime @default(now())
+  period      Json     // start/end dates
+
+  @@index([companyId])
+  @@index([type])
+  @@index([generatedAt])
+}
+
+// Sistema de Tareas de Background
+model BackgroundJob {
+  id          String   @id @default(cuid())
+  type        String   // scraping, email_campaign, report_generation
+  data        Json     // Datos del job
+  status      String   @default("pending") // pending, running, completed, failed
+  priority    Int      @default(0)
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  scheduledAt DateTime @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  errorMessage String?
+  createdAt   DateTime @default(now())
+
+  @@index([status])
+  @@index([type])
+  @@index([scheduledAt])
+  @@index([priority])
+}
+
+// Métricas y Analytics Avanzadas
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  companyId  String?
+  company    Company? @relation(fields: [companyId], references: [id])
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  agentId    String?
+  agent      AIAgent? @relation(fields: [agentId], references: [id])
+  event      String   // click, view, engagement, conversion
+  properties Json     // Propiedades del evento
+  sessionId  String?
+  timestamp  DateTime @default(now())
+
+  @@index([companyId])
+  @@index([employeeId])
+  @@index([event])
+  @@index([timestamp])
+}
+
+// Configuración de IA por Empresa
+model AIConfiguration {
+  id               String   @id @default(cuid())
+  companyId        String   @unique
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan             String   @default("BASICO") // BASICO, AVANZADO, EXPERTO
+  features         Json     // Features habilitadas
+  limits           Json     // Límites del plan
+  customPrompts    Json?    // Prompts personalizados
+  automationRules  Json?    // Reglas de automatización
+  isActive         Boolean  @default(true)
+  lastUpdated      DateTime @default(now())
+
+  @@index([plan])
+}
+
+// Modelo para Push Notifications
+model PushSubscription {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Web Push API subscription details
+  endpoint    String   @unique
+  p256dh      String   // Public key for encryption
+  auth        String   // Authentication secret
+  
+  // Device/Browser info
+  userAgent   String?
+  deviceType  String?  // mobile, desktop, tablet
+  browser     String?  // chrome, firefox, safari, edge
+  
+  // Status
+  isActive    Boolean  @default(true)
+  lastUsed    DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}

@@ -1,0 +1,373 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Modelo de usuario principal
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  password               String
+  role                   String    @default("EMPLEADO_PUBLICO") // UserRole as string
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  refreshToken           String?
+  lastLogin              DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Relations
+  employee          Employee?
+  company           Company?
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+  reactions         MessageReaction[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+  
+  // Relaciones de red social
+  posts             Post[] @relation("UserPosts")
+  postLikes         PostLike[] @relation("UserPostLikes")
+  postComments      PostComment[] @relation("UserPostComments")
+  commentLikes      CommentLike[] @relation("UserCommentLikes")
+
+  @@index([email])
+  @@index([role])
+}
+
+// Modelo de empleado público
+model Employee {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Personal info
+  firstName        String
+  lastName         String
+  dni              String?  @unique
+  birthDate        DateTime?
+  
+  // Professional info
+  jobTitle         String?
+  department       String?
+  organization     String?
+  organizationType String?  // Ayuntamiento, Generalitat, etc.
+  
+  // Location
+  community        String   // CommunityCode as string
+  province         String?
+  city             String?
+  
+  // Employment details
+  startDate        DateTime?
+  employeeCategory String?  // A1, A2, B, C1, C2
+  contractType     String?  // Funcionario, Interino, Laboral
+  
+  // Profile
+  avatar           String?
+  bio              String?
+  
+  // Privacy settings
+  isProfilePublic  Boolean  @default(true)
+  showEmail        Boolean  @default(false)
+  showPhone        Boolean  @default(false)
+  
+  // Status
+  isActive         Boolean  @default(true)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  colaboraciones   EmpresaColaboracion[]
+
+  @@index([community])
+  @@index([province])
+  @@index([organizationType])
+}
+
+// Modelo básico de empresa
+model Company {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  name         String
+  description  String?
+  sector       String
+  website      String?
+  email        String
+  phone        String?
+  
+  // Address
+  address      String?
+  city         String?
+  province     String?
+  postalCode   String?
+  country      String   @default("España")
+  
+  // Business info
+  cif          String   @unique
+  employeeCount String?
+  foundedYear  Int?
+  
+  // Profile
+  logo         String?
+  coverImage   String?
+  
+  // Extended Profile Fields
+  banner              String?   // Imagen de portada/banner
+  descripcionPublica  String?   // Descripción corta para cards (máx 200 chars)
+  descripcionCompleta String?   // Descripción detallada para perfil completo
+  tags                String?   // JSON array de sectores/tags donde colabora
+  ubicacionVisible    Boolean   @default(true)  // Mostrar ubicación en perfil público
+  contactoPublico     String?   // Email/teléfono de contacto público
+  websiteUrl          String?   // URL completa del sitio web
+  redesSociales       String?   // JSON object con redes sociales {linkedin, twitter, etc}
+  estadoPerfil        String    @default("BORRADOR") // BORRADOR, ACTIVO, PAUSADO, VERIFICADO
+  fechaCreacionPerfil DateTime  @default(now())
+  destacada           Boolean   @default(false)  // Para empresas destacadas/premium
+  
+  // Status
+  isActive     Boolean  @default(true)
+  verifiedAt   DateTime?
+  
+  // Relations
+  colaboraciones EmpresaColaboracion[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sector])
+  @@index([province])
+  @@index([estadoPerfil])
+  @@index([destacada])
+}
+
+// Modelo de mensajes
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  
+  subject     String   @default("")
+  content     String
+  attachments String?  // JSON string of attached files
+  linkPreviews String? // JSON string of link previews metadata
+  
+  status      String   @default("SENT") // MessageStatus as string
+  readAt      DateTime?
+  
+  // Relations
+  reactions   MessageReaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+// Modelo de reacciones a mensajes
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  emoji     String   // El emoji como string (ej: "👍", "❤️", "😂")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Un usuario solo puede tener una reacción por mensaje
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+}
+
+// Modelo de notificaciones
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // message_received, etc.
+  title     String
+  message   String
+  dataJson  String?  // JSON as string for metadata
+  
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// Modelo de suscripciones push
+model PushSubscription {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Web Push API subscription details
+  endpoint    String   @unique
+  p256dh      String   // Public key for encryption
+  auth        String   // Authentication secret
+  
+  // Device/Browser info
+  userAgent   String?
+  deviceType  String?  // mobile, desktop, tablet
+  browser     String?  // chrome, firefox, safari, edge
+  
+  // Status
+  isActive    Boolean  @default(true)
+  lastUsed    DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+// Modelo de posts de la red social
+model Post {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation("UserPosts", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Contenido básico
+  content     String
+  images      String?  // JSON array de URLs de imágenes
+  type        String   @default("texto") // texto, imagen, evento, oferta, demanda
+  
+  // Metadatos específicos según tipo (JSON)
+  offerData   String?  // Datos de oferta de trabajo (JSON)
+  eventData   String?  // Datos de evento (JSON)
+  demandData  String?  // Datos de demanda (JSON)
+  
+  // Configuración de privacidad y visibilidad
+  visibility  String   @default("publico") // publico, amigos, solo-yo
+  isModerated Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  
+  // Estadísticas
+  viewsCount  Int      @default(0)
+  sharesCount Int      @default(0)
+  
+  // Relaciones
+  likes       PostLike[]
+  comments    PostComment[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([visibility])
+  @@index([createdAt])
+}
+
+// Modelo de likes en posts
+model PostLike {
+  id     String @id @default(cuid())
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("UserPostLikes", fields: [userId], references: [id], onDelete: Cascade)
+  
+  emoji     String   @default("👍") // Emoji de reacción
+  createdAt DateTime @default(now())
+
+  // Un usuario solo puede dar like una vez por post
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+// Modelo de comentarios en posts
+model PostComment {
+  id     String @id @default(cuid())
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("UserPostComments", fields: [userId], references: [id], onDelete: Cascade)
+  
+  content   String
+  isEdited  Boolean  @default(false)
+  
+  // Comentarios anidados (respuestas)
+  parentId  String?
+  parent    PostComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   PostComment[] @relation("CommentReplies")
+  
+  // Reacciones a comentarios
+  likes     CommentLike[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+// Modelo de likes en comentarios
+model CommentLike {
+  id        String      @id @default(cuid())
+  commentId String
+  comment   PostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation("UserCommentLikes", fields: [userId], references: [id], onDelete: Cascade)
+  
+  emoji     String   @default("👍")
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// Modelo de colaboraciones empresa-empleado
+model EmpresaColaboracion {
+  id                String   @id @default(cuid())
+  
+  // Relaciones
+  empresaId         String
+  empresa           Company  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  empleadoId        String
+  empleado          Employee @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  
+  // Tipo de colaboración
+  tipoColaboracion  String   // SEGUIMIENTO, FAVORITA, CONTACTADA
+  fechaInicio       DateTime @default(now())
+  notasPrivadas     String?  // Notas privadas del empleado sobre la empresa
+  
+  // Metadata
+  ultimaInteraccion DateTime @default(now())
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Un empleado solo puede tener un tipo de colaboración por empresa
+  @@unique([empresaId, empleadoId])
+  @@index([empresaId])
+  @@index([empleadoId])
+  @@index([tipoColaboracion])
+}

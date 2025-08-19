@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin conexión - La Pública</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            text-align: center;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            opacity: 0.8;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .retry-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .retry-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .cached-content {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cached-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cached-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .cached-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .cached-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .connection-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .online {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .offline {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .offline-container {
+                padding: 30px 20px;
+            }
+            
+            .offline-icon {
+                font-size: 60px;
+            }
+        }
+
+        /* Animación de pulso para el ícono */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        .offline-icon.pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon pulse">📡</div>
+        <h1>Sin conexión</h1>
+        <p class="subtitle">
+            No hay conexión a internet, pero puedes seguir usando algunas funciones de La Pública
+        </p>
+
+        <div class="connection-status offline" id="connectionStatus">
+            🔴 Sin conexión a internet
+        </div>
+
+        <div class="cached-content">
+            <h3 style="margin-bottom: 20px;">📦 Contenido disponible offline:</h3>
+            
+            <div class="cached-item" onclick="navigateTo('/dashboard')">
+                <div class="cached-title">🏠 Dashboard</div>
+                <div class="cached-desc">Ver tu dashboard principal (última versión guardada)</div>
+            </div>
+            
+            <div class="cached-item" onclick="navigateTo('/mensajes')">
+                <div class="cached-title">💬 Mensajes</div>
+                <div class="cached-desc">Leer conversaciones guardadas localmente</div>
+            </div>
+            
+            <div class="cached-item" onclick="navigateTo('/grupos')">
+                <div class="cached-title">👥 Grupos</div>
+                <div class="cached-desc">Ver información de tus grupos</div>
+            </div>
+            
+            <div class="cached-item" onclick="navigateTo('/perfil')">
+                <div class="cached-title">👤 Perfil</div>
+                <div class="cached-desc">Ver tu perfil (modo solo lectura)</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button class="retry-button" onclick="checkConnection()">
+                🔄 Comprobar conexión
+            </button>
+            <a href="/" class="retry-button">
+                🏠 Ir al inicio
+            </a>
+        </div>
+
+        <ul class="feature-list" style="margin-top: 30px;">
+            <li>Los mensajes se sincronizarán cuando vuelvas a estar online</li>
+            <li>Las notificaciones push seguirán funcionando</li>
+            <li>Tu contenido guardado está disponible para consulta</li>
+        </ul>
+    </div>
+
+    <script>
+        // Función para navegar
+        function navigateTo(path) {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                // Enviar mensaje al service worker para navegar
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'NAVIGATE_OFFLINE',
+                    path: path
+                });
+            }
+            
+            // Fallback: intentar navegar directamente
+            window.location.href = path;
+        }
+
+        // Función para comprobar conexión
+        function checkConnection() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '🔄 Comprobando...';
+            button.disabled = true;
+            
+            // Intentar hacer una petición simple
+            fetch('/api/health', { 
+                method: 'HEAD',
+                cache: 'no-cache',
+                signal: AbortSignal.timeout(5000)
+            })
+            .then(response => {
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                    // Recargar la página si hay conexión
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    updateConnectionStatus(false);
+                }
+            })
+            .catch(error => {
+                console.log('Sin conexión:', error);
+                updateConnectionStatus(false);
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        // Función para actualizar estado de conexión
+        function updateConnectionStatus(isOnline) {
+            const status = document.getElementById('connectionStatus');
+            
+            if (isOnline) {
+                status.className = 'connection-status online';
+                status.innerHTML = '🟢 ¡Conexión restaurada!';
+            } else {
+                status.className = 'connection-status offline';
+                status.innerHTML = '🔴 Sin conexión a internet';
+            }
+        }
+
+        // Escuchar eventos de conexión
+        window.addEventListener('online', () => {
+            updateConnectionStatus(true);
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionStatus(false);
+        });
+
+        // Escuchar mensajes del service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data.type === 'CONNECTION_RESTORED') {
+                    updateConnectionStatus(true);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            });
+        }
+
+        // Comprobar conexión inicial
+        if (navigator.onLine) {
+            // Si el navegador dice que estamos online, comprobar realmente
+            setTimeout(checkConnection, 1000);
+        }
+
+        // Comprobar conexión periódicamente
+        setInterval(() => {
+            if (navigator.onLine) {
+                checkConnection();
+            }
+        }, 30000); // Cada 30 segundos
+    </script>
+</body>
+</html>

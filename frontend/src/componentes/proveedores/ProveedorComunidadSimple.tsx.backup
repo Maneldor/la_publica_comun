@@ -1,0 +1,55 @@
+'use client';
+
+import React, { ReactNode } from 'react';
+import { ContextoComunidad } from '../../../tipos/comunidad';
+import { ConfiguracionComunidad } from '../../../configuracion/comunidades';
+// Importar el contexto del archivo original
+import { ComunidadContext } from './ProveedorComunidad';
+
+// Configuración por defecto de Catalunya
+const configuracionDefecto: ConfiguracionComunidad = {
+  codigo: 'catalunya',
+  nombre: 'Catalunya',
+  host: 'lapublica.cat',
+  idiomas: ['ca', 'es'],
+  idiomaDefecto: 'ca',
+  tema: {
+    colorPrimario: '#0066CC',
+    colorSecundario: '#FF6B35',
+    colorAccento: '#4CAF50',
+  },
+  organizaciones: [
+    'Generalitat de Catalunya',
+    'Ajuntament de Barcelona',
+  ],
+  provincias: ['Barcelona', 'Girona', 'Lleida', 'Tarragona'],
+  tiposUsuario: ['miembro', 'empresa', 'administracion', 'sindicato'],
+  caracteristicas: {
+    empresas: true,
+    sindicatos: true,
+    oposiciones: true,
+    bolsasTrabajo: true,
+    interinidades: true,
+  },
+};
+
+interface PropiedadesProveedorComunidad {
+  children: ReactNode;
+}
+
+export const ProveedorComunidadSimple: React.FC<PropiedadesProveedorComunidad> = ({ children }) => {
+  const valorContexto: ContextoComunidad = {
+    configuracion: configuracionDefecto,
+    idioma: 'ca',
+    cambiarIdioma: (nuevoIdioma: string) => {
+      console.log('Cambiar idioma a:', nuevoIdioma);
+    },
+    estaActiva: true
+  };
+
+  return (
+    <ComunidadContext.Provider value={valorContexto}>
+      {children}
+    </ComunidadContext.Provider>
+  );
+};

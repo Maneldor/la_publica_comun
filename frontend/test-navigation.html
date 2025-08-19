@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .test-link {
+            display: block;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f0f0f0;
+            text-decoration: none;
+            color: #333;
+            border-radius: 5px;
+        }
+        .test-link:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Navigation Test</h1>
+    <p>Test different navigation approaches:</p>
+    
+    <a href="/grupos-avanzados" class="test-link">
+        Direct link to /grupos-avanzados
+    </a>
+    
+    <a href="http://localhost:3002/grupos-avanzados" class="test-link">
+        Full URL link to grupos-avanzados
+    </a>
+    
+    <button onclick="window.location.href='/grupos-avanzados'" class="test-link" style="border: none; width: 100%;">
+        JavaScript navigation to /grupos-avanzados
+    </button>
+    
+    <button onclick="console.log('Testing console'); window.location.href='/grupos-avanzados'" class="test-link" style="border: none; width: 100%;">
+        JavaScript navigation with console test
+    </button>
+    
+    <script>
+        console.log('Navigation test page loaded');
+        
+        // Test if JavaScript is working
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - JavaScript is working');
+        });
+        
+        // Add click listeners to test event handling
+        document.querySelectorAll('.test-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                console.log('Click detected on:', e.target.textContent.trim());
+            });
+        });
+    </script>
+</body>
+</html>

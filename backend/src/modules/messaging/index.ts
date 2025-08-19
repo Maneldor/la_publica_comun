@@ -1,0 +1,1 @@
+export { default as messagingRoutes } from './routes/messaging.routes';

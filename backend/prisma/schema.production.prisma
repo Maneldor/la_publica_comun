@@ -1,0 +1,321 @@
+// Schema optimizado para PostgreSQL en producción
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "metrics"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de usuario principal
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  password               String
+  role                   String    @default("EMPLEADO_PUBLICO") // UserRole as string
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  refreshToken           String?
+  lastLogin              DateTime?
+  isActive               Boolean   @default(true)
+  isBlocked              Boolean   @default(false)
+  blockReason            String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Relations
+  employee          Employee?
+  company           Company?
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+  reactions         MessageReaction[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+  loginLogs         LoginLog[]
+  userSessions      UserSession[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// Modelo de empleado público
+model Employee {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Personal info
+  firstName        String
+  lastName         String
+  dni              String?  @unique
+  birthDate        DateTime?
+  phone            String?
+  
+  // Professional info
+  jobTitle         String?
+  department       String?
+  organization     String?
+  organizationType String?  // Ayuntamiento, Generalitat, etc.
+  employeeNumber   String?  @unique
+  
+  // Location
+  community        String   // CommunityCode as string
+  province         String?
+  city             String?
+  
+  // Employment details
+  startDate        DateTime?
+  endDate          DateTime?
+  employeeCategory String?  // A1, A2, B, C1, C2
+  contractType     String?  // Funcionario, Interino, Laboral
+  
+  // Profile
+  avatar           String?
+  bio              String?
+  
+  // Privacy settings
+  isProfilePublic  Boolean  @default(true)
+  showEmail        Boolean  @default(false)
+  showPhone        Boolean  @default(false)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([community])
+  @@index([province])
+  @@index([organizationType])
+  @@index([firstName, lastName])
+  @@map("employees")
+}
+
+// Modelo básico de empresa
+model Company {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  name         String
+  description  String?
+  sector       String
+  website      String?
+  email        String
+  phone        String?
+  
+  // Address
+  address      String?
+  city         String?
+  province     String?
+  postalCode   String?
+  country      String   @default("España")
+  
+  // Business info
+  cif          String   @unique
+  employeeCount String?
+  foundedYear  Int?
+  
+  // Profile
+  logo         String?
+  coverImage   String?
+  
+  // Status
+  isActive     Boolean  @default(true)
+  isVerified   Boolean  @default(false)
+  verifiedAt   DateTime?
+  verifiedBy   String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sector])
+  @@index([province])
+  @@index([isActive])
+  @@index([isVerified])
+  @@map("companies")
+}
+
+// Modelo de mensajes con índices para búsqueda full-text
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  
+  subject     String   @default("")
+  content     String
+  attachments String?  // JSON string of attached files
+  linkPreviews String? // JSON string of link previews metadata
+  
+  status      String   @default("SENT") // MessageStatus as string
+  readAt      DateTime?
+  editedAt    DateTime?
+  deletedAt   DateTime?
+  
+  // Metadata
+  ipAddress   String?
+  userAgent   String?
+  
+  // Relations
+  reactions   MessageReaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([readAt])
+  // Full-text search index para PostgreSQL
+  @@index([content], type: Gin)
+  @@map("messages")
+}
+
+// Modelo de reacciones a mensajes
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  emoji     String   // El emoji como string (ej: "👍", "❤️", "😂")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Un usuario solo puede tener una reacción por mensaje
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@map("message_reactions")
+}
+
+// Modelo de notificaciones
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // message_received, reaction_added, etc.
+  title     String
+  message   String
+  dataJson  String?  // JSON as string for metadata
+  
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([type])
+  @@map("notifications")
+}
+
+// Modelo de suscripciones push
+model PushSubscription {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Web Push API subscription details
+  endpoint    String   @unique
+  p256dh      String   // Public key for encryption
+  auth        String   // Authentication secret
+  
+  // Device/Browser info
+  userAgent   String?
+  deviceType  String?  // mobile, desktop, tablet
+  browser     String?  // chrome, firefox, safari, edge
+  ipAddress   String?
+  
+  // Status
+  isActive    Boolean  @default(true)
+  lastUsed    DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([lastUsed])
+  @@map("push_subscriptions")
+}
+
+// Modelo de logs de login para auditoría
+model LoginLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  ipAddress String
+  userAgent String?
+  success   Boolean
+  reason    String?  // failed_password, account_blocked, etc.
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([success])
+  @@index([createdAt])
+  @@index([ipAddress])
+  @@map("login_logs")
+}
+
+// Modelo de sesiones de usuario
+model UserSession {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  refreshToken String   @unique
+  ipAddress    String
+  userAgent    String?
+  
+  isActive     Boolean  @default(true)
+  expiresAt    DateTime
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@index([isActive])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+// Modelo de métricas del sistema
+model SystemMetrics {
+  id               String   @id @default(cuid())
+  
+  // Métricas de usuarios
+  totalUsers       Int      @default(0)
+  activeUsers      Int      @default(0)
+  newUsersToday    Int      @default(0)
+  
+  // Métricas de mensajes
+  totalMessages    Int      @default(0)
+  messagesToday    Int      @default(0)
+  avgMessagesPerUser Float  @default(0)
+  
+  // Métricas del sistema
+  cpuUsage         Float?
+  memoryUsage      Float?
+  diskUsage        Float?
+  
+  recordedAt       DateTime @default(now())
+
+  @@index([recordedAt])
+  @@map("system_metrics")
+}

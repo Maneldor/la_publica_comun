@@ -1,0 +1,42 @@
+'use client'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { ReactNode } from 'react'
+import { AuthProvider } from '../src/contextos/AuthContext'
+import { ComunidadContext, configuracionCatalunya } from './ComunidadContext'
+// import { PostsProvider } from '../src/contextos/PostsContext'
+
+const inter = Inter({ subsets: ['latin'] })
+
+// Proveedor simplificado
+function ProveedorComunidadSimple({ children }: { children: ReactNode }) {
+  return (
+    <ComunidadContext.Provider value={{
+      configuracion: configuracionCatalunya,
+      idioma: 'ca',
+      cambiarIdioma: () => {},
+      estaActiva: true
+    }}>
+      {children}
+    </ComunidadContext.Provider>
+  )
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="es">
+      <body className={inter.className}>
+        <AuthProvider>
+          <ProveedorComunidadSimple>
+            {children}
+          </ProveedorComunidadSimple>
+        </AuthProvider>
+      </body>
+    </html>
+  )
+}

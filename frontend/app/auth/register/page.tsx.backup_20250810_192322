@@ -1,0 +1,570 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '../../../src/contextos/AuthContext';
+import { obtenerComunidadActual } from '../../../configuracion/comunidades';
+import { useTraduccion } from '../../../src/i18n/useTraduccion';
+
+// Tema para páginas de auth
+const tema = {
+  primario: '#059669',
+  secundario: '#0ea5e9',
+  acento: '#8b5cf6',
+  texto: '#1f2937',
+  textoSecundario: '#6b7280'
+};
+
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  nombre: string;
+  apellidos: string;
+  nick: string;
+  role: 'EMPLEADO_PUBLICO' | 'EMPRESA';
+  acceptTerms: boolean;
+  // Campos condicionales
+  companyName?: string;
+  companyCif?: string;
+  companySector?: string;
+  companyDescription?: string;
+  employeeCommunity?: string;
+  employeeOrganization?: string;
+  employeeJobTitle?: string;
+  employeeDepartment?: string;
+}
+
+export default function RegisterPage() {
+  const router = useRouter();
+  const { register, isLoading } = useAuth();
+  const { t } = useTraduccion();
+  
+  const [step, setStep] = useState(1); // Paso del formulario
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    nombre: '',
+    apellidos: '',
+    nick: '',
+    role: 'EMPLEADO_PUBLICO',
+    acceptTerms: false
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  // Estados para detección automática de comunidad
+  const [comunidadDetectada, setComunidadDetectada] = useState<string>('');
+  const [mostrarConfirmacionComunidad, setMostrarConfirmacionComunidad] = useState(false);
+  const [confirmacionComunidad, setConfirmacionComunidad] = useState<boolean | null>(null);
+
+  // Solo empleados públicos pueden registrarse directamente
+  const roles = [
+    { key: 'EMPLEADO_PUBLICO', label: 'Empleado Público', icon: '👥', desc: 'Trabajador del sector público español' }
+  ];
+
+  const comunidades = Object.keys(t.comunidades);
+
+  const sectores = [
+    'Tecnología', 'Consultoría', 'Construcción', 'Educación', 'Sanidad',
+    'Transporte', 'Turismo', 'Comercio', 'Industria', 'Servicios', 'Otros'
+  ];
+
+  // Detectar comunidad automáticamente al cargar
+  useEffect(() => {
+    const comunidadActual = obtenerComunidadActual();
+    setComunidadDetectada(comunidadActual.nombre);
+    setMostrarConfirmacionComunidad(true);
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+    if (error) setError('');
+  };
+
+  const handleConfirmacionComunidad = (respuesta: boolean) => {
+    setConfirmacionComunidad(respuesta);
+    if (respuesta) {
+      // Usuario confirma que trabaja en la comunidad detectada
+      setFormData(prev => ({ ...prev, employeeCommunity: comunidadDetectada }));
+    }
+    setMostrarConfirmacionComunidad(false);
+  };
+
+  const validateStep1 = (): boolean => {
+    if (!formData.email || !formData.password || !formData.confirmPassword || !formData.nombre || !formData.nick || !formData.employeeCommunity) {
+      setError(t.validacion.completaCampos);
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError(t.validacion.contraseñasNoCoinciden);
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError(t.validacion.contraseñaMinimo);
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError(t.validacion.emailInvalido);
+      return false;
+    }
+
+    // Validar longitud del nickname (sin contar el @)
+    const nickWithoutAt = formData.nick.startsWith('@') ? formData.nick.slice(1) : formData.nick;
+    if (nickWithoutAt.length < 3) {
+      setError(t.validacion.nicknameMinimo);
+      return false;
+    }
+
+    return true;
+  };
+
+  const validateStep2 = (): boolean => {
+    // Solo validamos campos restantes de empleado público
+    if (!formData.employeeOrganization || !formData.employeeJobTitle) {
+      setError(t.validacion.completaCampos);
+      return false;
+    }
+
+    if (!formData.acceptTerms) {
+      setError(t.validacion.aceptaTerminos);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep1()) {
+      setStep(2);
+      setError('');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!validateStep2()) return;
+
+    const registerData = {
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
+      firstName: formData.nombre,
+      lastName: formData.apellidos,
+      community: formData.employeeCommunity,
+      companyName: formData.companyName,
+      cif: formData.companyCif,
+      sector: formData.companySector
+    };
+
+    try {
+      await register(registerData);
+      
+      setSuccess('¡Registro exitoso! Redirigiendo...');
+      
+      // Redirigir después de 2 segundos
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Error en el registro');
+    }
+  };
+
+  const getDashboardUrl = (role: string): string => {
+    switch (role) {
+      case 'ADMIN': return '/admin-completo';
+      case 'EMPRESA': return '/empresa-completa';
+      case 'GESTOR_EMPRESAS': return '/gestor-completo';
+      case 'ADMINISTRACION_PUBLICA': return '/administracion-completa';
+      case 'SINDICATO': return '/sindicato-completo';
+      case 'EMPLEADO_PUBLICO': return '/empleado-completo';
+      default: return '/dashboard';
+    }
+  };
+
+  const renderStep1 = () => (
+    <>
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold" style={{ color: tema.texto }}>{t.registro.titulo}</h2>
+        <p className="text-sm mt-1" style={{ color: tema.textoSecundario }}>{t.registro.paso1}: {t.registro.datosBasicos}</p>
+      </div>
+
+      <div className="space-y-3">
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.emailRequerido}</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+            style={{ borderColor: `${tema.primario}20` }}
+            placeholder="tu@email.com"
+          />
+        </div>
+
+        {/* Nombre y Apellidos */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.nombreRequerido}</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+              style={{ borderColor: `${tema.primario}20` }}
+              placeholder={t.registro.nombre}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.apellidos}</label>
+            <input
+              type="text"
+              name="apellidos"
+              value={formData.apellidos}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+              style={{ borderColor: `${tema.primario}20` }}
+              placeholder={t.registro.apellidos}
+            />
+          </div>
+        </div>
+
+        {/* Nickname */}
+        <div>
+          <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.nicknameRequerido}</label>
+          <div className="relative">
+            <span className="absolute left-3 top-2 font-medium" style={{ color: tema.texto }}>@</span>
+            <input
+              type="text"
+              name="nick"
+              value={formData.nick.startsWith('@') ? formData.nick.slice(1) : formData.nick}
+              onChange={(e) => {
+                // Solo permitir letras, números y guiones bajos
+                const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                setFormData(prev => ({ ...prev, nick: '@' + value }));
+                if (error) setError('');
+              }}
+              className="w-full pl-7 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+              style={{ borderColor: `${tema.primario}20` }}
+              placeholder="tu_nickname"
+            />
+          </div>
+          <p className="text-xs mt-1" style={{ color: tema.textoSecundario }}>
+            {t.registro.nicknameDescripcion}
+          </p>
+        </div>
+
+        {/* Comunidad Autónoma */}
+        <div>
+          <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.comunidadRequerida}</label>
+          {confirmacionComunidad === true ? (
+            // Si confirmó la comunidad detectada, mostrar como campo fijo
+            <div className="w-full px-3 py-2 border rounded-lg" style={{ 
+              borderColor: `${tema.primario}20`,
+              backgroundColor: `${tema.primario}05`
+            }}>
+              <div className="flex items-center justify-between">
+                <span style={{ color: tema.texto }}>{t.comunidades[formData.employeeCommunity!] || formData.employeeCommunity}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmacionComunidad(null);
+                    setFormData(prev => ({ ...prev, employeeCommunity: '' }));
+                  }}
+                  className="text-xs px-2 py-1 rounded"
+                  style={{ color: tema.primario }}
+                >
+                  {t.cambiar}
+                </button>
+              </div>
+            </div>
+          ) : (
+            // Si no confirmó o rechazó, mostrar dropdown normal
+            <select
+              name="employeeCommunity"
+              value={formData.employeeCommunity || ''}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+              style={{ borderColor: `${tema.primario}20` }}
+            >
+              <option value="">{t.registro.seleccionaComunidad}</option>
+              {comunidades.map(comunidad => (
+                <option key={comunidad} value={comunidad}>{t.comunidades[comunidad] || comunidad}</option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {/* Contraseñas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.contraseñaRequerida}</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+              style={{ borderColor: `${tema.primario}20` }}
+              placeholder={t.registro.minimoCaracteres}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.confirmar}</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+              style={{ borderColor: `${tema.primario}20` }}
+              placeholder={t.registro.repiteContraseña}
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleNext}
+        className="w-full py-2 rounded-lg font-medium text-white transition-all duration-200 hover:shadow-lg mt-4"
+        style={{ backgroundColor: tema.primario }}
+      >
+        {t.continuar}
+      </button>
+    </>
+  );
+
+  const renderStep2 = () => (
+    <>
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold" style={{ color: tema.texto }}>{t.registro.informacionAdicional}</h2>
+        <p className="text-sm mt-1" style={{ color: tema.textoSecundario }}>{t.registro.paso2}: {t.registro.completarPerfil}</p>
+      </div>
+
+      <div className="space-y-3">
+        {/* Campos específicos para EMPLEADO_PUBLICO */}
+        {formData.role === 'EMPLEADO_PUBLICO' && (
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.organizacionRequerida}</label>
+              <input
+                type="text"
+                name="employeeOrganization"
+                value={formData.employeeOrganization || ''}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ borderColor: `${tema.primario}20` }}
+                placeholder={t.registro.organizacionPlaceholder}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.puestoRequerido}</label>
+                <input
+                  type="text"
+                  name="employeeJobTitle"
+                  value={formData.employeeJobTitle || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ borderColor: `${tema.primario}20` }}
+                  placeholder={t.registro.puestoPlaceholder}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: tema.texto }}>{t.registro.departamento}</label>
+                <input
+                  type="text"
+                  name="employeeDepartment"
+                  value={formData.employeeDepartment || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ borderColor: `${tema.primario}20` }}
+                  placeholder={t.registro.departamentoPlaceholder}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Términos y Condiciones */}
+        <div className="flex items-start space-x-3">
+          <input
+            type="checkbox"
+            name="acceptTerms"
+            checked={formData.acceptTerms}
+            onChange={handleInputChange}
+            className="mt-1"
+            style={{ accentColor: tema.primario }}
+          />
+          <label className="text-sm" style={{ color: tema.textoSecundario }}>
+            {t.registro.aceptoTerminos}{' '}
+            <Link href="/legal/terms" className="underline" style={{ color: tema.primario }}>
+              {t.registro.terminosCondiciones}
+            </Link>
+            {' '}y la{' '}
+            <Link href="/legal/privacy" className="underline" style={{ color: tema.primario }}>
+              {t.registro.politicaPrivacidad}
+            </Link>
+          </label>
+        </div>
+      </div>
+
+      <div className="flex space-x-3 mt-4">
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="flex-1 py-2 rounded-lg font-medium border transition-all duration-200"
+          style={{ 
+            borderColor: tema.primario,
+            color: tema.primario 
+          }}
+        >
+          {t.atras}
+        </button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="flex-1 py-2 rounded-lg font-medium text-white transition-all duration-200 disabled:opacity-50 hover:shadow-lg"
+          style={{ backgroundColor: tema.primario }}
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center space-x-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>{t.mensajes.registrando}</span>
+            </span>
+          ) : (
+            t.crearCuenta
+          )}
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br" style={{
+      background: `linear-gradient(135deg, ${tema.primario}10, ${tema.secundario}05)`
+    }}>
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-4xl">
+          <div className="flex items-center justify-center min-h-screen py-4">
+            <div className="w-full max-w-2xl">
+              {/* Logo compacto */}
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style={{
+                  backgroundColor: tema.primario
+                }}>
+                  <span className="text-lg text-white">🏢</span>
+                </div>
+                <h1 className="text-xl font-bold" style={{ color: tema.texto }}>La Pública</h1>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-xl p-6">
+                <form onSubmit={handleSubmit}>
+                  {step === 1 ? renderStep1() : renderStep2()}
+
+                  {/* Error */}
+                  {error && (
+                    <div className="mt-3 bg-red-50 border border-red-200 rounded-lg p-2">
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                  )}
+
+                  {/* Success */}
+                  {success && (
+                    <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-2">
+                      <p className="text-sm text-green-600">{success}</p>
+                    </div>
+                  )}
+                </form>
+
+                {/* Link de Login */}
+                <div className="mt-4 text-center">
+                  <div className="text-sm" style={{ color: tema.textoSecundario }}>
+                    {t.registro.yaTienesCuenta}{' '}
+                    <Link 
+                      href="/auth/login" 
+                      className="font-medium hover:underline"
+                      style={{ color: tema.primario }}
+                    >
+                      {t.registro.iniciaAqui}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de Confirmación de Comunidad */}
+      {mostrarConfirmacionComunidad && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{
+                backgroundColor: `${tema.primario}15`
+              }}>
+                <span className="text-3xl">🏛️</span>
+              </div>
+              <h3 className="text-xl font-bold mb-2" style={{ color: tema.texto }}>
+                {t.registro.confirmaTuComunidad}
+              </h3>
+              <p className="text-sm" style={{ color: tema.textoSecundario }}>
+                {t.registro.hemosDetectado} <strong>{t.comunidades[comunidadDetectada] || comunidadDetectada}</strong>
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-center font-medium" style={{ color: tema.texto }}>
+                {t.registro.eresTrabajador} <strong>{t.comunidades[comunidadDetectada] || comunidadDetectada}</strong>?
+              </p>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => handleConfirmacionComunidad(true)}
+                  className="flex-1 py-3 rounded-lg font-medium text-white transition-all duration-200 hover:shadow-lg"
+                  style={{ backgroundColor: tema.primario }}
+                >
+                  {t.registro.siTrabajo} {t.comunidades[comunidadDetectada] || comunidadDetectada}
+                </button>
+                <button
+                  onClick={() => handleConfirmacionComunidad(false)}
+                  className="flex-1 py-3 rounded-lg font-medium border transition-all duration-200 hover:shadow-sm"
+                  style={{ 
+                    borderColor: tema.primario,
+                    color: tema.primario 
+                  }}
+                >
+                  {t.registro.noTrabajoOtra}
+                </button>
+              </div>
+
+              <p className="text-xs text-center" style={{ color: tema.textoSecundario }}>
+                {t.registro.puedesCambiar}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
