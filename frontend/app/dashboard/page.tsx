@@ -26,40 +26,6 @@ export default function DashboardPage() {
 
   return (
     <LayoutXarxaSocial paginaActual="dashboard">
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
-        {/* Cards de estadísticas */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-lg font-semibold text-gray-900">1,247</div>
-              <div className="text-xs text-gray-500">Total Membres</div>
-            </div>
-            <div className="text-lg text-blue-500">👥</div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-lg font-semibold text-gray-900">127</div>
-              <div className="text-xs text-gray-500">Membres Online</div>
-            </div>
-            <div className="text-lg text-green-500">🟢</div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-lg font-semibold text-gray-900">8</div>
-              <div className="text-xs text-gray-500">Grups</div>
-            </div>
-            <div className="text-lg text-purple-500">🏢</div>
-          </div>
-        </div>
-      </div>
-      
       <div className="space-y-6">
         {/* Formulari per crear posts */}
         <div className="bg-white rounded-lg shadow-sm border">
@@ -111,7 +77,6 @@ export default function DashboardPage() {
 
       {/* Component global de missatges */}
       <MissatgesGlobal />
-      </div>
     </LayoutXarxaSocial>
   )
 }
