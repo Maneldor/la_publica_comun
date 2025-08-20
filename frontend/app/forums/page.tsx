@@ -1,12 +1,12 @@
 'use client'
 
-import LayoutXarxaSocial from '@/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '@/componentes/comunes/LayoutGeneral'
 import ForumPrincipal from '@/componentes/comunes/especificos-comunidad/ForumPrincipal'
 
 export default function ForumsPage() {
   return (
-    <LayoutXarxaSocial paginaActual="forums">
+    <LayoutGeneral paginaActual="forums">
       <ForumPrincipal />
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }

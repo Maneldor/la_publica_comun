@@ -61,7 +61,7 @@ export default function LoginPage() {
       
       // El contexto maneja el estado del usuario automáticamente
       // Redirigir al dashboard principal después del login exitoso
-      router.push('/dashboard');
+      router.push('/xarxa-social');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     }
@@ -75,7 +75,7 @@ export default function LoginPage() {
       case 'ADMINISTRACION_PUBLICA': return '/administracion-completa';
       case 'SINDICATO': return '/sindicato-completo';
       case 'EMPLEADO_PUBLICO': return '/empleado-completo';
-      default: return '/dashboard';
+      default: return '/xarxa-social';
     }
   };
 

@@ -290,7 +290,7 @@ export default function ForumTopic({ topicId }: ForumTopicProps) {
 
   if (!topic) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-full flex items-center justify-center py-12">
         <div className="text-center py-12">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
             <MessageCircle size={24} className="text-gray-400" />
@@ -310,7 +310,7 @@ export default function ForumTopic({ topicId }: ForumTopicProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full">
       
       {/* Header navegació - Estil BuddyBoss */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-10">

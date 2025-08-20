@@ -352,7 +352,7 @@ class AuthService {
       case 'EMPLEADO_PUBLICO':
         return '/empleado-completo';
       default:
-        return '/dashboard';
+        return '/xarxa-social';
     }
   }
 

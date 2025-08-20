@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ModalEditarPerfil from '../../../src/componentes/comunes/especificos-comunidad/ModalEditarPerfil'
-import LayoutXarxaSocial from '../../../src/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '../../../src/componentes/comunes/LayoutGeneral'
 import { useUsuario } from '../../../src/contextos/UsuarioContext'
 
 export default function EditarPerfilPage() {
@@ -74,7 +74,7 @@ export default function EditarPerfilPage() {
   }
 
   return (
-    <LayoutXarxaSocial paginaActual="perfil">
+    <LayoutGeneral paginaActual="perfil">
       <div className="px-4 sm:px-6 lg:px-8 py-6">
         <ModalEditarPerfil 
           isOpen={true}
@@ -84,6 +84,6 @@ export default function EditarPerfilPage() {
           guardando={guardando}
         />
       </div>
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }

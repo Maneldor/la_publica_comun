@@ -1,382 +1,496 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Filter, X, Building2, ChevronDown, RefreshCw } from 'lucide-react';
-import LayoutXarxaSocial from '../../../src/componentes/comunes/LayoutXarxaSocial';
-import { TarjetaEmpresa } from '../../../src/componentes/empresas';
-import { useEmpresas } from '../../../src/hooks/useEmpresas';
-import { useComunidad } from '../../../hooks/useComunidad';
+import React, { useState, useEffect } from 'react';
+import LayoutGeneral from '../../../src/componentes/comunes/LayoutGeneral';
+import { 
+  Building2,
+  Search,
+  MapPin,
+  Users,
+  Award,
+  Filter,
+  LayoutGrid,
+  List,
+  Eye,
+  Heart,
+  Phone,
+  Mail,
+  Globe,
+  Star
+} from 'lucide-react';
 
-// Componente Skeleton para loading
-function EmpresaSkeleton() {
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-64 animate-pulse">
-      <div className="p-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-          <div>
-            <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-24"></div>
-          </div>
-        </div>
-        <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-      </div>
-    </div>
-  );
+interface Empresa {
+  id: string
+  nombre: string
+  descripcion: string
+  sector: string
+  ubicacion: string
+  empleados: number
+  fundada: number
+  logo: string
+  verificada: boolean
+  destacada: boolean
+  rating: number
+  seguidores: number
+  telefono?: string
+  email?: string
+  web?: string
 }
 
-// Sectores disponibles
-const SECTORES = [
-  'Tecnología',
-  'Consultoría',
-  'Servicios',
-  'Industria',
-  'Salud',
-  'Educación',
-  'Construcción',
-  'Transporte'
-];
+// Datos mock de empresas
+const empresasMock: Empresa[] = [
+  {
+    id: '1',
+    nombre: 'TechSolutions S.A.',
+    descripcion: 'Empresa líder en soluciones tecnológicas para el sector público, especializada en transformación digital y servicios cloud.',
+    sector: 'Tecnologia',
+    ubicacion: 'Barcelona',
+    empleados: 150,
+    fundada: 2010,
+    logo: 'https://ui-avatars.com/api/?name=TechSolutions&background=3b82f6&color=fff',
+    verificada: true,
+    destacada: true,
+    rating: 4.8,
+    seguidores: 1250,
+    telefono: '+34 93 123 4567',
+    email: 'info@techsolutions.com',
+    web: 'techsolutions.com'
+  },
+  {
+    id: '2',
+    nombre: 'Consultoria Innovació',
+    descripcion: 'Consultoria estratégica especializada en innovación y modernización de procesos administrativos públicos.',
+    sector: 'Consultoria',
+    ubicacion: 'Madrid',
+    empleados: 85,
+    fundada: 2015,
+    logo: 'https://ui-avatars.com/api/?name=Consultoria+Innovacio&background=10b981&color=fff',
+    verificada: true,
+    destacada: false,
+    rating: 4.6,
+    seguidores: 980,
+    telefono: '+34 91 987 6543',
+    email: 'contacto@consultoria-innovacio.es',
+    web: 'consultoria-innovacio.es'
+  },
+  {
+    id: '3',
+    nombre: 'Servicios Municipales Plus',
+    descripcion: 'Proveedor integral de servicios para administraciones locales: limpieza, mantenimiento y gestión de espacios públicos.',
+    sector: 'Servicios',
+    ubicacion: 'Valencia',
+    empleados: 320,
+    fundada: 2008,
+    logo: 'https://ui-avatars.com/api/?name=Servicios+Municipales&background=f59e0b&color=fff',
+    verificada: false,
+    destacada: true,
+    rating: 4.4,
+    seguidores: 750,
+    telefono: '+34 96 555 1234',
+    email: 'info@serviciosmunicipales.com'
+  },
+  {
+    id: '4',
+    nombre: 'EduTech Innovation',
+    descripcion: 'Plataforma educativa digital para formación continua de empleados públicos y ciudadanos.',
+    sector: 'Educació',
+    ubicacion: 'Sevilla',
+    empleados: 45,
+    fundada: 2018,
+    logo: 'https://ui-avatars.com/api/?name=EduTech&background=8b5cf6&color=fff',
+    verificada: true,
+    destacada: false,
+    rating: 4.7,
+    seguidores: 620,
+    email: 'hola@edutech.es',
+    web: 'edutech-innovation.es'
+  },
+  {
+    id: '5',
+    nombre: 'Green Solutions',
+    descripcion: 'Consultoria ambiental especializada en sostenibilidad y eficiencia energética para edificios públicos.',
+    sector: 'Medi Ambient',
+    ubicacion: 'Bilbao',
+    empleados: 65,
+    fundada: 2012,
+    logo: 'https://ui-avatars.com/api/?name=Green+Solutions&background=22c55e&color=fff',
+    verificada: true,
+    destacada: true,
+    rating: 4.5,
+    seguidores: 890,
+    telefono: '+34 94 321 9876',
+    web: 'greensolutions.eus'
+  },
+  {
+    id: '6',
+    nombre: 'DataSecure Pro',
+    descripcion: 'Especialistas en ciberseguridad y protección de datos para administraciones públicas.',
+    sector: 'Seguretat',
+    ubicacion: 'Barcelona',
+    empleados: 95,
+    fundada: 2016,
+    logo: 'https://ui-avatars.com/api/?name=DataSecure&background=dc2626&color=fff',
+    verificada: true,
+    destacada: false,
+    rating: 4.9,
+    seguidores: 1100,
+    email: 'security@datasecure.com',
+    web: 'datasecure-pro.com'
+  }
+]
 
-// Ubicaciones disponibles
-const UBICACIONES = [
-  'Barcelona',
-  'Madrid',
-  'Valencia',
-  'Sevilla',
-  'Bilbao',
-  'Zaragoza',
-  'Málaga',
-  'Palma'
-];
+const sectores = ['Tecnologia', 'Consultoria', 'Servicios', 'Educació', 'Medi Ambient', 'Seguretat']
+const ubicaciones = ['Barcelona', 'Madrid', 'Valencia', 'Sevilla', 'Bilbao', 'Zaragoza']
 
 export default function EmpresasColaboradorasPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const contexto = useComunidad();
-  const tema = contexto.configuracion.tema;
-  const idioma = contexto.idioma;
-  
-  const {
-    empresas,
-    loading,
-    error,
-    hasMore,
-    seguidas,
-    filtros,
-    setSearchTerm,
-    setSectorFilter,
-    setUbicacionFilter,
-    setSoloVerificadas,
-    setSoloDestacadas,
-    followEmpresa,
-    unfollowEmpresa,
-    resetFilters,
-    loadMore,
-    refreshEmpresas
-  } = useEmpresas();
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedSector, setSelectedSector] = useState('all')
+  const [selectedUbicacion, setSelectedUbicacion] = useState('all')
+  const [soloVerificadas, setSoloVerificadas] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [filteredEmpresas, setFilteredEmpresas] = useState(empresasMock)
 
-  // Estado local para UI
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Sincronizar filtros con URL params
   useEffect(() => {
-    const search = searchParams.get('search');
-    const sector = searchParams.get('sector');
-    const ubicacion = searchParams.get('ubicacion');
-    const verificadas = searchParams.get('verificadas');
-    const destacadas = searchParams.get('destacadas');
+    let filtered = empresasMock
 
-    if (search) setSearchTerm(search);
-    if (sector) setSectorFilter(sector.split(','));
-    if (ubicacion) setUbicacionFilter(ubicacion);
-    if (verificadas === 'true') setSoloVerificadas(true);
-    if (destacadas === 'true') setSoloDestacadas(true);
-  }, [searchParams]);
-
-  // Handlers
-  const handleFollow = async (empresaId: string) => {
-    if (seguidas.has(empresaId)) {
-      await unfollowEmpresa(empresaId);
-    } else {
-      await followEmpresa(empresaId);
+    // Filtrar por búsqueda
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(empresa =>
+        empresa.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        empresa.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        empresa.sector.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     }
-  };
 
-  const handleViewMore = (empresaId: string) => {
-    router.push(`/empresas/${empresaId}`);
-  };
+    // Filtrar por sector
+    if (selectedSector !== 'all') {
+      filtered = filtered.filter(empresa => empresa.sector === selectedSector)
+    }
 
-  const handleClearFilters = () => {
-    resetFilters();
-    router.push('/dashboard/empresas');
-  };
+    // Filtrar por ubicación
+    if (selectedUbicacion !== 'all') {
+      filtered = filtered.filter(empresa => empresa.ubicacion === selectedUbicacion)
+    }
 
-  // Calcular si hay filtros activos
-  const hasActiveFilters = 
-    filtros.searchTerm || 
-    filtros.sectorFilter.length > 0 || 
-    filtros.ubicacionFilter || 
-    filtros.soloVerificadas || 
-    filtros.soloDestacadas;
+    // Filtrar solo verificadas
+    if (soloVerificadas) {
+      filtered = filtered.filter(empresa => empresa.verificada)
+    }
+
+    setFilteredEmpresas(filtered)
+  }, [searchTerm, selectedSector, selectedUbicacion, soloVerificadas])
 
   return (
-    <LayoutXarxaSocial paginaActual="dashboard">
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
-        {/* Breadcrumbs */}
-        <nav className="mb-6">
-          <div className="flex items-center space-x-2 text-sm">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              Dashboard
-            </button>
-            <span className="text-gray-500">›</span>
-            <span style={{ color: tema.colorPrimario }} className="font-medium">
-              {idioma === 'ca' ? 'Empreses Col·laboradores' : 'Empresas Colaboradoras'}
-            </span>
-          </div>
-        </nav>
+    <LayoutGeneral paginaActual="dashboard">
+      <div className="w-full">
+        <div className="px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Título y contador */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {idioma === 'ca' ? 'Empreses Col·laboradores' : 'Empresas Colaboradoras'}
-          </h1>
-          <p className="text-gray-600">
-            {empresas.length} {idioma === 'ca' ? 'empreses trobades' : 'empresas encontradas'}
-          </p>
-        </div>
-
-        {/* Barra de filtros */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6 p-4">
-          {/* Búsqueda principal */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                value={filtros.searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={idioma === 'ca' ? 'Cercar empreses...' : 'Buscar empresas...'}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+              <div className="mb-4 lg:mb-0">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Empreses Col·laboradores</h1>
+                <p className="text-gray-600">Descobreix empreses que col·laboren amb el sector públic</p>
+              </div>
             </div>
-            
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center px-4 py-2 border rounded-lg hover:bg-gray-50"
-            >
-              <Filter size={20} className="mr-2" />
-              {idioma === 'ca' ? 'Filtres' : 'Filtros'}
-              <ChevronDown 
-                size={16} 
-                className={`ml-2 transform transition-transform ${showFilters ? 'rotate-180' : ''}`} 
-              />
-            </button>
-          </div>
 
-          {/* Filtros expandibles */}
-          {showFilters && (
-            <div className="border-t pt-4 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Filtro por sector */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {idioma === 'ca' ? 'Sector' : 'Sector'}
-                  </label>
+            {/* Estadísticas */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Building2 size={20} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{empresasMock.length}</p>
+                    <p className="text-sm text-gray-500">Empreses</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Award size={20} className="text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {empresasMock.filter(e => e.verificada).length}
+                    </p>
+                    <p className="text-sm text-gray-500">Verificades</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Users size={20} className="text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {empresasMock.reduce((acc, empresa) => acc + empresa.seguidores, 0).toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-500">Seguidors</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <MapPin size={20} className="text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {new Set(empresasMock.map(e => e.ubicacion)).size}
+                    </p>
+                    <p className="text-sm text-gray-500">Ciutats</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filtros y búsqueda */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
+                <div className="relative flex-1">
+                  <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Cercar empreses..."
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
                   <select
-                    value={filtros.sectorFilter[0] || ''}
-                    onChange={(e) => setSectorFilter(e.target.value ? [e.target.value] : [])}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    value={selectedSector}
+                    onChange={(e) => setSelectedSector(e.target.value)}
                   >
-                    <option value="">{idioma === 'ca' ? 'Tots els sectors' : 'Todos los sectores'}</option>
-                    {SECTORES.map(sector => (
+                    <option value="all">Tots els sectors</option>
+                    {sectores.map(sector => (
                       <option key={sector} value={sector}>{sector}</option>
                     ))}
                   </select>
-                </div>
-
-                {/* Filtro por ubicación */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {idioma === 'ca' ? 'Ubicació' : 'Ubicación'}
-                  </label>
+                  
                   <select
-                    value={filtros.ubicacionFilter}
-                    onChange={(e) => setUbicacionFilter(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    value={selectedUbicacion}
+                    onChange={(e) => setSelectedUbicacion(e.target.value)}
                   >
-                    <option value="">{idioma === 'ca' ? 'Totes les ubicacions' : 'Todas las ubicaciones'}</option>
-                    {UBICACIONES.map(ubi => (
-                      <option key={ubi} value={ubi}>{ubi}</option>
+                    <option value="all">Totes les ubicacions</option>
+                    {ubicaciones.map(ubicacion => (
+                      <option key={ubicacion} value={ubicacion}>{ubicacion}</option>
                     ))}
                   </select>
-                </div>
 
-                {/* Toggles */}
-                <div className="space-y-2">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={filtros.soloVerificadas}
+                      checked={soloVerificadas}
                       onChange={(e) => setSoloVerificadas(e.target.checked)}
-                      className="mr-2"
-                      style={{ accentColor: tema.colorPrimario }}
+                      className="mr-2 rounded"
                     />
-                    <span className="text-sm">{idioma === 'ca' ? 'Només verificades' : 'Solo verificadas'}</span>
+                    <span className="text-sm">Només verificades</span>
                   </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={filtros.soloDestacadas}
-                      onChange={(e) => setSoloDestacadas(e.target.checked)}
-                      className="mr-2"
-                      style={{ accentColor: tema.colorPrimario }}
-                    />
-                    <span className="text-sm">{idioma === 'ca' ? 'Només destacades' : 'Solo destacadas'}</span>
-                  </label>
-                </div>
 
-                {/* Botón limpiar */}
-                {hasActiveFilters && (
-                  <div className="flex items-end">
+                  {/* Toggle vista */}
+                  <div className="flex items-center bg-gray-100 rounded-xl p-1">
                     <button
-                      onClick={handleClearFilters}
-                      className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-lg transition-colors ${
+                        viewMode === 'grid'
+                          ? 'bg-white text-blue-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                      title="Vista en graella"
                     >
-                      <X size={16} className="mr-1" />
-                      {idioma === 'ca' ? 'Netejar filtres' : 'Limpiar filtros'}
+                      <LayoutGrid size={18} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-lg transition-colors ${
+                        viewMode === 'list'
+                          ? 'bg-white text-blue-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                      title="Vista en llista"
+                    >
+                      <List size={18} />
                     </button>
                   </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm text-gray-500">
+                <span>{filteredEmpresas.length} empreses trobades</span>
+                {(searchTerm || selectedSector !== 'all' || selectedUbicacion !== 'all' || soloVerificadas) && (
+                  <button 
+                    onClick={() => {
+                      setSearchTerm('')
+                      setSelectedSector('all')
+                      setSelectedUbicacion('all')
+                      setSoloVerificadas(false)
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Netejar filtres
+                  </button>
                 )}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Estados de la página */}
-        {loading && !empresas.length ? (
-          // Loading state
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <EmpresaSkeleton key={i} />
-            ))}
           </div>
-        ) : error ? (
-          // Error state
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <div className="text-red-500 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {idioma === 'ca' ? 'Error al carregar empreses' : 'Error al cargar empresas'}
-            </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={refreshEmpresas}
-              className="inline-flex items-center px-4 py-2 rounded-md text-white"
-              style={{ backgroundColor: tema.colorPrimario }}
-            >
-              <RefreshCw size={16} className="mr-2" />
-              {idioma === 'ca' ? 'Tornar a intentar' : 'Reintentar'}
-            </button>
-          </div>
-        ) : empresas.length === 0 ? (
-          // Empty state
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <Building2 className="mx-auto h-16 w-16" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {idioma === 'ca' ? 'No s\'han trobat empreses' : 'No se encontraron empresas'}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {hasActiveFilters 
-                ? (idioma === 'ca' ? 'Prova amb altres filtres' : 'Prueba con otros filtros')
-                : (idioma === 'ca' ? 'Encara no hi ha empreses col·laboradores' : 'Aún no hay empresas colaboradoras')
-              }
-            </p>
-            {hasActiveFilters && (
-              <button
-                onClick={handleClearFilters}
-                className="inline-flex items-center px-4 py-2 rounded-md border"
-                style={{ color: tema.colorPrimario, borderColor: tema.colorPrimario }}
-              >
-                {idioma === 'ca' ? 'Netejar filtres' : 'Limpiar filtros'}
-              </button>
-            )}
-          </div>
-        ) : (
-          // Success state - Grid de empresas
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {empresas.map((empresa, index) => (
-                <div
-                  key={empresa.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <TarjetaEmpresa
-                    empresa={empresa}
-                    isFollowing={seguidas.has(empresa.id)}
-                    onFollow={handleFollow}
-                    onViewMore={handleViewMore}
-                  />
-                </div>
+
+          {/* Lista de empresas */}
+          {filteredEmpresas.length > 0 ? (
+            <div className={`${
+              viewMode === 'grid' 
+                ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+                : 'space-y-4'
+            }`}>
+              {filteredEmpresas.map((empresa) => (
+                <EmpresaCard key={empresa.id} empresa={empresa} viewMode={viewMode} />
               ))}
             </div>
-
-            {/* Load More */}
-            {hasMore && (
-              <div className="mt-8 text-center">
-                <button
-                  onClick={loadMore}
-                  disabled={loading}
-                  className="inline-flex items-center px-6 py-3 rounded-md text-white transition-opacity"
-                  style={{ 
-                    backgroundColor: tema.colorPrimario,
-                    opacity: loading ? 0.5 : 1
-                  }}
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      {idioma === 'ca' ? 'Carregant...' : 'Cargando...'}
-                    </>
-                  ) : (
-                    idioma === 'ca' ? 'Carregar més' : 'Cargar más'
-                  )}
-                </button>
-              </div>
-            )}
-          </>
-        )}
+          ) : (
+            <div className="bg-white rounded-xl border p-12 text-center">
+              <Building2 size={64} className="mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No s'han trobat empreses
+              </h3>
+              <p className="text-gray-600">
+                Prova ajustant els filtres de cerca
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   );
+}
+
+// Componente EmpresaCard
+interface EmpresaCardProps {
+  empresa: Empresa
+  viewMode: 'grid' | 'list'
+}
+
+function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
+  if (viewMode === 'list') {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-4 flex-1">
+            <img 
+              src={empresa.logo}
+              alt={empresa.nombre}
+              className="w-16 h-16 rounded-lg object-cover"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">{empresa.nombre}</h3>
+                {empresa.verificada && (
+                  <Award size={16} className="text-green-500" title="Empresa verificada" />
+                )}
+                {empresa.destacada && (
+                  <Star size={16} className="text-yellow-500" title="Empresa destacada" />
+                )}
+              </div>
+              <p className="text-gray-600 mb-3 line-clamp-2">{empresa.descripcion}</p>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-medium">
+                  {empresa.sector}
+                </span>
+                <span className="flex items-center">
+                  <MapPin size={14} className="mr-1" />
+                  {empresa.ubicacion}
+                </span>
+                <span className="flex items-center">
+                  <Users size={14} className="mr-1" />
+                  {empresa.empleados} empleats
+                </span>
+                <div className="flex items-center">
+                  <Star size={14} className="text-yellow-400 mr-1" />
+                  <span>{empresa.rating}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+      <div className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <img 
+            src={empresa.logo}
+            alt={empresa.nombre}
+            className="w-12 h-12 rounded-lg object-cover"
+          />
+          <div className="flex gap-1">
+            {empresa.verificada && (
+              <Award size={16} className="text-green-500" title="Empresa verificada" />
+            )}
+            {empresa.destacada && (
+              <Star size={16} className="text-yellow-500" title="Empresa destacada" />
+            )}
+          </div>
+        </div>
+        
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+          {empresa.nombre}
+        </h3>
+        
+        <p className="text-gray-600 mb-4 text-sm line-clamp-3">
+          {empresa.descripcion}
+        </p>
+        
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center text-xs text-gray-500">
+            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-medium">
+              {empresa.sector}
+            </span>
+          </div>
+          <div className="flex items-center text-xs text-gray-500">
+            <MapPin size={12} className="mr-1" />
+            <span>{empresa.ubicacion}</span>
+          </div>
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center">
+              <Users size={12} className="mr-1" />
+              <span>{empresa.empleados} empleats</span>
+            </div>
+            <div className="flex items-center">
+              <Star size={12} className="text-yellow-400 mr-1" />
+              <span>{empresa.rating}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Contacto */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex gap-2">
+            {empresa.telefono && (
+              <Phone size={12} className="text-gray-400" title={empresa.telefono} />
+            )}
+            {empresa.email && (
+              <Mail size={12} className="text-gray-400" title={empresa.email} />
+            )}
+            {empresa.web && (
+              <Globe size={12} className="text-gray-400" title={empresa.web} />
+            )}
+          </div>
+          <div className="flex items-center text-gray-500">
+            <Heart size={12} className="mr-1" />
+            <span>{empresa.seguidores}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }

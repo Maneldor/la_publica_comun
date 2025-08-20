@@ -9,7 +9,7 @@ import FeedGrupoPrivado from '../../src/componentes/comunes/especificos-comunida
 import ConexionesMiembros from '../../src/componentes/comunes/especificos-comunidad/ConexionesMiembros'
 import ListaMiembrosGrupo from '../../src/componentes/comunes/especificos-comunidad/ListaMiembrosGrupo'
 import OfertasExclusivasSimple from '../../src/componentes/comunes/especificos-comunidad/OfertasExclusivasSimple'
-import LayoutXarxaSocial from '../../src/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral'
 import { GrupoAvanzado } from '../../tipos/gruposAvanzados'
 import ModalGrupoAvanzado from '../../src/componentes/comunes/especificos-comunidad/ModalGrupoAvanzado'
 import { 
@@ -308,12 +308,12 @@ export default function GruposAvanzadosPage() {
   return (
     <>
       {vistaActiva === 'dashboard' ? (
-        <LayoutXarxaSocial paginaActual="grups">
+        <LayoutGeneral paginaActual="grups">
           {/* Esta página solo muestra vista de miembro - sin gestión admin */}
           <GruposMiembros
             onSeleccionarGrupo={handleSeleccionarGrupo}
           />
-        </LayoutXarxaSocial>
+        </LayoutGeneral>
       ) : (
         <div className="min-h-screen bg-gray-50">
           <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b">

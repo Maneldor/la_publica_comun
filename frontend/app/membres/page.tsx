@@ -1,10 +1,10 @@
 import DirectoriMembres from '../../src/componentes/comunes/especificos-comunidad/DirectoriMembres'
-import LayoutXarxaSocial from '../../src/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral'
 
 export default function MembresPage() {
   return (
-    <LayoutXarxaSocial paginaActual="membres">
+    <LayoutGeneral paginaActual="membres">
       <DirectoriMembres />
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }

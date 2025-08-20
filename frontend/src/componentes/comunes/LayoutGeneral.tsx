@@ -5,7 +5,7 @@ import HeaderGlobal from './HeaderGlobal'
 
 interface LayoutGeneralProps {
   children: ReactNode
-  paginaActual?: 'dashboard' | 'membres' | 'grups' | 'forums' | 'blogs' | 'perfil' | 'empresas'
+  paginaActual?: 'dashboard' | 'xarxa-social' | 'membres' | 'grups' | 'forums' | 'blogs' | 'perfil' | 'empresas' | 'tauler-anuncis' | 'ofertes' | 'assessorament' | 'enllcos-interes'
 }
 
 export default function LayoutGeneral({ 
@@ -47,14 +47,14 @@ export default function LayoutGeneral({
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">COMUNITAT</h3>
                 <nav className="space-y-1">
                   <a 
-                    href="/dashboard" 
+                    href="/xarxa-social" 
                     className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      isActive('dashboard') 
+                      (isActive('dashboard') || isActive('xarxa-social')) 
                         ? 'text-white bg-blue-500' 
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('dashboard') ? 'text-white' : 'text-gray-600'}>🏠</span>
+                    <span className={(isActive('dashboard') || isActive('xarxa-social')) ? 'text-white' : 'text-gray-600'}>🏠</span>
                     <span className="text-sm font-medium">Xarxa Social</span>
                   </a>
                   <button 
@@ -121,20 +121,48 @@ export default function LayoutGeneral({
                     <span className="text-gray-600">🏢</span>
                     <span className="text-xs md:text-sm">Empreses Col·laboradores</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">💼</span>
+                  <a 
+                    href="/ofertes" 
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('ofertes') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className={isActive('ofertes') ? 'text-white' : 'text-gray-600'}>💼</span>
                     <span className="text-xs md:text-sm">Ofertes</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">📄</span>
+                  <a 
+                    href="/tauler-anuncis" 
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('tauler-anuncis') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className={isActive('tauler-anuncis') ? 'text-white' : 'text-gray-600'}>📄</span>
                     <span className="text-xs md:text-sm">Taulell d'Anuncis</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">👁️</span>
+                  <a 
+                    href="/assessorament" 
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('assessorament') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className={isActive('assessorament') ? 'text-white' : 'text-gray-600'}>👁️</span>
                     <span className="text-xs md:text-sm">Assessorament</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">🔗</span>
+                  <a 
+                    href="/enllcos-interes" 
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('enllcos-interes') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className={isActive('enllcos-interes') ? 'text-white' : 'text-gray-600'}>🔗</span>
                     <span className="text-xs md:text-sm">Enllaços d'Interès</span>
                   </a>
                 </nav>
@@ -147,6 +175,10 @@ export default function LayoutGeneral({
                   <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
                     <span className="text-gray-600">🔍</span>
                     <span className="text-xs md:text-sm">Cercar</span>
+                  </a>
+                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span className="text-gray-600">💬</span>
+                    <span className="text-xs md:text-sm">Missatges</span>
                   </a>
                   <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
                     <span className="text-gray-600">🔔</span>
@@ -189,14 +221,14 @@ export default function LayoutGeneral({
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2 md:mb-3">COMUNITAT</h3>
                     <nav className="space-y-1">
                       <a 
-                        href="/dashboard" 
+                        href="/xarxa-social" 
                         className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
-                          isActive('dashboard') 
+                          (isActive('dashboard') || isActive('xarxa-social')) 
                             ? 'text-white bg-blue-500' 
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('dashboard') ? 'text-white' : 'text-gray-600'}>🏠</span>
+                        <span className={(isActive('dashboard') || isActive('xarxa-social')) ? 'text-white' : 'text-gray-600'}>🏠</span>
                         <span className="text-xs md:text-sm font-medium">Xarxa Social</span>
                       </a>
                       <button 
@@ -274,20 +306,48 @@ export default function LayoutGeneral({
                         <span className={isActive('empresas') ? 'text-white' : 'text-gray-600'}>🏢</span>
                         <span className="text-xs md:text-sm">Empreses Col·laboradores</span>
                       </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">💼</span>
+                      <a 
+                        href="/ofertes" 
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('ofertes') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span className={isActive('ofertes') ? 'text-white' : 'text-gray-600'}>💼</span>
                         <span className="text-xs md:text-sm">Ofertes</span>
                       </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">📄</span>
+                      <a 
+                        href="/tauler-anuncis" 
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('tauler-anuncis') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span className={isActive('tauler-anuncis') ? 'text-white' : 'text-gray-600'}>📄</span>
                         <span className="text-xs md:text-sm">Taulell d'Anuncis</span>
                       </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">👁️</span>
+                      <a 
+                        href="/assessorament" 
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('assessorament') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span className={isActive('assessorament') ? 'text-white' : 'text-gray-600'}>👁️</span>
                         <span className="text-xs md:text-sm">Assessorament</span>
                       </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">🔗</span>
+                      <a 
+                        href="/enllcos-interes" 
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('enllcos-interes') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span className={isActive('enllcos-interes') ? 'text-white' : 'text-gray-600'}>🔗</span>
                         <span className="text-xs md:text-sm">Enllaços d'Interès</span>
                       </a>
                     </nav>
@@ -300,6 +360,10 @@ export default function LayoutGeneral({
                       <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
                         <span className="text-gray-600">🔍</span>
                         <span className="text-xs md:text-sm">Cercar</span>
+                      </a>
+                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                        <span className="text-gray-600">💬</span>
+                        <span className="text-xs md:text-sm">Missatges</span>
                       </a>
                       <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
                         <span className="text-gray-600">🔔</span>
@@ -352,8 +416,8 @@ export default function LayoutGeneral({
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
         <div className="grid grid-cols-5 gap-1">
           <a 
-            href="/dashboard"
-            className={`py-3 text-xs text-center ${isActive('dashboard') ? 'text-blue-600' : 'text-gray-600'}`}
+            href="/xarxa-social"
+            className={`py-3 text-xs text-center ${(isActive('dashboard') || isActive('xarxa-social')) ? 'text-blue-600' : 'text-gray-600'}`}
           >
             <span className="block text-xl mb-1">🏠</span>
             Inici

@@ -16,7 +16,7 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import LayoutXarxaSocial from '../../../../src/componentes/comunes/LayoutXarxaSocial';
+import LayoutGeneral from '../../../../src/componentes/comunes/LayoutGeneral';
 import { useEmpresaDetail } from '../../../../src/hooks/useEmpresaDetail';
 import { useTema, useIdioma } from '../../../../hooks/useComunidad';
 
@@ -88,7 +88,7 @@ export default function EmpresaDetailPage() {
     : [];
 
   return (
-    <LayoutXarxaSocial paginaActual="dashboard">
+    <LayoutGeneral paginaActual="empresas">
       <div className="px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumbs */}
         <nav className="mb-6">
@@ -445,6 +445,6 @@ export default function EmpresaDetailPage() {
           </>
         ) : null}
       </div>
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   );
 }

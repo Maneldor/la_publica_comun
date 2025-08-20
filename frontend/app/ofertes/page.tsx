@@ -629,7 +629,7 @@ export default function OfertesPage() {
   };
 
   return (
-    <LayoutGeneral paginaActual="dashboard">
+    <LayoutGeneral paginaActual="ofertes">
       <div className="w-full">
         <div className="px-4 sm:px-6 lg:px-8 py-8">
 

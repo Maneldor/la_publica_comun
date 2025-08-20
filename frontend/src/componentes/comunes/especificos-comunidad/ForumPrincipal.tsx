@@ -8,19 +8,14 @@ import {
   MessageSquare,
   Pin,
   Lock,
-  Users,
   Eye,
   MessageCircle,
   Clock,
-  User,
   Search,
   Plus,
-  Filter,
-  ArrowUp,
-  ArrowDown,
-  MoreHorizontal,
-  Shield,
-  Crown
+  LayoutGrid,
+  List,
+  Hash
 } from 'lucide-react'
 
 interface ForumTopic {
@@ -30,6 +25,7 @@ interface ForumTopic {
   author: string
   authorAvatar?: string
   category: string
+  featuredImage: string
   isPinned: boolean
   isLocked: boolean
   replies: number
@@ -155,6 +151,7 @@ const recentTopics: ForumTopic[] = [
     author: 'Equip La Pública',
     authorAvatar: 'https://ui-avatars.com/api/?name=La+Publica&background=4338ca&color=fff',
     category: 'Informació i Anuncis de La Pública',
+    featuredImage: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=400&fit=crop',
     isPinned: true,
     isLocked: false,
     replies: 3,
@@ -170,6 +167,7 @@ const recentTopics: ForumTopic[] = [
     author: 'CTO La Pública',
     authorAvatar: 'https://ui-avatars.com/api/?name=CTO&background=4338ca&color=fff',
     category: 'Informació i Anuncis de La Pública',
+    featuredImage: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=400&fit=crop',
     isPinned: true,
     isLocked: false,
     replies: 2,
@@ -184,6 +182,7 @@ const recentTopics: ForumTopic[] = [
     author: 'Legal Team',
     authorAvatar: 'https://ui-avatars.com/api/?name=Legal&background=4338ca&color=fff',
     category: 'Informació i Anuncis de La Pública',
+    featuredImage: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: true,
     replies: 0,
@@ -200,6 +199,7 @@ const recentTopics: ForumTopic[] = [
     author: 'Admin Catalunya',
     authorAvatar: '/avatars/admin.jpg',
     category: 'Anuncis Oficials',
+    featuredImage: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=800&h=400&fit=crop',
     isPinned: true,
     isLocked: false,
     replies: 12,
@@ -214,6 +214,7 @@ const recentTopics: ForumTopic[] = [
     description: 'S\'ha aprovat el nou protocol de seguretat per a totes les administracions...',
     author: 'Secretaria General',
     category: 'Anuncis Oficials',
+    featuredImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop',
     isPinned: true,
     isLocked: true,
     replies: 5,
@@ -244,6 +245,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Com podem integrar intel·ligència artificial per millorar els serveis ciutadans...',
     author: 'Núria Pérez',
     category: 'Innovació i Transformació Digital',
+    featuredImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 45,
@@ -257,6 +259,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Debat sobre l\'ús de blockchain per garantir transparència en els processos administratius...',
     author: 'Jordi Pons',
     category: 'Innovació i Transformació Digital',
+    featuredImage: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 18,
@@ -272,6 +275,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Busquem professionals interessats en formar un grup de treball sobre Smart Cities...',
     author: 'Josep Fernàndez',
     category: 'Networking i Col·laboració',
+    featuredImage: 'https://images.unsplash.com/photo-1494522358652-f30e61a60313?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 31,
@@ -285,6 +289,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Proposta de crear una xarxa de col·laboració per compartir bones pràctiques...',
     author: 'Elena Rius',
     category: 'Networking i Col·laboració',
+    featuredImage: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 27,
@@ -298,6 +303,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Organització de la trobada anual per facilitar el networking entre professionals...',
     author: 'Associació Professional',
     category: 'Networking i Col·laboració',
+    featuredImage: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 56,
@@ -313,6 +319,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Compartiu les vostres experiències amb la digitalització de tràmits...',
     author: 'Anna López',
     category: 'Recursos i Eines',
+    featuredImage: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 18,
@@ -326,6 +333,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Recomanacions d\'eines per facilitar el treball en equip a distància...',
     author: 'Tech Team',
     category: 'Recursos i Eines',
+    featuredImage: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 34,
@@ -339,6 +347,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Comparació de diferents plataformes per a la formació continuada del personal...',
     author: 'Formació RRHH',
     category: 'Recursos i Eines',
+    featuredImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 22,
@@ -354,6 +363,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Cerco consells per optimitzar els canals digitals d\'atenció als ciutadans...',
     author: 'Pere Rodríguez',
     category: 'Preguntes i Respostes',
+    featuredImage: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 41,
@@ -367,6 +377,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Quins són els passos necessaris per implementar la firma electrònica en els nostres processos?',
     author: 'Miquel Rosell',
     category: 'Preguntes i Respostes',
+    featuredImage: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 15,
@@ -380,6 +391,7 @@ const recentTopics: ForumTopic[] = [
     description: 'Necessito aclarir alguns aspectes de la implementació de la llei de transparència...',
     author: 'Carmen Ruiz',
     category: 'Preguntes i Respostes',
+    featuredImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop',
     isPinned: false,
     isLocked: false,
     replies: 8,
@@ -393,23 +405,12 @@ export default function ForumPrincipal() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filteredTopics, setFilteredTopics] = useState(recentTopics)
-  const [filteredCategories, setFilteredCategories] = useState(categories)
   const [modalCategory, setModalCategory] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCreateTopicModalOpen, setIsCreateTopicModalOpen] = useState(false)
   const router = useRouter()
-
-  const formatDate = (date: Date) => {
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    
-    if (hours < 1) return 'Fa uns minuts'
-    if (hours < 24) return `Fa ${hours}h`
-    if (hours < 48) return 'Ahir'
-    return date.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
-  }
 
   // Ejecutar filtrado cuando cambien los valores
   useEffect(() => {
@@ -448,29 +449,12 @@ export default function ForumPrincipal() {
     }
     
     setFilteredTopics(filtered)
-    
-    // Filtrar categorías por búsqueda
-    let filteredCats = categories
-    if (searchTerm.trim()) {
-      filteredCats = categories.filter(cat => 
-        cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cat.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-    setFilteredCategories(filteredCats)
   }, [searchTerm, selectedCategory, sortBy])
 
   const handleNewTopic = () => {
     setIsCreateTopicModalOpen(true)
   }
 
-  const handleCategorySelect = (categoryId: string) => {
-    const category = categories.find(cat => cat.id === categoryId)
-    if (category) {
-      setModalCategory(category)
-      setIsModalOpen(true)
-    }
-  }
 
   const handleTopicClick = (topicId: string) => {
     // Navegar al tema específico
@@ -478,360 +462,363 @@ export default function ForumPrincipal() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
+    <div className="w-full">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-            <div>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+            <div className="mb-4 lg:mb-0">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Fòrums de la Comunitat</h1>
               <p className="text-gray-600">Espai de debat i col·laboració per a professionals del sector públic</p>
             </div>
             <button 
               onClick={handleNewTopic}
-              className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
             >
               <Plus size={20} className="mr-2" />
               Nou tema
             </button>
           </div>
 
-          {/* Search and filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cercar en els fòrums..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          {/* Estadísticas */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Hash size={20} className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
+                  <p className="text-sm text-gray-500">Categories</p>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                value={selectedCategory}
-                onChange={(e) => {
-                  const value = e.target.value
-                  if (value !== 'all') {
-                    handleCategorySelect(value)
-                  } else {
-                    setSelectedCategory('all')
-                  }
-                }}
-              >
-                <option value="all">Totes les categories</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="recent">Més recents</option>
-                <option value="popular">Més populars</option>
-                <option value="replies">Més respostes</option>
-              </select>
+            <div className="bg-white rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <MessageSquare size={20} className="text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{recentTopics.length}</p>
+                  <p className="text-sm text-gray-500">Temes actius</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <MessageCircle size={20} className="text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {recentTopics.reduce((acc, topic) => acc + topic.replies, 0)}
+                  </p>
+                  <p className="text-sm text-gray-500">Respostes</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Eye size={20} className="text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {recentTopics.reduce((acc, topic) => acc + topic.views, 0)}
+                  </p>
+                  <p className="text-sm text-gray-500">Visualitzacions</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Filtros activos - Indicador visual */}
-          {(searchTerm || selectedCategory !== 'all') && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-2 text-sm text-blue-700">
-                <span>Filtres actius:</span>
-                {searchTerm && (
-                  <span className="px-2 py-1 bg-blue-100 rounded-md">
-                    Cerca: "{searchTerm}"
-                  </span>
-                )}
-                {selectedCategory !== 'all' && (
-                  <span className="px-2 py-1 bg-blue-100 rounded-md">
-                    Categoria: {categories.find(cat => cat.id === selectedCategory)?.name}
-                  </span>
-                )}
+          {/* Filtros y búsqueda */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
+              <div className="relative flex-1">
+                <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Cercar temes en els fòrums..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <select
+                  className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="all">Totes les categories</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                
+                <select
+                  className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="recent">Més recents</option>
+                  <option value="popular">Més populars</option>
+                  <option value="replies">Més respostes</option>
+                </select>
+
+                {/* Toggle vista */}
+                <div className="flex items-center bg-gray-100 rounded-xl p-1">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-lg transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                    title="Vista en graella"
+                  >
+                    <LayoutGrid size={18} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-lg transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                    title="Vista en llista"
+                  >
+                    <List size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <span>{filteredTopics.length} temes trobats</span>
+              {(searchTerm || selectedCategory !== 'all') && (
                 <button 
                   onClick={() => {
                     setSearchTerm('')
                     setSelectedCategory('all')
                   }}
-                  className="ml-auto text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Esborrar tots els filtres
+                  Netejar filtres
                 </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Categories */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">Categories</h2>
-                <p className="text-gray-600">Explora els diferents temes de discussió</p>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {filteredCategories.length === 0 && searchTerm ? (
-                  <div className="p-6 text-center text-gray-500">
-                    <p>No s'han trobat categories que coincideixin amb la cerca "{searchTerm}"</p>
-                  </div>
-                ) : (
-                  filteredCategories.map((category) => (
-                    <div key={category.id} className="p-6 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleCategorySelect(category.id)}>
-                      <div className="flex items-start space-x-4">
-                        <div className={`w-12 h-12 ${category.color} rounded-lg flex items-center justify-center text-white text-xl`}>
-                          {category.icon}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 cursor-pointer">
-                                {category.name}
-                              </h3>
-                              {category.isAdminOnly && (
-                                <div className="flex items-center space-x-1">
-                                  <div className="flex items-center justify-center w-5 h-5 bg-amber-100 rounded-full">
-                                    <Crown size={12} className="text-amber-600" />
-                                  </div>
-                                  <span className="text-xs text-amber-600 font-medium px-2 py-0.5 bg-amber-50 rounded-full">
-                                    Admin
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span>{category.topicCount} temes</span>
-                              <span>{category.postCount} posts</span>
-                            </div>
-                          </div>
-                          <div className="flex items-start space-x-2">
-                            <p className="text-gray-600 mb-3 flex-1">{category.description}</p>
-                            {category.isAdminOnly && (
-                              <div className="flex items-center justify-center w-4 h-4 bg-red-100 rounded-full flex-shrink-0 mt-0.5">
-                                <Shield size={10} className="text-red-600" />
-                              </div>
-                            )}
-                          </div>
-                          {category.lastPost && (
-                            <div className="flex items-center text-sm text-gray-500">
-                              <MessageCircle size={14} className="mr-1" />
-                              <span className="mr-2">Últim:</span>
-                              <span className="font-medium text-gray-700">{category.lastPost.title}</span>
-                              <span className="mx-2">per</span>
-                              <span className="font-medium">{category.lastPost.author}</span>
-                              <span className="mx-2">•</span>
-                              <span>{formatDate(category.lastPost.date)}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Recent Topics */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">Temes Recents</h2>
-                <p className="text-gray-600">Les discussions més actives de la comunitat</p>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {filteredTopics.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">
-                    <p>No s'han trobat temes que coincideixin amb els filtres aplicats.</p>
-                    {searchTerm && (
-                      <button 
-                        onClick={() => {
-                          setSearchTerm('')
-                          setSelectedCategory('all')
-                        }}
-                        className="mt-2 text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        Esborrar filtres
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  filteredTopics.map((topic) => (
-                    <div key={topic.id} className="p-6 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleTopicClick(topic.id)}>
-                      <div className="flex items-start space-x-4">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                          {topic.authorAvatar ? (
-                            <img src={topic.authorAvatar} alt={topic.author} className="w-full h-full object-cover" />
-                          ) : (
-                            <User size={20} className="text-gray-500" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              {topic.isPinned && (
-                                <Pin size={16} className="text-blue-500" />
-                              )}
-                              {topic.isLocked && (
-                                <Lock size={16} className="text-red-500" />
-                              )}
-                              <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600">
-                                {topic.title}
-                              </h3>
-                            </div>
-                            <button className="text-gray-400 hover:text-gray-600">
-                              <MoreHorizontal size={20} />
-                            </button>
-                          </div>
-                          
-                          <p className="text-gray-600 mb-3 line-clamp-2">{topic.description}</p>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {topic.category}
-                              </span>
-                              <span>per {topic.author}</span>
-                              <span>•</span>
-                              <span>{formatDate(topic.lastActivity)}</span>
-                            </div>
-                            
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <div className="flex items-center">
-                                <Eye size={14} className="mr-1" />
-                                {topic.views}
-                              </div>
-                              <div className="flex items-center">
-                                <MessageCircle size={14} className="mr-1" />
-                                {topic.replies}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {topic.lastReplyBy && (
-                            <div className="flex items-center mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500">
-                              <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden mr-2">
-                                {topic.lastReplyAvatar ? (
-                                  <img src={topic.lastReplyAvatar} alt={topic.lastReplyBy} className="w-full h-full object-cover" />
-                                ) : (
-                                  <User size={12} className="text-gray-400" />
-                                )}
-                              </div>
-                              <span>Última resposta per {topic.lastReplyBy}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+        </div>
+
+        {/* Lista de temas */}
+        {filteredTopics.length > 0 ? (
+          <div className={`${
+            viewMode === 'grid' 
+              ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+              : 'space-y-4'
+          }`}>
+            {filteredTopics.map((topic) => (
+              <TopicCard key={topic.id} topic={topic} viewMode={viewMode} onClick={() => handleTopicClick(topic.id)} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border p-12 text-center">
+            <MessageSquare size={64} className="mx-auto text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No s'han trobat temes
+            </h3>
+            <p className="text-gray-600">
+              Prova ajustant els filtres de cerca o crea un nou tema
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Modales */}
+      {isModalOpen && modalCategory && (
+        <ModalCategoriaForum 
+          category={modalCategory}
+          topics={filteredTopics.filter(t => t.category === modalCategory.name)}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isCreateTopicModalOpen && (
+        <ModalCrearTema 
+          isOpen={isCreateTopicModalOpen}
+          onClose={() => setIsCreateTopicModalOpen(false)}
+          categories={categories}
+          userRole="EMPLEADO_PUBLICO"
+        />
+      )}
+    </div>
+  )
+}
+
+// Componente TopicCard para mostrar cada tema
+interface TopicCardProps {
+  topic: ForumTopic
+  viewMode: 'grid' | 'list'
+  onClick: () => void
+}
+
+function TopicCard({ topic, viewMode, onClick }: TopicCardProps) {
+  const formatDate = (date: Date) => {
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    
+    if (hours < 1) return 'Fa uns minuts'
+    if (hours < 24) return `Fa ${hours}h`
+    if (hours < 48) return 'Ahir'
+    return date.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
+  }
+
+  if (viewMode === 'list') {
+    return (
+      <div onClick={onClick} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer group">
+        <div className="flex flex-col md:flex-row">
+          <div className="relative md:w-80 h-48 md:h-auto flex-shrink-0">
+            <img 
+              src={topic.featuredImage} 
+              alt={topic.title}
+              className="w-full h-full object-cover"
+            />
+            {topic.isPinned && (
+              <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
+                <Pin size={12} className="mr-1" />
+                Destacat
+              </div>
+            )}
+            {topic.isLocked && (
+              <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs flex items-center">
+                <Lock size={12} className="mr-1" />
+                Tancat
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {topic.category}
+              </span>
+              <time className="text-sm text-gray-500 flex items-center">
+                <Clock size={14} className="mr-1" />
+                {formatDate(topic.lastActivity)}
+              </time>
+            </div>
             
-            {/* Forum Stats */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Estadístiques del Fòrum</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Temes totals</span>
-                  <span className="font-semibold text-gray-900">128</span>
+            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-tight">
+              {topic.title}
+            </h3>
+            
+            <p className="text-gray-600 mb-4 leading-relaxed line-clamp-2">
+              {topic.description}
+            </p>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <img 
+                  src={topic.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(topic.author)}&background=4338ca&color=fff`} 
+                  alt={topic.author}
+                  className="w-8 h-8 rounded-full"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{topic.author}</p>
+                  <p className="text-xs text-gray-500">Membre actiu</p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Posts totals</span>
-                  <span className="font-semibold text-gray-900">658</span>
+              </div>
+              
+              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <Eye size={14} className="mr-1" />
+                  {topic.views}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Membres actius</span>
-                  <span className="font-semibold text-gray-900">89</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Nous aquest mes</span>
-                  <span className="font-semibold text-blue-600">12</span>
+                <div className="flex items-center">
+                  <MessageCircle size={14} className="mr-1" />
+                  {topic.replies}
                 </div>
               </div>
             </div>
-
-            {/* Active Members */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Membres Més Actius</h3>
-              <div className="space-y-3">
-                {[
-                  { name: 'Maria Garcia', posts: 34, avatar: '/avatars/maria.jpg' },
-                  { name: 'Joan Martinez', posts: 28, avatar: '/avatars/joan.jpg' },
-                  { name: 'Anna López', posts: 23, avatar: '/avatars/anna.jpg' },
-                  { name: 'Pere Rodríguez', posts: 19, avatar: '/avatars/pere.jpg' }
-                ].map((member, index) => (
-                  <div key={member.name} className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                      {member.avatar ? (
-                        <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <User size={16} className="text-gray-500" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                      <p className="text-xs text-gray-500">{member.posts} posts</p>
-                    </div>
-                    <div className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium">
-                      {index + 1}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Forum Rules */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Normes del Fòrum</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <span className="w-4 h-4 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-xs font-medium mr-2 mt-0.5">✓</span>
-                  Respecta tots els membres de la comunitat
-                </li>
-                <li className="flex items-start">
-                  <span className="w-4 h-4 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-xs font-medium mr-2 mt-0.5">✓</span>
-                  Mantén les discussions constructives
-                </li>
-                <li className="flex items-start">
-                  <span className="w-4 h-4 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-xs font-medium mr-2 mt-0.5">✓</span>
-                  Utilitza un llenguatge professional
-                </li>
-                <li className="flex items-start">
-                  <span className="w-4 h-4 bg-red-100 text-red-800 rounded-full flex items-center justify-center text-xs font-medium mr-2 mt-0.5">✗</span>
-                  No publiquis contingut spam o promocional
-                </li>
-              </ul>
-            </div>
-
           </div>
         </div>
       </div>
+    )
+  }
 
-      {/* Modal Categoria Forum */}
-      <ModalCategoriaForum 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        category={modalCategory}
-        topics={recentTopics}
-      />
-
-      {/* Modal Crear Tema */}
-      <ModalCrearTema 
-        isOpen={isCreateTopicModalOpen}
-        onClose={() => setIsCreateTopicModalOpen(false)}
-        categories={categories}
-        userRole="admin-web" // TODO: Get from auth context
-      />
+  // Grid View
+  return (
+    <div onClick={onClick} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer group">
+      <div className="relative">
+        <img 
+          src={topic.featuredImage} 
+          alt={topic.title}
+          className="w-full h-48 object-cover"
+        />
+        {topic.isPinned && (
+          <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
+            <Pin size={12} className="mr-1" />
+            Destacat
+          </div>
+        )}
+        {topic.isLocked && (
+          <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs flex items-center">
+            <Lock size={12} className="mr-1" />
+            Tancat
+          </div>
+        )}
+      </div>
+      
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-3">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {topic.category}
+          </span>
+          <time className="text-sm text-gray-500 flex items-center">
+            <Clock size={14} className="mr-1" />
+            {formatDate(topic.lastActivity)}
+          </time>
+        </div>
+        
+        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-tight line-clamp-2">
+          {topic.title}
+        </h3>
+        
+        <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+          {topic.description}
+        </p>
+        
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <img 
+              src={topic.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(topic.author)}&background=4338ca&color=fff`} 
+              alt={topic.author}
+              className="w-6 h-6 rounded-full"
+            />
+            <div>
+              <p className="text-sm font-medium text-gray-900">{topic.author}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3 text-xs text-gray-500">
+            <div className="flex items-center">
+              <Eye size={12} className="mr-1" />
+              {topic.views}
+            </div>
+            <div className="flex items-center">
+              <MessageCircle size={12} className="mr-1" />
+              {topic.replies}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

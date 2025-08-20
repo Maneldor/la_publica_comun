@@ -1,6 +1,6 @@
 'use client'
 
-import LayoutXarxaSocial from '@/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '@/componentes/comunes/LayoutGeneral'
 import CategoriaForumPage from '@/componentes/comunes/especificos-comunidad/CategoriaForumPage'
 
 interface ForumCategoriaPageProps {
@@ -11,8 +11,8 @@ interface ForumCategoriaPageProps {
 
 export default function ForumCategoriaPage({ params }: ForumCategoriaPageProps) {
   return (
-    <LayoutXarxaSocial paginaActual="forums">
+    <LayoutGeneral paginaActual="forums">
       <CategoriaForumPage categoriaId={params.id} />
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }

@@ -721,7 +721,8 @@ export default function BlogPost({ blogId }: BlogPostProps) {
 
   if (!blog) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
+      <div className="w-full">
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
@@ -738,24 +739,14 @@ export default function BlogPost({ blogId }: BlogPostProps) {
             </button>
           </div>
         </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
-        {/* Navigation */}
-        <div className="mb-6">
-          <button 
-            onClick={() => router.push('/blogs')}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium transition-colors"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Tornar als blogs
-          </button>
-        </div>
-
+    <div className="w-full">
+      <div className="px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Article Header */}
         <article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           
@@ -1081,6 +1072,7 @@ export default function BlogPost({ blogId }: BlogPostProps) {
             )}
           </div>
         </article>
+      </div>
     </div>
   )
 }

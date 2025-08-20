@@ -72,7 +72,7 @@ const AccessDenied = ({ userRole, requiredRoles }: { userRole: UserRole; require
         router.push('/sindicato-completo');
         break;
       default:
-        router.push('/dashboard');
+        router.push('/xarxa-social');
     }
   };
 

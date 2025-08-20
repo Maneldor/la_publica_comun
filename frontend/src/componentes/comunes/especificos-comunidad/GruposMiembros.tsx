@@ -392,7 +392,7 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
@@ -557,7 +557,7 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
         
         {gruposFiltrados.length > 0 ? (
           <div className={vistaActiva === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" 
+            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
             : "space-y-4"
           }>
             {gruposFiltrados.map(renderTarjetaGrupo)}

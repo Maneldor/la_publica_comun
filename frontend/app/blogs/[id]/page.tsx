@@ -1,6 +1,6 @@
 'use client'
 
-import LayoutXarxaSocial from '@/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '@/componentes/comunes/LayoutGeneral'
 import BlogPost from '@/componentes/comunes/especificos-comunidad/BlogPost'
 
 interface BlogPageProps {
@@ -11,8 +11,8 @@ interface BlogPageProps {
 
 export default function BlogPage({ params }: BlogPageProps) {
   return (
-    <LayoutXarxaSocial paginaActual="blogs">
+    <LayoutGeneral paginaActual="blogs">
       <BlogPost blogId={params.id} />
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }

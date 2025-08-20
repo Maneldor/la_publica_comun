@@ -1,12 +1,12 @@
 'use client'
 
-import LayoutXarxaSocial from '@/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '@/componentes/comunes/LayoutGeneral'
 import BlogsPrincipal from '@/componentes/comunes/especificos-comunidad/BlogsPrincipal'
 
 export default function BlogsPage() {
   return (
-    <LayoutXarxaSocial paginaActual="blogs">
+    <LayoutGeneral paginaActual="blogs">
       <BlogsPrincipal />
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }

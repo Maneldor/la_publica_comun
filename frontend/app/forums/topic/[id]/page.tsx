@@ -1,6 +1,6 @@
 'use client'
 
-import LayoutXarxaSocial from '@/componentes/comunes/LayoutXarxaSocial'
+import LayoutGeneral from '@/componentes/comunes/LayoutGeneral'
 import ForumTopic from '@/componentes/comunes/especificos-comunidad/ForumTopic'
 
 interface ForumTopicPageProps {
@@ -11,8 +11,8 @@ interface ForumTopicPageProps {
 
 export default function ForumTopicPage({ params }: ForumTopicPageProps) {
   return (
-    <LayoutXarxaSocial paginaActual="forums">
+    <LayoutGeneral paginaActual="forums">
       <ForumTopic topicId={params.id} />
-    </LayoutXarxaSocial>
+    </LayoutGeneral>
   )
 }
