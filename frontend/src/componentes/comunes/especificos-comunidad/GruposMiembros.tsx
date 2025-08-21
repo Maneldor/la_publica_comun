@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useGruposAvanzados } from '../../../contextos/GruposAvanzadosContext'
+import { useAuth } from '../../../contextos/AuthContext'
 import { 
   Users, 
   Search, 
@@ -17,7 +18,10 @@ import {
   Gift,
   UserPlus,
   Clock,
-  CheckCircle
+  CheckCircle,
+  XCircle,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react'
 import { GrupoAvanzado, RolGrupo } from '../../../../tipos/gruposAvanzados'
 
@@ -30,18 +34,27 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
     grupos, 
     cargando, 
     esMiembroGrupo,
-    agregarMiembro
+    agregarMiembro,
+    eliminarGrupo
   } = useGruposAvanzados()
+  
+  const { user } = useAuth()
   
   const [busqueda, setBusqueda] = useState('')
   const [filtroTipo, setFiltroTipo] = useState<'meus' | 'publics' | 'professionals'>('meus')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>('')
   const [vistaActiva, setVistaActiva] = useState<'grid' | 'llista'>('grid')
+  
+  // Determinar si es administrador web
+  const esAdminWeb = user?.role === 'admin-web'
 
   // Filtrar grupos según el filtro de tipo seleccionado
   const gruposFiltradosPorTipo = grupos.filter(grupo => {
     // Nunca mostrar grupos ocultos (solo por invitación)
     if (grupo.tipo === 'oculto') return false
+    
+    // Solo mostrar grupos inactivos a los administradores web
+    if (!grupo.activo && !esAdminWeb) return false
 
     switch (filtroTipo) {
       case 'meus':
@@ -137,17 +150,33 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
   const renderTarjetaGrupo = (grupo: GrupoAvanzado) => {
     const estado = obtenerEstadoAcceso(grupo)
     const esMiembro = esMiembroGrupo(grupo.id)
+    const esInactivo = !grupo.activo
     
     // URLs de imágenes placeholder que funcionan
     const avatarPlaceholder = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
     const portadaPlaceholder = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=160&fit=crop'
+    
+    const handleEliminarGrupo = async () => {
+      if (window.confirm(`Estàs segur que vols eliminar el grup "${grupo.nombre}"? Aquesta acció no es pot desfer.`)) {
+        try {
+          await eliminarGrupo(grupo.id)
+        } catch (error) {
+          console.error('Error eliminando grupo:', error)
+          alert('Error eliminant el grup. Torna-ho a provar.')
+        }
+      }
+    }
     
     if (vistaActiva === 'llista') {
       // Vista de lista horizontal
       return (
         <div 
           key={grupo.id}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 p-4"
+          className={`bg-white rounded-lg shadow-sm border transition-all duration-300 p-4 ${
+            esInactivo 
+              ? 'border-red-200 bg-red-50/50 hover:shadow-sm' 
+              : 'border-gray-200 hover:shadow-md'
+          }`}
         >
           <div className="flex items-center space-x-4">
             {/* Avatar del grupo */}
@@ -169,9 +198,19 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0 pr-4">
-                  <h3 className="font-bold text-lg text-gray-900 truncate">
-                    {grupo.nombre}
-                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <h3 className={`font-bold text-lg truncate ${
+                      esInactivo ? 'text-red-700' : 'text-gray-900'
+                    }`}>
+                      {grupo.nombre}
+                    </h3>
+                    {esInactivo && esAdminWeb && (
+                      <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium flex items-center space-x-1">
+                        <XCircle size={12} />
+                        <span>Inactiu</span>
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-600 line-clamp-2 mt-1">
                     {grupo.descripcion}
                   </p>
@@ -198,16 +237,28 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
                 
                 {/* Botón de acción */}
                 <div className="flex-shrink-0">
-                  <button 
-                    onClick={estado.accion}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                      esMiembro 
-                        ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                        : grupo.tipo === 'publico'
-                          ? 'bg-green-500 text-white hover:bg-green-600'
-                          : 'bg-yellow-500 text-white hover:bg-yellow-600'
-                    }`}
-                  >
+                  {esInactivo && esAdminWeb ? (
+                    <button 
+                      onClick={handleEliminarGrupo}
+                      className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-500 text-white hover:bg-red-600 flex items-center space-x-1"
+                    >
+                      <Trash2 size={14} />
+                      <span>Eliminar</span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={estado.accion}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                        esMiembro 
+                          ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                          : grupo.tipo === 'publico'
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : 'bg-yellow-500 text-white hover:bg-yellow-600'
+                      } ${
+                        esInactivo ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      disabled={esInactivo}
+                    >
                     <div className="flex items-center space-x-1">
                       {esMiembro ? (
                         <>
@@ -227,6 +278,7 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
                       )}
                     </div>
                   </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -239,10 +291,27 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
     return (
       <div 
         key={grupo.id}
-        className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group"
+        className={`bg-white rounded-xl shadow-sm border transition-all duration-300 overflow-hidden group relative ${
+          esInactivo 
+            ? 'border-red-200 bg-red-50/50 hover:shadow-sm' 
+            : 'border-gray-200 hover:shadow-lg'
+        }`}
       >
+        {/* Badge de grupo inactivo - Solo visible para admin */}
+        {esInactivo && esAdminWeb && (
+          <div className="absolute top-2 right-2 z-10">
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center space-x-1 shadow-lg">
+              <AlertTriangle size={12} />
+              <span>Inactiu</span>
+            </span>
+          </div>
+        )}
         {/* Header con portada estilo BuddyBoss */}
-        <div className="relative h-32 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+        <div className={`relative h-32 ${
+          esInactivo 
+            ? 'bg-gradient-to-br from-red-400 via-red-500 to-red-600' 
+            : 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'
+        }`}>
           {/* Solo mostrar imagen si es grupo público o si tiene portada personalizada sin texto */}
           {grupo.tipo === 'publico' ? (
             <img 
@@ -261,7 +330,9 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
           )}
           
           {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          <div className={`absolute inset-0 bg-gradient-to-t to-transparent ${
+            esInactivo ? 'from-red-900/50' : 'from-black/30'
+          }`}></div>
 
           {/* Avatar del grupo - Estilo BuddyBoss */}
           <div className="absolute -bottom-6 left-3">
@@ -292,7 +363,11 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
           <div className="mb-3">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0 pr-2">
-                <h3 className="font-bold text-base text-gray-900 truncate group-hover:text-blue-600 transition-colors leading-tight">
+                <h3 className={`font-bold text-base truncate transition-colors leading-tight ${
+                  esInactivo 
+                    ? 'text-red-700' 
+                    : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
                   {grupo.nombre}
                 </h3>
               </div>
@@ -333,35 +408,59 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
 
           {/* Botón principal - ancho completo */}
           <div className="px-1">
-            <button 
-              onClick={estado.accion}
-              className={`w-full px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:scale-[1.02] ${
-                esMiembro 
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl' 
-                  : grupo.tipo === 'publico'
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg hover:shadow-xl'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-1">
-                {esMiembro ? (
-                  <>
-                    <Eye size={14} />
-                    <span>{estado.textoBoton}</span>
-                  </>
-                ) : grupo.tipo === 'publico' ? (
-                  <>
-                    <UserPlus size={14} />
-                    <span>{estado.textoBoton}</span>
-                  </>
-                ) : (
-                  <>
-                    <Clock size={14} />
-                    <span>{estado.textoBoton}</span>
-                  </>
-                )}
-              </div>
-            </button>
+            {esInactivo && esAdminWeb ? (
+              <button 
+                onClick={handleEliminarGrupo}
+                className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:scale-[1.02] bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl"
+              >
+                <div className="flex items-center justify-center space-x-1">
+                  <Trash2 size={14} />
+                  <span>Eliminar Grup</span>
+                </div>
+              </button>
+            ) : (
+              <button 
+                onClick={estado.accion}
+                className={`w-full px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 transform ${
+                  esInactivo 
+                    ? 'opacity-50 cursor-not-allowed bg-gray-400'
+                    : 'hover:scale-[1.02]'
+                } ${
+                  !esInactivo && esMiembro 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl' 
+                    : !esInactivo && grupo.tipo === 'publico'
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl'
+                      : !esInactivo
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg hover:shadow-xl'
+                        : ''
+                }`}
+                disabled={esInactivo}
+              >
+                <div className="flex items-center justify-center space-x-1">
+                  {esInactivo ? (
+                    <>
+                      <XCircle size={14} />
+                      <span>Inactiu</span>
+                    </>
+                  ) : esMiembro ? (
+                    <>
+                      <Eye size={14} />
+                      <span>{estado.textoBoton}</span>
+                    </>
+                  ) : grupo.tipo === 'publico' ? (
+                    <>
+                      <UserPlus size={14} />
+                      <span>{estado.textoBoton}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock size={14} />
+                      <span>{estado.textoBoton}</span>
+                    </>
+                  )}
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
