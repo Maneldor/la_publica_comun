@@ -14,11 +14,19 @@ import {
   Star,
   ExternalLink,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Phone,
+  Gift,
+  Percent,
+  Heart,
+  Share2,
+  Award
 } from 'lucide-react';
 import LayoutGeneral from '../../../../src/componentes/comunes/LayoutGeneral';
 import { useEmpresaDetail } from '../../../../src/hooks/useEmpresaDetail';
 import { useTema, useIdioma } from '../../../../hooks/useComunidad';
+import { TarjetaOferta, OfertaComercial } from '../../../../src/componentes/ofertes/TarjetaOferta';
+import { TarjetaEmpresa, CompanyProfile } from '../../../../src/componentes/empresas/TarjetaEmpresa';
 
 // Componente Skeleton para loading
 function EmpresaDetailSkeleton() {
@@ -49,17 +57,137 @@ function EmpresaDetailSkeleton() {
   );
 }
 
+// Mock de ofertas de la empresa
+const ofertasMock: OfertaComercial[] = [
+  {
+    id: '1',
+    categoria: 'TECNOLOGIA' as any,
+    imagen: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=250&fit=crop',
+    titulo: 'Pack Office 365 - 30% descuento',
+    descripcion: 'Licencia anual de Microsoft Office 365 con todas las aplicaciones incluidas.',
+    empresa: {
+      id: '1',
+      nombre: 'TechSolutions S.A.',
+      logo: 'https://ui-avatars.com/api/?name=TechSolutions&background=3b82f6&color=fff',
+      sector: 'Tecnología',
+      verificada: true
+    },
+    tipoDescuento: 'PORCENTAJE',
+    descuento: {
+      valor: 30,
+      valorOriginal: 120,
+      valorFinal: 84,
+      moneda: 'EUR'
+    },
+    modalidad: 'ONLINE',
+    ubicaciones: ['Online'],
+    codigoDescuento: 'TECH30PUB',
+    enlaceExterno: 'https://techsolutions.com/office365',
+    instrucciones: 'Aplica el código en el checkout',
+    fechaPublicacion: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    fechaVencimiento: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
+    limitaciones: [],
+    destacada: true,
+    exclusiva: true,
+    estado: 'ACTIVA',
+    vistas: 450,
+    canjes: 89,
+    favoritos: 156,
+    stockDisponible: 50
+  },
+  {
+    id: '2',
+    categoria: 'SERVICIOS_PROFESIONALES' as any,
+    imagen: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=400&h=250&fit=crop',
+    titulo: 'Consultoría IT - Primera sesión gratis',
+    descripcion: 'Sesión de consultoría tecnológica de 2 horas sin coste para nuevos clientes.',
+    empresa: {
+      id: '1',
+      nombre: 'TechSolutions S.A.',
+      logo: 'https://ui-avatars.com/api/?name=TechSolutions&background=3b82f6&color=fff',
+      sector: 'Tecnología',
+      verificada: true
+    },
+    tipoDescuento: 'REGALO',
+    descuento: {
+      valor: 100,
+      valorOriginal: 200,
+      valorFinal: 0,
+      moneda: 'EUR'
+    },
+    modalidad: 'AMBAS',
+    ubicaciones: ['Barcelona', 'Madrid', 'Online'],
+    instrucciones: 'Solicita tu cita gratuita mediante formulario',
+    fechaPublicacion: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    fechaVencimiento: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+    limitaciones: ['Solo nuevos clientes', 'Una sesión por empresa'],
+    destacada: false,
+    exclusiva: true,
+    estado: 'ACTIVA',
+    vistas: 234,
+    canjes: 45,
+    favoritos: 89
+  }
+];
+
+// Mock de empresas similares
+const empresasSimilaresMock: CompanyProfile[] = [
+  {
+    id: '2',
+    name: 'Digital Innovators',
+    logo: 'https://ui-avatars.com/api/?name=Digital+Innovators&background=8b5cf6&color=fff',
+    imagen: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&h=200&fit=crop',
+    sector: 'Tecnología',
+    descripcionPublica: 'Soluciones digitales innovadoras para el sector público y privado.',
+    ubicacionVisible: true,
+    city: 'Madrid',
+    province: 'Madrid',
+    estadoPerfil: 'VERIFICADO',
+    destacada: true,
+    employeeCount: '50-100'
+  },
+  {
+    id: '3',
+    name: 'CloudTech Solutions',
+    logo: 'https://ui-avatars.com/api/?name=CloudTech&background=10b981&color=fff',
+    imagen: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=200&fit=crop',
+    sector: 'Cloud Computing',
+    descripcionPublica: 'Especialistas en migración y gestión de infraestructuras cloud.',
+    ubicacionVisible: true,
+    city: 'Valencia',
+    province: 'Valencia',
+    estadoPerfil: 'VERIFICADO',
+    destacada: false,
+    employeeCount: '25-50'
+  },
+  {
+    id: '4',
+    name: 'Data Analytics Pro',
+    logo: 'https://ui-avatars.com/api/?name=Data+Analytics&background=f59e0b&color=fff',
+    imagen: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop',
+    sector: 'Análisis de Datos',
+    descripcionPublica: 'Transformamos datos en decisiones estratégicas para tu negocio.',
+    ubicacionVisible: true,
+    city: 'Barcelona',
+    province: 'Barcelona',
+    estadoPerfil: 'ACTIVO',
+    destacada: false,
+    employeeCount: '10-25'
+  }
+];
+
 export default function EmpresaDetailPage() {
   const params = useParams();
   const router = useRouter();
   const tema = useTema();
-  const idioma = useIdioma();
+  const { idioma } = useIdioma();
   
   const empresaId = params.id as string;
   const { empresa, loading, error, notFound, isFollowing, followEmpresa, unfollowEmpresa } = useEmpresaDetail(empresaId);
   
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'info' | 'ofertas' | 'contacto'>('info');
 
   // Handle follow/unfollow
   const handleFollowToggle = async () => {
@@ -158,8 +286,8 @@ export default function EmpresaDetailPage() {
             <div 
               className="relative h-48 rounded-lg mb-6 bg-gradient-to-r overflow-hidden"
               style={{ 
-                background: empresa.banner 
-                  ? `url(${empresa.banner}) center/cover` 
+                background: (empresa as any).banner 
+                  ? `url(${(empresa as any).banner}) center/cover` 
                   : `linear-gradient(135deg, ${tema.primario}20, ${tema.secundario}10)`
               }}
             >
@@ -440,6 +568,122 @@ export default function EmpresaDetailPage() {
                     )}
                   </div>
                 </div>
+                
+                {/* Estadísticas */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="font-semibold mb-4">
+                    {idioma === 'ca' ? 'Estadístiques' : 'Estadísticas'}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <Gift className="w-8 h-8" style={{ color: tema.primario }} />
+                      </div>
+                      <p className="text-2xl font-bold">{ofertasMock.length}</p>
+                      <p className="text-xs text-gray-500">
+                        {idioma === 'ca' ? 'Ofertes actives' : 'Ofertas activas'}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <Heart className="w-8 h-8 text-red-500" />
+                      </div>
+                      <p className="text-2xl font-bold">1.2k</p>
+                      <p className="text-xs text-gray-500">
+                        {idioma === 'ca' ? 'Seguidors' : 'Seguidores'}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <Star className="w-8 h-8 text-yellow-500" />
+                      </div>
+                      <p className="text-2xl font-bold">4.8</p>
+                      <p className="text-xs text-gray-500">
+                        {idioma === 'ca' ? 'Valoració' : 'Valoración'}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <Award className="w-8 h-8 text-green-500" />
+                      </div>
+                      <p className="text-2xl font-bold">250+</p>
+                      <p className="text-xs text-gray-500">
+                        {idioma === 'ca' ? 'Bescanvis' : 'Canjes'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Sección de Ofertas de la Empresa */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {idioma === 'ca' ? 'Ofertes de ' : 'Ofertas de '}{empresa.name}
+                </h2>
+                <button 
+                  className="text-sm font-medium"
+                  style={{ color: tema.primario }}
+                  onClick={() => router.push('/ofertes')}
+                >
+                  {idioma === 'ca' ? 'Veure totes' : 'Ver todas'} →
+                </button>
+              </div>
+              
+              {ofertasMock.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {ofertasMock.map((oferta) => (
+                    <div key={oferta.id} className="w-full max-w-sm mx-auto">
+                      <TarjetaOferta 
+                        oferta={oferta}
+                        onViewMore={(id) => router.push(`/ofertes/${id}`)}
+                        onRedeem={(id) => console.log('Canjear:', id)}
+                        onToggleFavorite={async (id) => console.log('Toggle favorito:', id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                  <Gift size={48} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {idioma === 'ca' ? 'Encara no hi ha ofertes' : 'Aún no hay ofertas'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {idioma === 'ca' 
+                      ? 'Aquesta empresa encara no ha publicat ofertes'
+                      : 'Esta empresa aún no ha publicado ofertas'}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {/* Sección de Empresas Similares */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {idioma === 'ca' ? 'Empreses similars' : 'Empresas similares'}
+                </h2>
+                <button 
+                  className="text-sm font-medium"
+                  style={{ color: tema.primario }}
+                  onClick={() => router.push('/dashboard/empresas')}
+                >
+                  {idioma === 'ca' ? 'Veure més' : 'Ver más'} →
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {empresasSimilaresMock.map((empresaSimilar) => (
+                  <div key={empresaSimilar.id} className="w-full max-w-sm mx-auto">
+                    <TarjetaEmpresa 
+                      empresa={empresaSimilar}
+                      onViewMore={(id) => router.push(`/dashboard/empresas/${id}`)}
+                      onFollow={async (id) => console.log('Seguir empresa:', id)}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </>
