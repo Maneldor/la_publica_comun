@@ -28,6 +28,7 @@ interface Empresa {
   empleados: number
   fundada: number
   logo: string
+  imagen?: string // Nueva imagen de portada
   verificada: boolean
   destacada: boolean
   rating: number
@@ -304,7 +305,7 @@ export default function EmpresasColaboradorasPage() {
                           ? 'bg-white text-blue-600 shadow-sm'
                           : 'text-gray-500 hover:text-gray-700'
                       }`}
-                      title="Vista en graella"
+                      data-title="Vista en graella"
                     >
                       <LayoutGrid size={18} />
                     </button>
@@ -315,7 +316,7 @@ export default function EmpresasColaboradorasPage() {
                           ? 'bg-white text-blue-600 shadow-sm'
                           : 'text-gray-500 hover:text-gray-700'
                       }`}
-                      title="Vista en llista"
+                      data-title="Vista en llista"
                     >
                       <List size={18} />
                     </button>
@@ -351,7 +352,9 @@ export default function EmpresasColaboradorasPage() {
                 : 'space-y-4'
             }`}>
               {filteredEmpresas.map((empresa) => (
-                <EmpresaCard key={empresa.id} empresa={empresa} viewMode={viewMode} />
+                <div key={empresa.id} className="w-full max-w-sm mx-auto">
+                  <EmpresaCard empresa={empresa} viewMode={viewMode} />
+                </div>
               ))}
             </div>
           ) : (
@@ -378,6 +381,32 @@ interface EmpresaCardProps {
 }
 
 function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
+  // Imágenes placeholder por sector
+  const getImagenPorSector = (sector: string): string => {
+    const imagenesSector: { [key: string]: string } = {
+      'Tecnologia': 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=200&fit=crop',
+      'Consultoria': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=200&fit=crop',
+      'Servicios': 'https://images.unsplash.com/photo-1556740758-90de374c12ad?w=400&h=200&fit=crop',
+      'Educació': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=200&fit=crop',
+      'Salud': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=200&fit=crop',
+      'Finanzas': 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=200&fit=crop',
+      'Construcción': 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=200&fit=crop',
+      'Transporte': 'https://images.unsplash.com/photo-1473445730015-841f29a9490b?w=400&h=200&fit=crop',
+      'Marketing': 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=400&h=200&fit=crop',
+      'Retail': 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=200&fit=crop'
+    };
+    
+    const imagenDefecto = 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&h=200&fit=crop';
+    
+    for (const [key, value] of Object.entries(imagenesSector)) {
+      if (sector.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+    
+    return imagenDefecto;
+  };
+
   if (viewMode === 'list') {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -392,10 +421,10 @@ function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="text-lg font-semibold text-gray-900">{empresa.nombre}</h3>
                 {empresa.verificada && (
-                  <Award size={16} className="text-green-500" title="Empresa verificada" />
+                  <Award size={16} className="text-green-500" />
                 )}
                 {empresa.destacada && (
-                  <Star size={16} className="text-yellow-500" title="Empresa destacada" />
+                  <Star size={16} className="text-yellow-500" />
                 )}
               </div>
               <p className="text-gray-600 mb-3 line-clamp-2">{empresa.descripcion}</p>
@@ -424,70 +453,100 @@ function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
+      {/* Imagen de portada */}
+      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600">
+        <img 
+          src={empresa.imagen || getImagenPorSector(empresa.sector)}
+          alt={empresa.nombre}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = getImagenPorSector(empresa.sector);
+          }}
+        />
+        
+        {/* Overlay gradient suave */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        
+        {/* Logo de la empresa en la esquina inferior izquierda */}
+        <div className="absolute bottom-3 left-3">
           <img 
             src={empresa.logo}
             alt={empresa.nombre}
-            className="w-12 h-12 rounded-lg object-cover"
+            className="w-14 h-14 rounded-lg object-cover border-2 border-white shadow-lg bg-white"
           />
-          <div className="flex gap-1">
-            {empresa.verificada && (
-              <Award size={16} className="text-green-500" title="Empresa verificada" />
-            )}
-            {empresa.destacada && (
-              <Star size={16} className="text-yellow-500" title="Empresa destacada" />
-            )}
+        </div>
+
+        {/* Badges en la esquina superior derecha */}
+        <div className="absolute top-3 right-3 space-y-2">
+          {empresa.verificada && (
+            <span className="block px-2 py-1 rounded text-xs font-medium bg-green-500 text-white shadow-md">
+              <Award size={12} className="inline mr-1" />
+              Verificada
+            </span>
+          )}
+          {empresa.destacada && (
+            <span className="block px-2 py-1 rounded text-xs font-medium bg-yellow-500 text-white shadow-md">
+              <Star size={12} className="inline mr-1" />
+              Destacada
+            </span>
+          )}
+        </div>
+        
+        {/* Rating en esquina superior izquierda */}
+        <div className="absolute top-3 left-3">
+          <div className="bg-white/90 backdrop-blur rounded-lg px-2 py-1 flex items-center space-x-1 shadow-md">
+            <Star size={14} className="text-yellow-400 fill-yellow-400" />
+            <span className="text-sm font-semibold text-gray-900">{empresa.rating}</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Contenido */}
+      <div className="p-4 flex-1 flex flex-col">
+        {/* Nombre y sector */}
+        <div className="mb-3">
+          <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1">
+            {empresa.nombre}
+          </h3>
+          <div className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600">{empresa.sector}</span>
+            <span className="text-gray-400">•</span>
+            <div className="flex items-center text-sm text-gray-600">
+              <Users size={14} className="mr-1" />
+              <span>{empresa.empleados} empleats</span>
+            </div>
           </div>
         </div>
         
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
-          {empresa.nombre}
-        </h3>
-        
-        <p className="text-gray-600 mb-4 text-sm line-clamp-3">
+        {/* Descripción */}
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-1">
           {empresa.descripcion}
         </p>
         
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-xs text-gray-500">
-            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-medium">
-              {empresa.sector}
-            </span>
-          </div>
-          <div className="flex items-center text-xs text-gray-500">
-            <MapPin size={12} className="mr-1" />
-            <span>{empresa.ubicacion}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center">
-              <Users size={12} className="mr-1" />
-              <span>{empresa.empleados} empleats</span>
-            </div>
-            <div className="flex items-center">
-              <Star size={12} className="text-yellow-400 mr-1" />
-              <span>{empresa.rating}</span>
-            </div>
-          </div>
+        {/* Ubicación */}
+        <div className="flex items-center text-sm text-gray-500 mb-3">
+          <MapPin size={14} className="mr-1 flex-shrink-0" />
+          <span className="truncate">{empresa.ubicacion}</span>
         </div>
-
-        {/* Contacto */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex gap-2">
+        
+        {/* Footer con info de contacto y seguidores */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex gap-3">
             {empresa.telefono && (
-              <Phone size={12} className="text-gray-400" title={empresa.telefono} />
+              <Phone size={14} className="text-gray-400 hover:text-blue-500 cursor-pointer transition-colors" />
             )}
             {empresa.email && (
-              <Mail size={12} className="text-gray-400" title={empresa.email} />
+              <Mail size={14} className="text-gray-400 hover:text-blue-500 cursor-pointer transition-colors" />
             )}
             {empresa.web && (
-              <Globe size={12} className="text-gray-400" title={empresa.web} />
+              <Globe size={14} className="text-gray-400 hover:text-blue-500 cursor-pointer transition-colors" />
             )}
           </div>
-          <div className="flex items-center text-gray-500">
-            <Heart size={12} className="mr-1" />
-            <span>{empresa.seguidores}</span>
+          <div className="flex items-center text-sm text-gray-500">
+            <Heart size={14} className="mr-1" />
+            <span>{empresa.seguidores} seguidors</span>
           </div>
         </div>
       </div>
