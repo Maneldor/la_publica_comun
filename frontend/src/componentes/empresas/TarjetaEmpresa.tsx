@@ -119,13 +119,16 @@ export function TarjetaEmpresa({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 h-full flex flex-col overflow-hidden">
-      {/* Imagen de portada */}
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 h-full flex flex-col overflow-hidden group">
+      {/* Imagen de portada - Clickable */}
+      <div 
+        className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 cursor-pointer"
+        onClick={handleViewMore}
+      >
         <img 
           src={empresa.imagen || getImagenPorSector(empresa.sector)} 
           alt={empresa.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = getImagenPorSector(empresa.sector);
@@ -171,9 +174,12 @@ export function TarjetaEmpresa({
 
       {/* Contenido */}
       <div className="p-4 flex-1 flex flex-col">
-        {/* Nombre y sector */}
+        {/* Nombre y sector - Título clickable */}
         <div className="mb-3">
-          <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1">
+          <h3 
+            className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1 cursor-pointer hover:text-blue-600 transition-colors"
+            onClick={handleViewMore}
+          >
             {empresa.name}
           </h3>
           <div className="flex items-center space-x-3">

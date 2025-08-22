@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import LayoutGeneral from '../../../src/componentes/comunes/LayoutGeneral';
+import { TarjetaEmpresa, CompanyProfile } from '../../../src/componentes/empresas/TarjetaEmpresa';
 import { 
   Building2,
   Search,
@@ -144,12 +146,31 @@ const sectores = ['Tecnologia', 'Consultoria', 'Servicios', 'Educació', 'Medi A
 const ubicaciones = ['Barcelona', 'Madrid', 'Valencia', 'Sevilla', 'Bilbao', 'Zaragoza']
 
 export default function EmpresasColaboradorasPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSector, setSelectedSector] = useState('all')
   const [selectedUbicacion, setSelectedUbicacion] = useState('all')
   const [soloVerificadas, setSoloVerificadas] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filteredEmpresas, setFilteredEmpresas] = useState(empresasMock)
+  
+  // Convertir formato Empresa a CompanyProfile para TarjetaEmpresa
+  const convertirACompanyProfile = (empresa: Empresa): CompanyProfile => {
+    return {
+      id: empresa.id,
+      name: empresa.nombre,
+      logo: empresa.logo,
+      imagen: empresa.imagen,
+      sector: empresa.sector,
+      descripcionPublica: empresa.descripcion,
+      ubicacionVisible: true,
+      city: empresa.ubicacion,
+      province: undefined,
+      estadoPerfil: empresa.verificada ? 'VERIFICADO' : 'ACTIVO',
+      destacada: empresa.destacada,
+      employeeCount: empresa.empleados.toString()
+    };
+  };
 
   useEffect(() => {
     let filtered = empresasMock
@@ -353,7 +374,17 @@ export default function EmpresasColaboradorasPage() {
             }`}>
               {filteredEmpresas.map((empresa) => (
                 <div key={empresa.id} className="w-full max-w-sm mx-auto">
-                  <EmpresaCard empresa={empresa} viewMode={viewMode} />
+                  {viewMode === 'grid' ? (
+                    <TarjetaEmpresa 
+                      empresa={convertirACompanyProfile(empresa)}
+                      onViewMore={(id) => router.push(`/dashboard/empresas/${id}`)}
+                      onFollow={async (id) => {
+                        console.log('Seguir empresa:', id);
+                      }}
+                    />
+                  ) : (
+                    <EmpresaCard empresa={empresa} viewMode={viewMode} />
+                  )}
                 </div>
               ))}
             </div>
@@ -381,6 +412,7 @@ interface EmpresaCardProps {
 }
 
 function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
+  const router = useRouter();
   // Imágenes placeholder por sector
   const getImagenPorSector = (sector: string): string => {
     const imagenesSector: { [key: string]: string } = {
@@ -419,7 +451,12 @@ function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">{empresa.nombre}</h3>
+                <h3 
+                  className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                  onClick={() => router.push(`/dashboard/empresas/${empresa.id}`)}
+                >
+                  {empresa.nombre}
+                </h3>
                 {empresa.verificada && (
                   <Award size={16} className="text-green-500" />
                 )}
@@ -454,8 +491,11 @@ function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
-      {/* Imagen de portada */}
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600">
+      {/* Imagen de portada - Clickable */}
+      <div 
+        className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 cursor-pointer"
+        onClick={() => router.push(`/dashboard/empresas/${empresa.id}`)}
+      >
         <img 
           src={empresa.imagen || getImagenPorSector(empresa.sector)}
           alt={empresa.nombre}
@@ -505,9 +545,12 @@ function EmpresaCard({ empresa, viewMode }: EmpresaCardProps) {
       
       {/* Contenido */}
       <div className="p-4 flex-1 flex flex-col">
-        {/* Nombre y sector */}
+        {/* Nombre y sector - Clickable */}
         <div className="mb-3">
-          <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1">
+          <h3 
+            className="font-semibold text-gray-900 text-lg line-clamp-1 mb-1 cursor-pointer hover:text-blue-600 transition-colors"
+            onClick={() => router.push(`/dashboard/empresas/${empresa.id}`)}
+          >
             {empresa.nombre}
           </h3>
           <div className="flex items-center space-x-3">
