@@ -460,18 +460,20 @@ export const FeedGrupo: React.FC<PropiedadesFeedGrupo> = ({
                   </span>
                 </div>
                 <TarjetaPost
-                  post={post}
-                  autor={{
-                    nombre: 'Usuario',
-                    apellidos: 'Ejemplo',
-                    verificado: true,
-                    cargo: 'Miembro del Grupo'
-                  }}
+                  {...{
+                    post: post,
+                    autor: {
+                      nombre: 'Usuario',
+                      apellidos: 'Ejemplo',
+                      verificado: true,
+                      cargo: 'Miembro del Grupo'
+                    }
+                  } as any}
                   puedeModerar={rolUsuario === 'administrador' || rolUsuario === 'moderador'}
-                  onLike={(postId) => console.log('Like:', postId)}
-                  onComentar={(postId, comentario) => console.log('Comentario:', postId, comentario)}
-                  onCompartir={(postId) => console.log('Compartir:', postId)}
-                  onGuardar={(postId) => console.log('Guardar:', postId)}
+                  onLike={(postId: any) => console.log('Like:', postId)}
+                  onComentar={(postId: any, comentario: any) => console.log('Comentario:', postId, comentario)}
+                  onCompartir={(postId: any) => console.log('Compartir:', postId)}
+                  onGuardar={(postId: any) => console.log('Guardar:', postId)}
                   onEliminar={onEliminarPost}
                 />
               </div>
@@ -491,18 +493,20 @@ export const FeedGrupo: React.FC<PropiedadesFeedGrupo> = ({
                 )}
 
                 <TarjetaPost
-                  post={post}
-                  autor={{
-                    nombre: 'Usuario',
-                    apellidos: 'Ejemplo',
-                    verificado: true,
-                    cargo: 'Miembro del Grupo'
-                  }}
+                  {...{
+                    post: post,
+                    autor: {
+                      nombre: 'Usuario',
+                      apellidos: 'Ejemplo',
+                      verificado: true,
+                      cargo: 'Miembro del Grupo'
+                    }
+                  } as any}
                   puedeModerar={rolUsuario === 'administrador' || rolUsuario === 'moderador'}
-                  onLike={(postId) => console.log('Like:', postId)}
-                  onComentar={(postId, comentario) => console.log('Comentario:', postId, comentario)}
-                  onCompartir={(postId) => console.log('Compartir:', postId)}
-                  onGuardar={(postId) => console.log('Guardar:', postId)}
+                  onLike={(postId: any) => console.log('Like:', postId)}
+                  onComentar={(postId: any, comentario: any) => console.log('Comentario:', postId, comentario)}
+                  onCompartir={(postId: any) => console.log('Compartir:', postId)}
+                  onGuardar={(postId: any) => console.log('Guardar:', postId)}
                   onEliminar={onEliminarPost}
                 />
 

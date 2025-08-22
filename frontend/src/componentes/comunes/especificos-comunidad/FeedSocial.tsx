@@ -432,7 +432,7 @@ export default function FeedSocial() {
 
               {/* Formulari de creació de posts */}
               <FormulariPost 
-                onPublicar={crearPost}
+                onPublicar={crearPost as any}
                 carregant={carregant}
               />
 

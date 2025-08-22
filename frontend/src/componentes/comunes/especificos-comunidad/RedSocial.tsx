@@ -17,7 +17,7 @@ import {
   Heart,
   Share2
 } from 'lucide-react';
-import { useComunidad, useTema } from '../../../hooks/useComunidad';
+import { useComunidad, useTema } from '../../../../hooks/useComunidad';
 import { useAuth } from '../../../contextos/AuthContext';
 
 interface PropiedadesRedSocial {
@@ -27,7 +27,7 @@ interface PropiedadesRedSocial {
 export const RedSocial: React.FC<PropiedadesRedSocial> = ({ className = '' }) => {
   const { configuracion } = useComunidad();
   const { colores } = useTema();
-  const { usuario } = useAuth();
+  const { user } = useAuth();
   const [filtroActivitat, setFiltroActivitat] = useState('todo');
 
   // Posts de ejemplo

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '../src/contextos/AuthContext'
 import { ComunidadProvider } from './ComunidadContext'
+import { TraduccioProvider } from '../src/contextos/TraduccioContext'
 import { PostsProvider } from '../src/contextos/PostsContext'
 import { NotificationsProvider } from '../src/contextos/NotificationsContext'
 import { NotificacionsProvider } from '../src/contextos/NotificacionsContext'
@@ -26,7 +27,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <ComunidadProvider>
-            <UsuarioProvider>
+            <TraduccioProvider>
+              <UsuarioProvider>
               <PostsProvider>
                 <NotificationsProvider>
                   <NotificacionsProvider>
@@ -42,7 +44,8 @@ export default function RootLayout({
                   </NotificacionsProvider>
                 </NotificationsProvider>
               </PostsProvider>
-            </UsuarioProvider>
+              </UsuarioProvider>
+            </TraduccioProvider>
           </ComunidadProvider>
         </AuthProvider>
       </body>

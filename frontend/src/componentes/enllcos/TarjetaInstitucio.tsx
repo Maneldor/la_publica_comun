@@ -8,9 +8,10 @@ import {
   MousePointer,
   Award
 } from 'lucide-react';
-import { useContenidoTraducido } from '../../../hooks/useContenidoTraducido';
+import { useTraduccio } from '../../contextos/TraduccioContext';
 import { InstitucioEnllac, TIPUS_INSTITUCIONS_METADATA } from '../../../tipos/enllcos';
 import { useComunidad } from '../../../hooks/useComunidad';
+import { useState, useEffect } from 'react';
 
 interface TarjetaInstitucioProps {
   institucio: InstitucioEnllac;
@@ -18,10 +19,48 @@ interface TarjetaInstitucioProps {
   translations: any;
 }
 
-export default function TarjetaInstitucio({ institucio, onVisitarWeb, translations: t }: TarjetaInstitucioProps) {
+export default function TarjetaInstitucio({ institucio, onVisitarWeb, translations: tLegacy }: TarjetaInstitucioProps) {
   const { idioma } = useComunidad();
-  const nomTraducit = useContenidoTraducido(institucio.nom);
-  const descripcionTraducida = useContenidoTraducido(institucio.descripcio);
+  const { t, tDynamic } = useTraduccio();
+  
+  // Estado para contenido dinámico traducido
+  const [nomTraducit, setNomTraducit] = useState({ texto: institucio.nom.texto, cargando: false });
+  const [descripcionTraducida, setDescripcionTraducida] = useState({ texto: institucio.descripcio.texto, cargando: false });
+  
+  // Efectos para traducir contenido dinámico
+  useEffect(() => {
+    const traducirNom = async () => {
+      setNomTraducit({ texto: institucio.nom.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: institucio.nom.texto,
+          idiomaOriginal: institucio.nom.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setNomTraducit({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setNomTraducit({ texto: institucio.nom.texto, cargando: false });
+      }
+    };
+    traducirNom();
+  }, [institucio.nom.texto, institucio.nom.idiomaOriginal, tDynamic]);
+  
+  useEffect(() => {
+    const traducirDescripcion = async () => {
+      setDescripcionTraducida({ texto: institucio.descripcio.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: institucio.descripcio.texto,
+          idiomaOriginal: institucio.descripcio.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setDescripcionTraducida({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setDescripcionTraducida({ texto: institucio.descripcio.texto, cargando: false });
+      }
+    };
+    traducirDescripcion();
+  }, [institucio.descripcio.texto, institucio.descripcio.idiomaOriginal, tDynamic]);
   const tipusMetadata = TIPUS_INSTITUCIONS_METADATA[institucio.tipus];
 
   return (
@@ -46,7 +85,7 @@ export default function TarjetaInstitucio({ institucio, onVisitarWeb, translatio
             className="inline-block px-2 py-1 rounded text-xs font-medium text-white"
             style={{ backgroundColor: tipusMetadata.color }}
           >
-            {tipusMetadata.nom.traducciones?.[idioma] || tipusMetadata.nom.texto}
+            {(tipusMetadata.nom.traducciones as any)?.[idioma] || tipusMetadata.nom.texto}
           </span>
         </div>
         
@@ -117,7 +156,7 @@ export default function TarjetaInstitucio({ institucio, onVisitarWeb, translatio
             <MousePointer size={12} className="mr-1" />
             {institucio.clics}
           </div>
-          <span>{t.ambits[institucio.ambit]}</span>
+          <span>{tLegacy.ambits[institucio.ambit]}</span>
         </div>
         
         {/* Botón visitar web */}
@@ -126,7 +165,7 @@ export default function TarjetaInstitucio({ institucio, onVisitarWeb, translatio
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
         >
           <ExternalLink className="h-4 w-4 mr-2" />
-          {t.visitarWeb}
+          {tLegacy.visitarWeb}
         </button>
       </div>
     </div>

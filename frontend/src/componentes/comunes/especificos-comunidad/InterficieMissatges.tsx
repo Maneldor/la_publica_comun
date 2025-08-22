@@ -82,7 +82,7 @@ export default function InterficieMissatges({
       console.log('🟢 Missatge enviat i textarea netejat')
     } catch (error) {
       console.error('🔴 Error enviant missatge:', error)
-      alert('Error enviant el missatge: ' + error.message)
+      alert('Error enviant el missatge: ' + (error as Error).message)
     }
   }
 

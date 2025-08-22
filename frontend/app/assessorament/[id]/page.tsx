@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import LayoutGeneral from '../../../src/componentes/comunes/LayoutGeneral';
 import { useComunidad } from '../../../hooks/useComunidad';
-import { useContenidoTraducido, crearContenidoMultiidioma } from '../../../hooks/useContenidoTraducido';
+import { useTraduccio } from '../../../src/contextos/TraduccioContext';
+import { crearContenidoMultiidioma } from '../../../src/utils/contenidoMultiidioma';
 import { ServeiAsesorament, TipoAsesorament } from '../../../tipos/asesorament';
 
 // Mock data del servicio (en una app real vendría de la API)
@@ -127,10 +128,79 @@ export default function AssessoramentDetallPage() {
     cargarServei();
   }, [params.id]);
 
-  const tituloTraducido = servei ? useContenidoTraducido(servei.titol) : null;
-  const descripcionTraducida = servei ? useContenidoTraducido(servei.descripcio) : null;
-  const tarifaTraducida = servei ? useContenidoTraducido(servei.tarifa.descripcio) : null;
-  const descripcionEmpresaTraducida = servei ? useContenidoTraducido(servei.empresa.descripcio) : null;
+  const { t, tDynamic } = useTraduccio();
+  
+  // Estado para contenido dinámico traducido
+  const [tituloTraducido, setTituloTraducido] = useState<{ texto: string; cargando: boolean } | null>(null);
+  const [descripcionTraducida, setDescripcionTraducida] = useState<{ texto: string; cargando: boolean } | null>(null);
+  const [tarifaTraducida, setTarifaTraducida] = useState<{ texto: string; cargando: boolean } | null>(null);
+  const [descripcionEmpresaTraducida, setDescripcionEmpresaTraducida] = useState<{ texto: string; cargando: boolean } | null>(null);
+  
+  // Efectos para traducir contenido dinámico
+  useEffect(() => {
+    if (!servei) return;
+    
+    const traducirTitulo = async () => {
+      setTituloTraducido({ texto: servei.titol.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: servei.titol.texto,
+          idiomaOriginal: servei.titol.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setTituloTraducido({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setTituloTraducido({ texto: servei.titol.texto, cargando: false });
+      }
+    };
+    
+    const traducirDescripcion = async () => {
+      setDescripcionTraducida({ texto: servei.descripcio.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: servei.descripcio.texto,
+          idiomaOriginal: servei.descripcio.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setDescripcionTraducida({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setDescripcionTraducida({ texto: servei.descripcio.texto, cargando: false });
+      }
+    };
+    
+    const traducirTarifa = async () => {
+      setTarifaTraducida({ texto: servei.tarifa.descripcio.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: servei.tarifa.descripcio.texto,
+          idiomaOriginal: servei.tarifa.descripcio.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setTarifaTraducida({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setTarifaTraducida({ texto: servei.tarifa.descripcio.texto, cargando: false });
+      }
+    };
+    
+    const traducirEmpresa = async () => {
+      setDescripcionEmpresaTraducida({ texto: servei.empresa.descripcio.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: servei.empresa.descripcio.texto,
+          idiomaOriginal: servei.empresa.descripcio.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setDescripcionEmpresaTraducida({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setDescripcionEmpresaTraducida({ texto: servei.empresa.descripcio.texto, cargando: false });
+      }
+    };
+    
+    traducirTitulo();
+    traducirDescripcion();
+    traducirTarifa();
+    traducirEmpresa();
+  }, [servei, tDynamic]);
 
   const iconosModalitat = {
     TELEFONIC: Phone,

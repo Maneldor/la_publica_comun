@@ -288,7 +288,7 @@ export const TarjetaGrupo: React.FC<PropiedadesTarjetaGrupo> = ({
             </span>
             
             {/* Tag de destacado (ejemplo - puedes añadir lógica para mostrar si está destacado) */}
-            {grupo.destacado && (
+            {(grupo as any).destacado && (
               <span className="bg-yellow-100 border-2 border-yellow-200 rounded-full px-3 py-1 flex items-center space-x-1">
                 <span className="text-yellow-600">⭐</span>
                 <span className="text-xs font-medium text-yellow-700">Destacat</span>

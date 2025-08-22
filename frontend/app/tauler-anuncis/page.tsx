@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral';
 import { useComunidad } from '../../hooks/useComunidad';
-import { useContenidoTraducido, crearContenidoMultiidioma } from '../../hooks/useContenidoTraducido';
+import { crearContenidoMultiidioma } from '../../src/utils/contenidoMultiidioma';
 import { CategoriaAnuncio, Anuncio, FiltrosAnuncios, EstadisticasTablon } from '../../tipos/anuncios';
 import TarjetaAnuncio from '../../src/componentes/anuncios/TarjetaAnuncio';
 
@@ -913,7 +913,7 @@ export default function TaulerAnuncisPage() {
               >
                 <option value="">{idioma === 'ca' ? 'Totes les categories' : 'Todas las categorías'}</option>
                 {Object.entries(t.categorias).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>{label as string}</option>
                 ))}
               </select>
             </div>
@@ -940,7 +940,7 @@ export default function TaulerAnuncisPage() {
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Object.entries(t.ordenPor).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>{label as string}</option>
                 ))}
               </select>
             </div>
@@ -1030,13 +1030,14 @@ export default function TaulerAnuncisPage() {
           ) : (
             // Lista de anuncios con traducción automática
             anuncios.map((anuncio) => (
-              <TarjetaAnuncio
-                key={anuncio.id}
-                anuncio={anuncio}
-                vista={vista}
-                onFavorito={handleFavorito}
-                onContactar={handleContactar}
-              />
+              <div key={anuncio.id} className="w-full max-w-sm mx-auto">
+                <TarjetaAnuncio
+                  anuncio={anuncio}
+                  vista={vista}
+                  onFavorito={handleFavorito}
+                  onContactar={handleContactar}
+                />
+              </div>
             ))
           )}
         </div>

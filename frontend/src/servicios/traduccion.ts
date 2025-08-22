@@ -76,6 +76,9 @@ export async function traducirTexto(
 // Función para traducir por patrones comunes
 function traducirPorPatron(texto: string, idioma: IdiomasSoportados): string {
   const patrones = {
+    es: {
+      // Para español, no hay traducción necesaria
+    },
     ca: {
       'Vendo ': 'Venc ',
       'Como nuevo': 'Com nou',

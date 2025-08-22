@@ -237,7 +237,8 @@ const recentTopics: ForumTopic[] = [
     views: 156,
     lastActivity: new Date('2025-08-14T10:30:00'),
     lastReplyBy: 'Joan Martinez',
-    lastReplyAvatar: '/avatars/joan.jpg'
+    lastReplyAvatar: '/avatars/joan.jpg',
+    featuredImage: ''
   },
   {
     id: '4',

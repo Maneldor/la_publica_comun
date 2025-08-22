@@ -5,6 +5,7 @@ import { useTema } from '../../../hooks/useComunidad';
 import { AIChatInterface } from './AIChatInterface';
 import { PerformanceMetrics } from './PerformanceMetrics';
 import { JobOfferManager } from './JobOfferManager';
+import { OfertasComerciales } from './OfertasComerciales';
 import { EmailCampaigns } from './EmailCampaigns';
 import { CompetitiveAnalysis } from './CompetitiveAnalysis';
 import { PlanBilling } from './PlanBilling';
@@ -22,6 +23,7 @@ const sections: DashboardSection[] = [
   { id: 'chat', name: 'Asistente IA', icon: '🤖', component: AIChatInterface },
   { id: 'metrics', name: 'Estadísticas', icon: '📊', component: PerformanceMetrics },
   { id: 'offers', name: 'Ofertas Laborales', icon: '👥', component: JobOfferManager },
+  { id: 'comercial', name: 'Ofertas Comerciales', icon: '🎯', component: OfertasComerciales },
   { id: 'emails', name: 'Campañas Email', icon: '📧', component: EmailCampaigns },
   { id: 'competition', name: 'Análisis Competitivo', icon: '🔍', component: CompetitiveAnalysis },
   { id: 'billing', name: 'Plan y Facturación', icon: '💳', component: PlanBilling },

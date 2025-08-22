@@ -118,7 +118,7 @@ Descobreix esdeveniments, cursos i oportunitats de formació exclusives per al s
 Sense quotes ni pagaments. La Pública és i sempre serà gratuïta per a tots els empleats públics.
 
 Registra't ara:
-https://lapublica.${configuracion.domini || 'cat'}/registre?ref=${usuario?.id}
+https://${configuracion.host}/registre?ref=${usuario?.id}
 
 T'esperem!
 
@@ -128,7 +128,7 @@ ${nomRemitent}
 --
 La Pública - Xarxa Social d'Empleats Públics
 ${comunitat}
-www.lapublica.${configuracion.domini || 'cat'}`
+${configuracion.host}`
   }
 
   return (

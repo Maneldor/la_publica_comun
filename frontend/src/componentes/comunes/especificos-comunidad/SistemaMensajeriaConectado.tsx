@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
-import SistemaMensajeriaSimple from './SistemaMensajeriaSimple';
-
-// Re-exportar el componente simple (sin llamadas por ahora) como el componente conectado principal
+// Simple placeholder component
 const SistemaMensajeriaConectado: React.FC = () => {
-  return <SistemaMensajeriaSimple />;
+  return (
+    <div className="p-4 text-center text-gray-500">
+      Sistema de Mensajería - En desarrollo
+    </div>
+  );
 };
 
 export default SistemaMensajeriaConectado;

@@ -1,7 +1,6 @@
 // Exportaciones centralizadas de componentes específicos de comunidad
 export { default as TarjetaPost } from './TarjetaPost';
 export { default as TarjetaGrupo } from './TarjetaGrupo';
-export { default as TarjetaEmpresa } from './TarjetaEmpresa';
 export { default as DashboardPrincipal } from './DashboardPrincipal';
 // SistemaMensajeria eliminado
 // SistemaMensajeriaConectado eliminado

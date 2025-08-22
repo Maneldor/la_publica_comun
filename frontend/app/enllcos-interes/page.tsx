@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral';
 import { useComunidad } from '../../hooks/useComunidad';
-import { crearContenidoMultiidioma } from '../../hooks/useContenidoTraducido';
+import { crearContenidoMultiidioma } from '../../src/utils/contenidoMultiidioma';
 import { 
   TipusInstitucio, 
   AmbitTerritorial, 
@@ -80,7 +80,7 @@ const traducciones = {
 };
 
 export default function EnllaçosInteresPage() {
-  const { usuario, idioma } = useComunidad();
+  const { idioma } = useComunidad();
   const [busqueda, setBusqueda] = useState('');
   const [filtres, setFiltres] = useState<FiltresEnllacos>({});
   const [institucions, setInstitucions] = useState<InstitucioEnllac[]>([]);
@@ -520,7 +520,7 @@ export default function EnllaçosInteresPage() {
                 <option value="">{t.tots} {t.tipus}</option>
                 {Object.entries(TIPUS_INSTITUCIONS_METADATA).map(([key, metadata]) => (
                   <option key={key} value={key}>
-                    {metadata.nom.traducciones?.[idioma] || metadata.nom.texto}
+                    {metadata.nom.traducciones?.[idioma as keyof typeof metadata.nom.traducciones] || metadata.nom.texto}
                   </option>
                 ))}
               </select>
@@ -532,7 +532,7 @@ export default function EnllaçosInteresPage() {
               >
                 <option value="">{t.tots} {t.ambit}</option>
                 {Object.entries(t.ambits).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>{label as string}</option>
                 ))}
               </select>
 
@@ -589,12 +589,13 @@ export default function EnllaçosInteresPage() {
         {/* Lista de instituciones */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {institucionsFiltrades.map((institucio) => (
-            <TarjetaInstitucio
-              key={institucio.id}
-              institucio={institucio}
-              onVisitarWeb={handleVisitarWeb}
-              translations={t}
-            />
+            <div key={institucio.id} className="w-full max-w-sm mx-auto">
+              <TarjetaInstitucio
+                institucio={institucio}
+                onVisitarWeb={handleVisitarWeb}
+                translations={t}
+              />
+            </div>
           ))}
         </div>
 

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral';
 import { useComunidad } from '../../hooks/useComunidad';
-import { crearContenidoMultiidioma } from '../../hooks/useContenidoTraducido';
+import { crearContenidoMultiidioma } from '../../src/utils/contenidoMultiidioma';
 import { 
   TipoAsesorament, 
   ModalitatiAsesorament, 
@@ -108,7 +108,7 @@ const traducciones = {
 
 export default function AssessoramentPage() {
   const router = useRouter();
-  const { usuario, idioma } = useComunidad();
+  const { idioma } = useComunidad();
   const [busqueda, setBusqueda] = useState('');
   const [filtres, setFiltres] = useState<FiltresAsesorament>({});
   const [serveis, setServeis] = useState<ServeiAsesorament[]>([]);
@@ -541,7 +541,7 @@ export default function AssessoramentPage() {
               >
                 <option value="">{t.totes}</option>
                 {Object.entries(t.tipusAssessorament).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>{label as string}</option>
                 ))}
               </select>
 
@@ -598,12 +598,13 @@ export default function AssessoramentPage() {
         {/* Lista de servicios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {servicesFiltrats.map((servei) => (
-            <TarjetaServei
-              key={servei.id}
-              servei={servei}
-              onSolicitar={handleSolicitar}
-              translations={t}
-            />
+            <div key={servei.id} className="w-full max-w-sm mx-auto">
+              <TarjetaServei
+                servei={servei}
+                onSolicitar={handleSolicitar}
+                translations={t}
+              />
+            </div>
           ))}
         </div>
 

@@ -811,13 +811,14 @@ export default function OfertesPage() {
                 : 'space-y-4'
             }`}>
               {filteredOfertas.map((oferta) => (
-                <TarjetaOferta 
-                  key={oferta.id} 
-                  oferta={oferta}
-                  onViewMore={handleViewMore}
-                  onRedeem={handleRedeem}
-                  onToggleFavorite={handleToggleFavorite}
-                />
+                <div key={oferta.id} className="w-full max-w-sm mx-auto">
+                  <TarjetaOferta 
+                    oferta={oferta}
+                    onViewMore={handleViewMore}
+                    onRedeem={handleRedeem}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                </div>
               ))}
             </div>
           ) : (

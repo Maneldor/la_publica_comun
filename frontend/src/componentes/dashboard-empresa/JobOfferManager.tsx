@@ -113,7 +113,7 @@ export function JobOfferManager() {
             <input 
               type="text" 
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: `${tema.primario}20`, focusRingColor: tema.primario }}
+              style={{ borderColor: `${tema.primario}20` }}
               placeholder="Ej: Técnico Superior en Informática"
             />
           </div>

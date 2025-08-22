@@ -224,9 +224,9 @@ export default function DirectoriMembres() {
     // Filtre de cerca
     if (cerca) {
       filtrats = filtrats.filter(usuari =>
-        usuari.nick.toLowerCase().includes(cerca.toLowerCase()) ||
-        usuari.nom.toLowerCase().includes(cerca.toLowerCase()) ||
-        usuari.cognom.toLowerCase().includes(cerca.toLowerCase())
+        usuari.nick?.toLowerCase().includes(cerca.toLowerCase()) ||
+        usuari.nom?.toLowerCase().includes(cerca.toLowerCase()) ||
+        usuari.cognom?.toLowerCase().includes(cerca.toLowerCase())
       )
     }
 
@@ -280,8 +280,8 @@ export default function DirectoriMembres() {
     // Mapear datos al formato del componente unificado
     const usuarioUnificado = {
       id: usuari.id,
-      nombre: usuari.nom, // Pot ser undefined
-      apellidos: usuari.cognom, // Pot ser undefined
+      nombre: usuari.nom || usuari.nick, // Use nick as fallback
+      apellidos: usuari.cognom || '', // Use empty string as fallback
       nick: usuari.nick,
       avatar: usuari.avatar || AvatarGenerator.generateDefaultAvatar(usuari.nick), // Generar avatar automàtic si no en té
       rol: usuari.rol,

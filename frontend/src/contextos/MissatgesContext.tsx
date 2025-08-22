@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { useConexiones } from './ConexionesContext'
 import { audioNotificacions } from '../utils/audioNotificacions'
-import { emailNotificacions } from '../utils/emailNotificacions'
+import { emailNotificacionsService } from '../servicios/emailNotificacions'
 import { 
   Missatge, 
   Conversa, 
@@ -154,9 +154,26 @@ export function MissatgesProvider({ children }: MissatgesProviderProps) {
     
     await new Promise(resolve => setTimeout(resolve, 200))
 
-    const conversa = converses.find(c => c.id === conversaId)
-    console.log('📬 conversa trobada:', conversa)
-    if (!conversa) throw new Error('Conversa no trobada')
+    let conversa = converses.find(c => c.id === conversaId)
+    
+    // Si no trobem la conversa, la creem dinàmicament
+    if (!conversa) {
+      console.log('📬 Creant nova conversa per ID:', conversaId)
+      conversa = {
+        id: conversaId,
+        tipus: 'directa',
+        participants: ['user-1', conversaId.replace('conv-', 'user-')],
+        estat: 'activa',
+        darrerMissatge: new Date(),
+        noLlegits: 0,
+        missatges: [],
+        ultimMissatge: undefined
+      } as any
+      // Afegir la nova conversa a la llista
+      setConverses(prev => [...prev, conversa as Conversa])
+    }
+    
+    console.log('📬 conversa trobada/creada:', conversa)
 
     // Simular càrrega de missatges
     const missatgesMock: Missatge[] = [
@@ -204,7 +221,7 @@ export function MissatgesProvider({ children }: MissatgesProviderProps) {
       ...conversa,
       missatges: missatgesMock,
       participantsDetall: participantsDetallMock
-    }
+    } as any
 
     setConversaActiva(conversaDetall)
     
@@ -357,36 +374,83 @@ export function MissatgesProvider({ children }: MissatgesProviderProps) {
       const destinatariId = conversa.participants.find(p => p !== missatge.emissor)
       if (!destinatariId) return
 
-      // Obtenir dades del destinatari
-      const dadesDestinatari = await emailNotificacions.obtenirDadesUsuariPerEmail(destinatariId)
-      if (!dadesDestinatari) return
-
-      // Obtenir dades de l'emissor (simulat)
-      const dadesEmisor = await emailNotificacions.obtenirDadesUsuariPerEmail(missatge.emissor)
-      if (!dadesEmisor) return
-
-      // Preparar dades per l'email
-      const dadesEmail = {
-        destinatariEmail: dadesDestinatari.email,
-        destinatariNom: dadesDestinatari.nom,
-        remitentNom: dadesEmisor.nom,
-        remitentNick: `@${dadesEmisor.nom.toLowerCase().replace(' ', '_')}`,
-        contingutMissatge: missatge.contingut,
-        urlConversa: `${window.location.origin}/missatges/${conversaId}`
+      // Verificar si el destinatari està online
+      if (emailNotificacionsService.esUsuariOnline(destinatariId)) {
+        console.log('👤 Usuari online, no cal enviar email')
+        return
       }
+
+      // Verificar configuració d'emails del destinatari
+      const configEmail = emailNotificacionsService.obtenirConfiguracioEmail(destinatariId)
+      if (!configEmail.missatges) {
+        console.log('📧 Notificacions per email desactivades per l\'usuari')
+        return
+      }
+
+      // Obtenir dades del destinatari (simulades)
+      const dadesDestinatari = obtenirDadesUsuari(destinatariId)
+      const dadesEmisor = obtenirDadesUsuari(missatge.emissor)
+
+      if (!dadesDestinatari || !dadesEmisor) return
 
       console.log('📧 Enviant email de notificació...')
-      const emailEnviat = await emailNotificacions.enviarEmailMissatgeNou(dadesEmail)
+      await emailNotificacionsService.crearNotificacioMissatge(
+        destinatariId,
+        dadesDestinatari.email,
+        dadesDestinatari.nom,
+        {
+          id: dadesEmisor.id,
+          nom: dadesEmisor.nom,
+          avatar: dadesEmisor.avatar
+        },
+        missatge.contingut,
+        conversaId
+      )
       
-      if (emailEnviat) {
-        console.log('📧 Email de notificació enviat correctament')
-      } else {
-        console.log('📧 Email de notificació no s\'ha pogut enviar')
-      }
+      console.log('📧 Email de notificació programat correctament')
 
     } catch (error) {
       console.error('📧 Error enviant email de notificació:', error)
     }
+  }
+
+  // Funció auxiliar per obtenir dades d'usuari (simulada)
+  const obtenirDadesUsuari = (usuariId: string) => {
+    // En un entorn real, això vindria d'una API o base de dades
+    const usuarisMock = {
+      'user-1': {
+        id: 'user-1',
+        nom: 'Manel Amador',
+        email: 'plegats.cat@gmail.com',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+      },
+      'user-2': {
+        id: 'user-2',
+        nom: 'Maria García',
+        email: 'maria.garcia@lapublica.cat',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b151b04c?w=100&h=100&fit=crop&crop=face'
+      },
+      'user-3': {
+        id: 'user-3',
+        nom: 'Joan Martínez',
+        email: 'joan.martinez@lapublica.cat',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
+      },
+      'user-4': {
+        id: 'user-4',
+        nom: 'Anna Puig',
+        email: 'anna.puig@lapublica.cat',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
+      },
+      'user-5': {
+        id: 'user-5',
+        nom: 'Pere Rodríguez',
+        email: 'pere.rodriguez@lapublica.cat',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
+      }
+    }
+    
+    return usuarisMock[usuariId as keyof typeof usuarisMock] || null
   }
 
   const marcarComLlegits = useCallback(async (conversaId: string) => {

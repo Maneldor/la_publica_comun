@@ -288,10 +288,10 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
           <div className="flex items-start space-x-3">
             {/* Avatar del autor */}
             <div className="relative">
-              {post.autor.avatar ? (
+              {(post as any).autor?.avatar ? (
                 <img
-                  src={post.autor.avatar}
-                  alt={post.autor.nom}
+                  src={(post as any).autor.avatar}
+                  alt={(post as any).autor.nom}
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
@@ -299,10 +299,10 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium"
                   style={{ backgroundColor: colores.primario }}
                 >
-                  {post.autor.nom.charAt(0).toUpperCase()}
+                  {(post as any).autor.nom?.charAt(0).toUpperCase()}
                 </div>
               )}
-              {post.autor.verificat && (
+              {(post as any).autor?.verificat && (
                 <div 
                   className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center"
                   style={{ backgroundColor: colores.primario }}
@@ -316,7 +316,7 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
             <div className="flex-1">
               <div className="flex items-center space-x-2">
                 <h3 className="font-semibold text-gray-900 hover:underline cursor-pointer">
-                  {post.autor.nom} {post.autor.apellidos}
+                  {(post as any).autor.nom} {(post as any).autor.apellidos}
                 </h3>
                 <span className="text-gray-500">•</span>
                 <span className="text-sm text-gray-500 flex items-center">
@@ -326,10 +326,10 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
               </div>
               
               <div className="flex items-center space-x-2 text-sm text-gray-500">
-                {post.autor.perfil?.càrrec && (
+                {(post as any).autor.perfil?.càrrec && (
                   <>
-                    <span>{post.autor.perfil.càrrec}</span>
-                    {post.autor.perfil.departament && <span>en {post.autor.perfil.departament}</span>}
+                    <span>{(post as any).autor.perfil.càrrec}</span>
+                    {(post as any).autor.perfil.departament && <span>en {(post as any).autor.perfil.departament}</span>}
                     <span>•</span>
                   </>
                 )}

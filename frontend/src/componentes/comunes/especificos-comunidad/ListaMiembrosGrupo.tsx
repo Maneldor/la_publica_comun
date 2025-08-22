@@ -51,7 +51,7 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
     // Filtrar por búsqueda
     if (busqueda) {
       filtrados = filtrados.filter(miembro => {
-        const nick = miembro.usuario?.nick || `@user${miembro.usuarioId.slice(-1)}`
+        const nick = (miembro.usuario as any)?.nick || `@user${miembro.usuarioId.slice(-1)}`
         return nick.toLowerCase().includes(busqueda.toLowerCase())
       })
     }
@@ -65,8 +65,8 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
     filtrados.sort((a, b) => {
       switch (ordenamiento) {
         case 'nombre':
-          const nickA = a.usuario?.nick || `@user${a.usuarioId.slice(-1)}`
-          const nickB = b.usuario?.nick || `@user${b.usuarioId.slice(-1)}`
+          const nickA = (a.usuario as any)?.nick || `@user${a.usuarioId.slice(-1)}`
+          const nickB = (b.usuario as any)?.nick || `@user${b.usuarioId.slice(-1)}`
           return nickA.localeCompare(nickB)
         case 'fecha':
           return b.fechaUnion.getTime() - a.fechaUnion.getTime()
@@ -81,7 +81,7 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
     
     // Ordenar por rol (embaixador > admin > moderador > miembro)
     const ordenRoles = { embaixador: 0, administrador: 1, moderador: 2, miembro: 3 }
-    filtrados.sort((a, b) => ordenRoles[a.rol] - ordenRoles[b.rol])
+    filtrados.sort((a, b) => (ordenRoles as any)[a.rol] - (ordenRoles as any)[b.rol])
     
     return filtrados
   }, [miembros, busqueda, filtroRol, ordenamiento])
@@ -126,7 +126,7 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
     const esYo = miembro.usuarioId === 'user-1' // TODO: obtener del contexto de auth
     const conectado = esConectado(miembro.usuarioId)
     const nombre = miembro.usuario?.nombre || `Usuario ${miembro.usuarioId}`
-    const nick = miembro.usuario?.nick || `@user${miembro.usuarioId.slice(-1)}`
+    const nick = (miembro.usuario as any)?.nick || `@user${miembro.usuarioId.slice(-1)}`
     
     // Determinar estado de conexión
     const estadoConexion: 'conectado' | 'pendiente' | 'disponible' = conectado ? 'conectado' : 'disponible'
@@ -149,8 +149,8 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
     return (
       <TarjetaMiembro
         key={miembro.usuarioId}
-        usuario={usuarioUnificado}
-        layout="compacto"
+        usuario={usuarioUnificado as any}
+        layout="buddyboss"
         estadoConexion={estadoConexion}
         esYo={esYo}
         esAdmin={esAdmin && !esYo && miembro.rol !== 'embaixador'}
@@ -158,7 +158,7 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
         onVerPerfil={() => {
           setPerfilSeleccionado(miembro.usuarioId)
         }}
-        onCambiarRol={(nuevoRol) => handleCambiarRol(miembro.usuarioId, nuevoRol)}
+        onCambiarRol={(nuevoRol: any) => handleCambiarRol(miembro.usuarioId, nuevoRol)}
         onEliminar={() => handleRemoverMiembro(miembro.usuarioId)}
       />
     )
@@ -258,8 +258,12 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
       
       {/* Lista de miembros */}
       {miembrosFiltrados.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {miembrosFiltrados.map(renderTarjetaMiembro)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {miembrosFiltrados.map((miembro) => (
+            <div key={miembro.usuarioId} className="w-full max-w-sm">
+              {renderTarjetaMiembro(miembro)}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="bg-white rounded-lg border p-8 text-center">
@@ -276,9 +280,11 @@ export default function ListaMiembrosGrupo({ grupoId }: ListaMiembrosGrupoProps)
       {/* Modal de perfil */}
       {perfilSeleccionado && (
         <ModalPerfilUsuari
-          usuariId={perfilSeleccionado}
-          obert={true}
-          onTancar={() => setPerfilSeleccionado(null)}
+          {...{
+            usuari: perfilSeleccionado,
+            obert: true,
+            onTancar: () => setPerfilSeleccionado(null)
+          } as any}
         />
       )}
     </div>

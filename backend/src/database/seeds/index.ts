@@ -8,7 +8,7 @@ async function seed() {
 
     // Create admin user
     const adminPassword = await bcrypt.hash('admin123456', 12);
-    const admin = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: 'admin@lapublica.es' },
       update: {},
       create: {
@@ -23,7 +23,7 @@ async function seed() {
 
     // Create sample company
     const companyPassword = await bcrypt.hash('company123456', 12);
-    const companyUser = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: 'empresa@ejemplo.es' },
       update: {},
       create: {
@@ -41,7 +41,6 @@ async function seed() {
             city: 'Barcelona',
             province: 'Barcelona',
             country: 'España',
-            status: 'ACTIVE',
             verifiedAt: new Date(),
           },
         },
@@ -52,7 +51,7 @@ async function seed() {
 
     // Create sample employee
     const employeePassword = await bcrypt.hash('employee123456', 12);
-    const employeeUser = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: 'empleado@generalitat.cat' },
       update: {},
       create: {
@@ -72,9 +71,7 @@ async function seed() {
             organization: 'Generalitat de Catalunya',
             organizationType: 'Comunidad Autónoma',
             employeeCategory: 'A1',
-            salaryRange: '40k-50k',
             contractType: 'Funcionario de carrera',
-            status: 'ACTIVE',
           },
         },
       },
@@ -82,64 +79,8 @@ async function seed() {
 
     logger.info('✅ Sample employee created');
 
-    // Create sample posts
-    const posts = [
-      {
-        title: 'Nueva Convocatoria de Oposiciones A1',
-        slug: 'nueva-convocatoria-oposiciones-a1',
-        content: 'Se ha publicado una nueva convocatoria para plazas de Técnico Superior...',
-        excerpt: 'Nueva convocatoria para 50 plazas de Técnico Superior en la Generalitat',
-        category: 'Oposiciones',
-        tags: ['oposiciones', 'A1', 'generalitat'],
-        status: 'PUBLISHED',
-        publishedAt: new Date(),
-        companyId: companyUser.id,
-        authorId: companyUser.id,
-      },
-      {
-        title: 'Guía para Preparar Oposiciones 2024',
-        slug: 'guia-preparar-oposiciones-2024',
-        content: 'Esta guía completa te ayudará a preparar las oposiciones de manera efectiva...',
-        excerpt: 'Todo lo que necesitas saber para preparar las oposiciones este año',
-        category: 'Formación',
-        tags: ['formación', 'guía', 'preparación'],
-        status: 'PUBLISHED',
-        publishedAt: new Date(),
-        companyId: companyUser.id,
-        authorId: companyUser.id,
-      },
-    ];
-
-    for (const post of posts) {
-      await prisma.post.upsert({
-        where: { slug: post.slug },
-        update: {},
-        create: post,
-      });
-    }
-
-    logger.info('✅ Sample posts created');
-
-    // Create sample email template
-    await prisma.emailTemplate.upsert({
-      where: { id: 'default-template' },
-      update: {},
-      create: {
-        id: 'default-template',
-        companyId: companyUser.id,
-        name: 'Plantilla por Defecto',
-        subject: 'Nueva oportunidad para empleados públicos',
-        content: `
-          <h1>Hola {{firstName}},</h1>
-          <p>Tenemos una nueva oportunidad que puede interesarte:</p>
-          <div>{{content}}</div>
-          <p>Saludos,<br>{{companyName}}</p>
-        `,
-        variables: ['firstName', 'content', 'companyName'],
-      },
-    });
-
-    logger.info('✅ Sample email template created');
+    // Sample posts and email templates are not available in SQLite schema
+    logger.info('✅ Basic data seeding completed');
 
     logger.info('🎉 Database seeding completed successfully!');
     

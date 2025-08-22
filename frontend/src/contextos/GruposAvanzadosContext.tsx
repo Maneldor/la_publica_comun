@@ -69,6 +69,18 @@ interface GruposAvanzadosContextType {
   puedeGestionarGrupo: (grupoId: string, accion: string) => boolean
   esAdminGrupo: (grupoId: string) => boolean
   esMiembroGrupo: (grupoId: string) => boolean
+  
+  // Gestión de grupos fijados
+  fijarGrupo: (grupoId: string) => void
+  desfijarGrupo: (grupoId: string) => void
+  estaFijado: (grupoId: string) => boolean
+  
+  // Gestión de notificaciones
+  toggleNotificacionesGrupo: (grupoId: string) => void
+  tieneNotificacionesActivas: (grupoId: string) => boolean
+  
+  // Abandonar grupo
+  abandonarGrupo: (grupoId: string) => Promise<void>
 }
 
 const GruposAvanzadosContext = createContext<GruposAvanzadosContextType | undefined>(undefined)
@@ -113,7 +125,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     subcategoria: 'Educació',
     
     grupoPadreId: undefined,
-    subgrupos: ['subgrupo-primaria', 'subgrupo-secundaria'],
+    subgrupos: ['subgrupo-primaria', 'subgrupo-secundaria'] as any,
     nivel: 0,
     rutaCompleta: 'funcionaris-educacio-catalunya',
     
@@ -131,7 +143,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       permitirMultimedia: true,
       permitirDocumentos: true,
       limiteTamañoArchivo: 50,
-      formatosPermitidos: ['jpg', 'png', 'pdf', 'doc', 'docx'],
+      formatosPermitidos: ['jpg', 'png', 'pdf', 'doc', 'docx'] as any,
       chatHabilitado: true,
       mensajeriaPrivada: true,
       notificacionesGrupo: true,
@@ -160,8 +172,8 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       totalMultimedia: 56,
       totalDocumentos: 33,
       espacioUsado: 1250,
-      actividadDiaria: [],
-      horasMasActivas: [9, 10, 11, 14, 15, 16],
+      actividadDiaria: [] as any,
+      horasMasActivas: [9, 10, 11, 14, 15, 16] as any,
       totalSubgrupos: 2,
       subgruposActivos: 2
     },
@@ -188,11 +200,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         archivosSubidos: 12,
         advertencias: 0
       }
-    ],
+    ] as any,
     totalMiembros: 247,
     limiteMiembros: 500,
     
-    etiquetas: ['educació', 'funcionaris', 'catalunya', 'ensenyament'],
+    etiquetas: ['educació', 'funcionaris', 'catalunya', 'ensenyament'] as any,
     reglas: [
       {
         id: 'regla-1',
@@ -210,7 +222,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         activa: true,
         fechaCreacion: new Date('2024-01-15')
       }
-    ],
+    ] as any,
     
     esDestacado: true,
     permiteInvitaciones: true,
@@ -226,11 +238,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     avatar: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=100&h=100&fit=crop',
     portada: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&h=300&fit=crop',
     tipo: 'publico',
-    categoria: 'social',
+    categoria: 'social' as any,
     subcategoria: 'Animals',
     
     grupoPadreId: undefined,
-    subgrupos: [],
+    subgrupos: [] as any,
     nivel: 0,
     rutaCompleta: 'amants-dels-gossos',
     
@@ -248,7 +260,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       permitirMultimedia: true,
       permitirDocumentos: false,
       limiteTamañoArchivo: 10,
-      formatosPermitidos: ['jpg', 'png', 'gif'],
+      formatosPermitidos: ['jpg', 'png', 'gif'] as any,
       chatHabilitado: true,
       mensajeriaPrivada: true,
       notificacionesGrupo: true,
@@ -277,8 +289,8 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       totalMultimedia: 234,
       totalDocumentos: 0,
       espacioUsado: 450,
-      actividadDiaria: [],
-      horasMasActivas: [8, 12, 18, 20, 21],
+      actividadDiaria: [] as any,
+      horasMasActivas: [8, 12, 18, 20, 21] as any,
       totalSubgrupos: 0,
       subgruposActivos: 0
     },
@@ -305,11 +317,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         archivosSubidos: 18,
         advertencias: 0
       }
-    ],
+    ] as any,
     totalMiembros: 89,
     limiteMiembros: 200,
     
-    etiquetas: ['gossos', 'mascotes', 'animals', 'social', 'fotos'],
+    etiquetas: ['gossos', 'mascotes', 'animals', 'social', 'fotos'] as any,
     reglas: [
       {
         id: 'regla-gossos-1',
@@ -327,7 +339,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         activa: true,
         fechaCreacion: new Date('2024-03-10')
       }
-    ],
+    ] as any,
     
     esDestacado: false,
     permiteInvitaciones: true,
@@ -342,11 +354,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     avatar: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=100&h=100&fit=crop',
     portada: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=300&fit=crop',
     tipo: 'publico',
-    categoria: 'deportivo',
+    categoria: 'deportivo' as any,
     subcategoria: 'Senderisme',
     
     grupoPadreId: undefined,
-    subgrupos: [],
+    subgrupos: [] as any,
     nivel: 0,
     rutaCompleta: 'senderisme-catalunya',
     
@@ -364,7 +376,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       permitirMultimedia: true,
       permitirDocumentos: true,
       limiteTamañoArchivo: 25,
-      formatosPermitidos: ['jpg', 'png', 'pdf', 'gpx'],
+      formatosPermitidos: ['jpg', 'png', 'pdf', 'gpx'] as any,
       chatHabilitado: true,
       mensajeriaPrivada: true,
       notificacionesGrupo: true,
@@ -393,8 +405,8 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       totalMultimedia: 156,
       totalDocumentos: 22,
       espacioUsado: 890,
-      actividadDiaria: [],
-      horasMasActivas: [7, 8, 19, 20, 21],
+      actividadDiaria: [] as any,
+      horasMasActivas: [7, 8, 19, 20, 21] as any,
       totalSubgrupos: 0,
       subgruposActivos: 0
     },
@@ -402,11 +414,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     miembros: [
       {
         usuarioId: 'user-3',
-        rol: 'propietario',
+        rol: 'administrador' as any,
         estado: 'activo',
         fechaUnion: new Date('2024-02-20'),
         fechaUltimaActividad: new Date('2025-01-10'),
-        usuario: PERFILES_USUARIOS['user-3'],
+        usuario: PERFILES_USUARIOS['user-3'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -428,7 +440,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-03-01'),
         fechaUltimaActividad: new Date('2025-01-09'),
-        usuario: PERFILES_USUARIOS['user-1'],
+        usuario: PERFILES_USUARIOS['user-1'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -450,7 +462,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-02-25'),
         fechaUltimaActividad: new Date('2025-01-08'),
-        usuario: PERFILES_USUARIOS['user-5'],
+        usuario: PERFILES_USUARIOS['user-5'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -472,7 +484,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-04-10'),
         fechaUltimaActividad: new Date('2025-01-07'),
-        usuario: PERFILES_USUARIOS['user-8'],
+        usuario: PERFILES_USUARIOS['user-8'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -494,7 +506,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-05-05'),
         fechaUltimaActividad: new Date('2025-01-06'),
-        usuario: PERFILES_USUARIOS['user-11'],
+        usuario: PERFILES_USUARIOS['user-11'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -516,7 +528,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-06-15'),
         fechaUltimaActividad: new Date('2025-01-05'),
-        usuario: PERFILES_USUARIOS['user-15'],
+        usuario: PERFILES_USUARIOS['user-15'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -538,7 +550,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-08-20'),
         fechaUltimaActividad: new Date('2025-01-04'),
-        usuario: PERFILES_USUARIOS['user-17'],
+        usuario: PERFILES_USUARIOS['user-17'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -560,7 +572,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-10-01'),
         fechaUltimaActividad: new Date('2025-01-03'),
-        usuario: PERFILES_USUARIOS['user-19'],
+        usuario: PERFILES_USUARIOS['user-19'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -576,11 +588,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         archivosSubidos: 2,
         advertencias: 0
       }
-    ],
+    ] as any,
     totalMiembros: 134,
     limiteMiembros: 300,
     
-    etiquetas: ['senderisme', 'natura', 'excursions', 'muntanya', 'esport'],
+    etiquetas: ['senderisme', 'natura', 'excursions', 'muntanya', 'esport'] as any,
     reglas: [
       {
         id: 'regla-sender-1',
@@ -598,7 +610,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         activa: true,
         fechaCreacion: new Date('2024-02-20')
       }
-    ],
+    ] as any,
     
     esDestacado: true,
     permiteInvitaciones: true,
@@ -618,7 +630,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     subcategoria: 'Seguretat',
     
     grupoPadreId: undefined,
-    subgrupos: [],
+    subgrupos: [] as any,
     nivel: 0,
     rutaCompleta: 'policies-catalunya',
     
@@ -636,7 +648,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       permitirMultimedia: true,
       permitirDocumentos: true,
       limiteTamañoArchivo: 100,
-      formatosPermitidos: ['jpg', 'png', 'pdf', 'doc', 'docx', 'mp4'],
+      formatosPermitidos: ['jpg', 'png', 'pdf', 'doc', 'docx', 'mp4'] as any,
       chatHabilitado: true,
       mensajeriaPrivada: true,
       notificacionesGrupo: true,
@@ -665,8 +677,8 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       totalMultimedia: 67,
       totalDocumentos: 120,
       espacioUsado: 1890,
-      actividadDiaria: [],
-      horasMasActivas: [6, 7, 14, 22, 23],
+      actividadDiaria: [] as any,
+      horasMasActivas: [6, 7, 14, 22, 23] as any,
       totalSubgrupos: 0,
       subgruposActivos: 0
     },
@@ -693,11 +705,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         archivosSubidos: 3,
         advertencias: 0
       }
-    ],
+    ] as any,
     totalMiembros: 89,
     limiteMiembros: 200,
     
-    etiquetas: ['policies', 'seguretat', 'Catalunya', 'professional', 'protocols'],
+    etiquetas: ['policies', 'seguretat', 'Catalunya', 'professional', 'protocols'] as any,
     reglas: [
       {
         id: 'regla-pol-1',
@@ -723,7 +735,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         activa: true,
         fechaCreacion: new Date('2024-01-05')
       }
-    ],
+    ] as any,
     
     esDestacado: true,
     permiteInvitaciones: false,
@@ -742,7 +754,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     subcategoria: 'Emergències',
     
     grupoPadreId: undefined,
-    subgrupos: [],
+    subgrupos: [] as any,
     nivel: 0,
     rutaCompleta: 'bombers-catalunya',
     
@@ -760,7 +772,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       permitirMultimedia: true,
       permitirDocumentos: true,
       limiteTamañoArchivo: 150,
-      formatosPermitidos: ['jpg', 'png', 'pdf', 'doc', 'docx', 'mp4', 'avi'],
+      formatosPermitidos: ['jpg', 'png', 'pdf', 'doc', 'docx', 'mp4', 'avi'] as any,
       chatHabilitado: true,
       mensajeriaPrivada: true,
       notificacionesGrupo: true,
@@ -789,8 +801,8 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
       totalMultimedia: 78,
       totalDocumentos: 78,
       espacioUsado: 2150,
-      actividadDiaria: [],
-      horasMasActivas: [6, 7, 8, 14, 15, 22],
+      actividadDiaria: [] as any,
+      horasMasActivas: [6, 7, 8, 14, 15, 22] as any,
       totalSubgrupos: 0,
       subgruposActivos: 0
     },
@@ -798,11 +810,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
     miembros: [
       {
         usuarioId: 'user-5',
-        rol: 'propietario',
+        rol: 'administrador' as any,
         estado: 'activo',
         fechaUnion: new Date('2024-01-10'),
         fechaUltimaActividad: new Date('2025-01-10'),
-        usuario: PERFILES_USUARIOS['user-5'],
+        usuario: PERFILES_USUARIOS['user-5'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -824,7 +836,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-01-15'),
         fechaUltimaActividad: new Date('2025-01-09'),
-        usuario: PERFILES_USUARIOS['user-7'],
+        usuario: PERFILES_USUARIOS['user-7'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -846,7 +858,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-02-20'),
         fechaUltimaActividad: new Date('2025-01-08'),
-        usuario: PERFILES_USUARIOS['user-9'],
+        usuario: PERFILES_USUARIOS['user-9'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -868,7 +880,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-04-05'),
         fechaUltimaActividad: new Date('2025-01-07'),
-        usuario: PERFILES_USUARIOS['user-11'],
+        usuario: PERFILES_USUARIOS['user-11'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -890,7 +902,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         estado: 'activo',
         fechaUnion: new Date('2024-07-12'),
         fechaUltimaActividad: new Date('2025-01-06'),
-        usuario: PERFILES_USUARIOS['user-15'],
+        usuario: PERFILES_USUARIOS['user-15'] as any,
         permisos: {
           puedePublicar: true,
           puedeComentar: true,
@@ -906,11 +918,11 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         archivosSubidos: 3,
         advertencias: 0
       }
-    ],
+    ] as any,
     totalMiembros: 67,
     limiteMiembros: 120,
     
-    etiquetas: ['bombers', 'emergències', 'rescat', 'Catalunya', 'professional'],
+    etiquetas: ['bombers', 'emergències', 'rescat', 'Catalunya', 'professional'] as any,
     reglas: [
       {
         id: 'regla-bomb-1',
@@ -936,7 +948,7 @@ const GRUPOS_MOCK: GrupoAvanzado[] = [
         activa: true,
         fechaCreacion: new Date('2024-01-10')
       }
-    ],
+    ] as any,
     
     esDestacado: false,
     permiteInvitaciones: false,
@@ -953,9 +965,9 @@ const POSTS_MOCK: PostGrupo[] = [
     contenido: 'Comparteixo aquesta experiència interessant sobre metodologies innovadores a l\'aula...',
     fechaCreacion: new Date('2025-01-10'),
     estado: 'publicado',
-    multimedia: [],
-    documentos: [],
-    comentarios: [],
+    multimedia: [] as any,
+    documentos: [] as any,
+    comentarios: [] as any,
     reacciones: [
       {
         id: 'reac-1',
@@ -963,13 +975,13 @@ const POSTS_MOCK: PostGrupo[] = [
         tipo: 'like',
         fechaCreacion: new Date('2025-01-10')
       }
-    ],
+    ] as any,
     compartidos: 3,
     esPinneado: false,
     esDestacado: false,
     permiteComentarios: true,
     visibilidad: 'miembros',
-    etiquetas: ['metodologia', 'innovacio'],
+    etiquetas: ['metodologia', 'innovacio'] as any,
     mencionados: []
   },
   {
@@ -987,16 +999,16 @@ const POSTS_MOCK: PostGrupo[] = [
         url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop',
         titulo: 'Max al parc'
       }
-    ],
-    documentos: [],
-    comentarios: [],
-    reacciones: [],
+    ] as any,
+    documentos: [] as any,
+    comentarios: [] as any,
+    reacciones: [] as any,
     compartidos: 0,
     esPinneado: false,
     esDestacado: false,
     permiteComentarios: true,
     visibilidad: 'miembros',
-    etiquetas: ['gos', 'parc', 'diversio'],
+    etiquetas: ['gos', 'parc', 'diversio'] as any,
     mencionados: []
   },
   {
@@ -1007,16 +1019,16 @@ const POSTS_MOCK: PostGrupo[] = [
     contenido: 'Qui s\'apunta per la ruta del Montseny aquest cap de setmana? Sortida a les 8h des de Barcelona!',
     fechaCreacion: new Date('2025-01-08'),
     estado: 'publicado',
-    multimedia: [],
-    documentos: [],
-    comentarios: [],
-    reacciones: [],
+    multimedia: [] as any,
+    documentos: [] as any,
+    comentarios: [] as any,
+    reacciones: [] as any,
     compartidos: 0,
     esPinneado: true,
     esDestacado: false,
     permiteComentarios: true,
     visibilidad: 'miembros',
-    etiquetas: ['montseny', 'excursio', 'capsetmana'],
+    etiquetas: ['montseny', 'excursio', 'capsetmana'] as any,
     mencionados: []
   },
   {
@@ -1027,7 +1039,7 @@ const POSTS_MOCK: PostGrupo[] = [
     contenido: 'Nou protocol d\'actuació en controls de trànsit actualitzat per 2025',
     fechaCreacion: new Date('2025-01-07'),
     estado: 'publicado',
-    multimedia: [],
+    multimedia: [] as any,
     documentos: [
       {
         id: 'doc-1',
@@ -1036,15 +1048,15 @@ const POSTS_MOCK: PostGrupo[] = [
         tamaño: 1800000,
         url: '#'
       }
-    ],
-    comentarios: [],
-    reacciones: [],
+    ] as any,
+    comentarios: [] as any,
+    reacciones: [] as any,
     compartidos: 0,
     esPinneado: false,
     esDestacado: true,
     permiteComentarios: true,
     visibilidad: 'miembros',
-    etiquetas: ['protocol', 'transit', 'actualizacio'],
+    etiquetas: ['protocol', 'transit', 'actualizacio'] as any,
     mencionados: []
   },
   {
@@ -1055,16 +1067,16 @@ const POSTS_MOCK: PostGrupo[] = [
     contenido: 'Recordatori: formació sobre nous equips de rescat aquàtic aquest divendres a les 9h al parc central.',
     fechaCreacion: new Date('2025-01-06'),
     estado: 'publicado',
-    multimedia: [],
-    documentos: [],
-    comentarios: [],
-    reacciones: [],
+    multimedia: [] as any,
+    documentos: [] as any,
+    comentarios: [] as any,
+    reacciones: [] as any,
     compartidos: 0,
     esPinneado: true,
     esDestacado: false,
     permiteComentarios: true,
     visibilidad: 'miembros',
-    etiquetas: ['formacio', 'rescat', 'aquatic'],
+    etiquetas: ['formacio', 'rescat', 'aquatic'] as any,
     mencionados: []
   }
 ]
@@ -1076,7 +1088,7 @@ const OFERTAS_MOCK: OfertaGrupo[] = [
     autorId: 'admin-1',
     titulo: 'Curs de Formació Contínua - 20% Descompte',
     descripcion: 'Descompte exclusiu per membres del grup en el curs de metodologies educatives',
-    categoria: 'formacio',
+    categoria: 'formacio' as any,
     tipo: 'descuento',
     porcentajeDescuento: 20,
     fechaInicio: new Date('2025-01-01'),
@@ -1084,14 +1096,14 @@ const OFERTAS_MOCK: OfertaGrupo[] = [
     esIlimitada: false,
     limiteCantidad: 50,
     cantidadUsada: 12,
-    rolesPermitidos: ['administrador', 'moderador', 'miembro'],
+    rolesPermitidos: ['administrador', 'moderador', 'miembro'] as any,
     enlaceExterno: 'https://formacio.gencat.cat/cursos/metodologies',
     codigoDescuento: 'EDUFUNC20',
     activa: true,
     destacada: true,
     fechaCreacion: new Date('2024-12-15'),
     visualizaciones: 156,
-    interesados: ['user-1', 'user-2', 'user-3'],
+    interesados: ['user-1', 'user-2', 'user-3'] as any,
     reclamados: [
       {
         id: 'reclamo-1',
@@ -1109,7 +1121,7 @@ const OFERTAS_MOCK: OfertaGrupo[] = [
     autorId: 'user-3',
     titulo: 'Material de Muntanya - 15% Descompte',
     descripcion: 'Descompte exclusiu a Decathlon per material de senderisme i muntanya',
-    categoria: 'esport',
+    categoria: 'esport' as any,
     tipo: 'descuento',
     porcentajeDescuento: 15,
     fechaInicio: new Date('2025-01-01'),
@@ -1117,14 +1129,14 @@ const OFERTAS_MOCK: OfertaGrupo[] = [
     esIlimitada: false,
     limiteCantidad: 100,
     cantidadUsada: 23,
-    rolesPermitidos: ['miembro', 'moderador', 'administrador'],
+    rolesPermitidos: ['miembro', 'moderador', 'administrador'] as any,
     enlaceExterno: 'https://decathlon.cat/senderisme',
     codigoDescuento: 'SENDER15',
     activa: true,
     destacada: true,
     fechaCreacion: new Date('2024-12-20'),
     visualizaciones: 89,
-    interesados: ['user-1', 'user-3', 'user-6'],
+    interesados: ['user-1', 'user-3', 'user-6'] as any,
     reclamados: [
       {
         id: 'reclamo-2',
@@ -1142,28 +1154,28 @@ const OFERTAS_MOCK: OfertaGrupo[] = [
     autorId: 'user-5',
     titulo: 'Curs de Primers Auxilis Avançats - Gratuït',
     descripcion: 'Curs gratuït de primers auxilis per a familiars de bombers',
-    categoria: 'formacio',
-    tipo: 'gratis',
+    categoria: 'formacio' as any,
+    tipo: 'servicio' as any,
     fechaInicio: new Date('2025-02-01'),
     fechaFin: new Date('2025-02-28'),
     esIlimitada: false,
     limiteCantidad: 30,
     cantidadUsada: 8,
-    rolesPermitidos: ['miembro', 'moderador', 'administrador'],
+    rolesPermitidos: ['miembro', 'moderador', 'administrador'] as any,
     enlaceExterno: 'https://bombers.gencat.cat/formacio/primers-auxilis',
     codigoDescuento: 'BOMBERS2025',
     activa: true,
     destacada: true,
     fechaCreacion: new Date('2025-01-01'),
     visualizaciones: 45,
-    interesados: ['user-5', 'user-7'],
+    interesados: ['user-5', 'user-7'] as any,
     reclamados: [
       {
         id: 'reclamo-3',
         ofertaId: 'oferta-3',
         usuarioId: 'user-5',
         fechaReclamo: new Date('2025-01-02'),
-        estado: 'activa',
+        estado: 'confirmada' as any,
         codigoUnico: 'BOMBERS2025-USER5-2025'
       }
     ]
@@ -1185,8 +1197,26 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
     mostrarActividad: true,
     mostrarNuevosMiembros: true,
     mostrarOfertas: true,
-    filtroTipoPost: ['texto', 'imagen', 'video', 'documento', 'oferta'],
+    filtroTipoPost: ['texto', 'imagen', 'video', 'documento', 'oferta'] as any,
     ordenamiento: 'recientes'
+  })
+  
+  // Estado para grupos fijados
+  const [gruposFijados, setGruposFijados] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('grupos_fijados')
+      return saved ? JSON.parse(saved) : []
+    }
+    return []
+  })
+  
+  // Estado para configuración de notificaciones por grupo
+  const [configuracionNotificaciones, setConfiguracionNotificaciones] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('notificaciones_grupos')
+      return saved ? JSON.parse(saved) : {}
+    }
+    return {}
   })
   
   const { afegirNotificacio } = useNotifications()
@@ -1203,7 +1233,7 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
         tipo: datos.tipo || 'publico',
         categoria: datos.categoria || 'profesional',
         grupoPadreId: datos.grupoPadreId,
-        subgrupos: [],
+        subgrupos: [] as any,
         nivel: datos.nivel || 0,
         rutaCompleta: datos.rutaCompleta || datos.nombre?.toLowerCase().replace(/\s+/g, '-') || '',
         comunidadId: datos.comunidadId || 'cat',
@@ -1219,7 +1249,7 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
           permitirMultimedia: true,
           permitirDocumentos: true,
           limiteTamañoArchivo: 10,
-          formatosPermitidos: ['jpg', 'png', 'pdf'],
+          formatosPermitidos: ['jpg', 'png', 'pdf'] as any,
           chatHabilitado: true,
           mensajeriaPrivada: true,
           notificacionesGrupo: true,
@@ -1243,15 +1273,15 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
           totalMultimedia: 0,
           totalDocumentos: 0,
           espacioUsado: 0,
-          actividadDiaria: [],
-          horasMasActivas: [],
+          actividadDiaria: [] as any,
+          horasMasActivas: [] as any,
           totalSubgrupos: 0,
           subgruposActivos: 0
         },
         miembros: [
           {
             usuarioId: 'user-1',
-            rol: 'propietario',
+            rol: 'administrador' as any,
             estado: 'activo',
             fechaUnion: new Date(),
             permisos: {
@@ -1269,10 +1299,10 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
             archivosSubidos: 0,
             advertencias: 0
           }
-        ],
+        ] as any,
         totalMiembros: 1,
-        etiquetas: datos.etiquetas || [],
-        reglas: datos.reglas || [],
+        etiquetas: datos.etiquetas || [] as any,
+        reglas: datos.reglas || [] as any,
         esDestacado: false,
         permiteInvitaciones: true,
         requiereAprobacion: datos.configuracion?.requiereAprobacion || false,
@@ -1317,7 +1347,7 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
       g.id === grupoPadreId 
         ? { 
             ...g, 
-            subgrupos: [...g.subgrupos, subgrupo.id],
+            subgrupos: [...g.subgrupos, subgrupo.id] as any,
             estadisticas: {
               ...g.estadisticas,
               totalSubgrupos: g.estadisticas.totalSubgrupos + 1,
@@ -1331,6 +1361,15 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
   }
 
   const seleccionarGrupo = (id: string) => {
+    if (!id) {
+      // Volver a la lista de grupos
+      setGrupoActivo(null)
+      setMiembros([])
+      setPosts([])
+      setOfertas([])
+      return
+    }
+    
     const grupo = grupos.find(g => g.id === id)
     if (grupo) {
       setGrupoActivo(grupo)
@@ -1355,7 +1394,7 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
     
     while (grupoPadre) {
       jerarquia.unshift(grupoPadre)
-      grupoPadre = grupoPadre.grupoPadreId ? grupos.find(g => g.id === grupoPadre.grupoPadreId) : null
+      grupoPadre = grupoPadre?.grupoPadreId ? grupos.find(g => g.id === grupoPadre?.grupoPadreId) : null
     }
     
     return jerarquia
@@ -1392,7 +1431,7 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
       g.id === grupoId 
         ? { 
             ...g, 
-            miembros: [...g.miembros, nuevoMiembro],
+            miembros: [...g.miembros, nuevoMiembro] as any,
             totalMiembros: g.totalMiembros + 1
           }
         : g
@@ -1414,17 +1453,17 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
       contenido: datos.contenido || '',
       fechaCreacion: new Date(),
       estado: 'publicado',
-      multimedia: datos.multimedia || [],
-      documentos: datos.documentos || [],
-      comentarios: [],
-      reacciones: [],
+      multimedia: datos.multimedia || [] as any,
+      documentos: datos.documentos || [] as any,
+      comentarios: [] as any,
+      reacciones: [] as any,
       compartidos: 0,
       esPinneado: false,
       esDestacado: false,
       permiteComentarios: true,
       visibilidad: 'miembros',
-      etiquetas: datos.etiquetas || [],
-      mencionados: datos.mencionados || [],
+      etiquetas: datos.etiquetas || [] as any,
+      mencionados: datos.mencionados || [] as any,
       ...datos
     }
 
@@ -1451,13 +1490,13 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
       fechaInicio: datos.fechaInicio || new Date(),
       esIlimitada: datos.esIlimitada || false,
       cantidadUsada: 0,
-      rolesPermitidos: datos.rolesPermitidos || ['miembro'],
+      rolesPermitidos: datos.rolesPermitidos || ['miembro'] as any,
       activa: true,
       destacada: false,
       fechaCreacion: new Date(),
       visualizaciones: 0,
-      interesados: [],
-      reclamados: [],
+      interesados: [] as any,
+      reclamados: [] as any,
       ...datos
     }
 
@@ -1578,6 +1617,92 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
     // Implementar lógica de estadísticas
   }
 
+  // Funciones para gestión de grupos fijados
+  const fijarGrupo = (grupoId: string) => {
+    const nuevosGruposFijados = [...gruposFijados, grupoId]
+    setGruposFijados(nuevosGruposFijados)
+    localStorage.setItem('grupos_fijados', JSON.stringify(nuevosGruposFijados))
+    
+    afegirNotificacio({
+      tipus: 'grup',
+      titol: 'Grup fijat',
+      descripcio: 'El grup s\'ha fijat correctament'
+    })
+  }
+  
+  const desfijarGrupo = (grupoId: string) => {
+    const nuevosGruposFijados = gruposFijados.filter(id => id !== grupoId)
+    setGruposFijados(nuevosGruposFijados)
+    localStorage.setItem('grupos_fijados', JSON.stringify(nuevosGruposFijados))
+    
+    afegirNotificacio({
+      tipus: 'grup',
+      titol: 'Grup desfijat',
+      descripcio: 'El grup s\'ha desfijat correctament'
+    })
+  }
+  
+  const estaFijado = (grupoId: string): boolean => {
+    return gruposFijados.includes(grupoId)
+  }
+  
+  // Funciones para gestión de notificaciones
+  const toggleNotificacionesGrupo = (grupoId: string) => {
+    const nuevaConfiguracion = {
+      ...configuracionNotificaciones,
+      [grupoId]: !configuracionNotificaciones[grupoId]
+    }
+    setConfiguracionNotificaciones(nuevaConfiguracion)
+    localStorage.setItem('notificaciones_grupos', JSON.stringify(nuevaConfiguracion))
+    
+    const activadas = nuevaConfiguracion[grupoId]
+    afegirNotificacio({
+      tipus: 'grup',
+      titol: activadas ? 'Notificacions activades' : 'Notificacions desactivades',
+      descripcio: `Les notificacions del grup s'han ${activadas ? 'activat' : 'desactivat'}`
+    })
+  }
+  
+  const tieneNotificacionesActivas = (grupoId: string): boolean => {
+    return configuracionNotificaciones[grupoId] ?? true // Por defecto están activadas
+  }
+  
+  // Función para abandonar grupo
+  const abandonarGrupo = async (grupoId: string): Promise<void> => {
+    try {
+      // Remover al usuario actual del grupo
+      await removerMiembro(grupoId, 'user-1')
+      
+      // Si era el grupo activo, volver a la lista
+      if (grupoActivo?.id === grupoId) {
+        seleccionarGrupo('')
+      }
+      
+      // Remover de grupos fijados si estaba fijado
+      if (estaFijado(grupoId)) {
+        desfijarGrupo(grupoId)
+      }
+      
+      // Limpiar configuración de notificaciones
+      const nuevaConfiguracion = { ...configuracionNotificaciones }
+      delete nuevaConfiguracion[grupoId]
+      setConfiguracionNotificaciones(nuevaConfiguracion)
+      localStorage.setItem('notificaciones_grupos', JSON.stringify(nuevaConfiguracion))
+      
+      afegirNotificacio({
+        tipus: 'grup',
+        titol: 'Has abandonat el grup',
+        descripcio: 'Has sortit del grup correctament'
+      })
+    } catch (error) {
+      afegirNotificacio({
+        tipus: 'grup',
+        titol: 'Error',
+        descripcio: 'No s\'ha pogut abandonar el grup'
+      })
+    }
+  }
+
   return (
     <GruposAvanzadosContext.Provider value={{
       grupos,
@@ -1614,7 +1739,13 @@ export function GruposAvanzadosProvider({ children }: { children: ReactNode }) {
       obtenerEstadisticas,
       puedeGestionarGrupo,
       esAdminGrupo,
-      esMiembroGrupo
+      esMiembroGrupo,
+      fijarGrupo,
+      desfijarGrupo,
+      estaFijado,
+      toggleNotificacionesGrupo,
+      tieneNotificacionesActivas,
+      abandonarGrupo
     }}>
       {children}
     </GruposAvanzadosContext.Provider>

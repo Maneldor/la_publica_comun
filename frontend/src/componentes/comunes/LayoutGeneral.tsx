@@ -2,10 +2,17 @@
 
 import { useState, ReactNode } from 'react'
 import HeaderGlobal from './HeaderGlobal'
+import ModalBusqueda from './especificos-comunidad/ModalBusqueda'
+import ModalMissatgesGlobal from './especificos-comunidad/ModalMissatgesGlobal'
+import ModalConfiguracioEmails from './especificos-comunidad/ModalConfiguracioEmails'
+import ModalConfiguracio from './especificos-comunidad/ModalConfiguracio'
+import DebugTraduccions from './especificos-comunidad/DebugTraduccions'
+import { usePresencia } from '../../hooks/usePresencia'
+import { useT } from '../../contextos/TraduccioContext'
 
 interface LayoutGeneralProps {
   children: ReactNode
-  paginaActual?: 'dashboard' | 'xarxa-social' | 'membres' | 'grups' | 'forums' | 'blogs' | 'perfil' | 'empresas' | 'tauler-anuncis' | 'ofertes' | 'assessorament' | 'enllcos-interes'
+  paginaActual?: 'dashboard' | 'xarxa-social' | 'membres' | 'grups' | 'forums' | 'blogs' | 'perfil' | 'empresas' | 'tauler-anuncis' | 'ofertes' | 'assessorament' | 'enllcos-interes' | 'missatges' | 'notificacions' | 'calendari'
 }
 
 export default function LayoutGeneral({ 
@@ -14,6 +21,17 @@ export default function LayoutGeneral({
 }: LayoutGeneralProps) {
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [modalBusquedaObert, setModalBusquedaObert] = useState(false)
+  const [modalMissatgesObert, setModalMissatgesObert] = useState(false)
+  const [modalConfiguracioEmailsObert, setModalConfiguracioEmailsObert] = useState(false)
+  const [modalConfiguracioObert, setModalConfiguracioObert] = useState(false)
+  const [terminiBusqueda, setTerminiBusqueda] = useState('')
+
+  // Hook per gestionar presència online/offline
+  usePresencia()
+  
+  // Hook per traduccions automàtiques
+  const t = useT()
 
   const isActive = (pagina: string) => paginaActual === pagina
 
@@ -34,7 +52,7 @@ export default function LayoutGeneral({
           <div className="fixed left-0 top-0 bottom-0 w-72 bg-white overflow-y-auto">
             <div className="p-4">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold">Menú</h2>
+                <h2 className="text-lg font-semibold">{t('nav.menu', { fallback: 'Menú' })}</h2>
                 <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -44,7 +62,7 @@ export default function LayoutGeneral({
 
               {/* COMUNITAT */}
               <div className="mb-6">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">COMUNITAT</h3>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{t('section.comunitat')}</h3>
                 <nav className="space-y-1">
                   <a 
                     href="/xarxa-social" 
@@ -172,20 +190,40 @@ export default function LayoutGeneral({
               <div className="mb-6">
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">ACCIONS RÀPIDES</h3>
                 <nav className="space-y-1">
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button 
+                    onClick={() => setModalBusquedaObert(true)}
+                    className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left">
                     <span className="text-gray-600">🔍</span>
                     <span className="text-xs md:text-sm">Cercar</span>
-                  </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">💬</span>
+                  </button>
+                  <a 
+                    href="/missatges"
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('missatges') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}>
+                    <span className={isActive('missatges') ? 'text-white' : 'text-gray-600'}>💬</span>
                     <span className="text-xs md:text-sm">Missatges</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">🔔</span>
+                  <a 
+                    href="/notificacions"
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('notificacions') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}>
+                    <span className={isActive('notificacions') ? 'text-white' : 'text-gray-600'}>🔔</span>
                     <span className="text-xs md:text-sm">Notificacions</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">📅</span>
+                  <a 
+                    href="/calendari"
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('calendari') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}>
+                    <span className={isActive('calendari') ? 'text-white' : 'text-gray-600'}>📅</span>
                     <span className="text-xs md:text-sm">Calendari</span>
                   </a>
                 </nav>
@@ -195,10 +233,20 @@ export default function LayoutGeneral({
               <div className="mb-6">
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">CONFIGURACIÓ</h3>
                 <nav className="space-y-1">
-                  <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button 
+                    onClick={() => setModalConfiguracioObert(true)}
+                    className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
                     <span className="text-gray-600">⚙️</span>
                     <span className="text-xs md:text-sm">Configuració</span>
-                  </a>
+                  </button>
+                  <button 
+                    onClick={() => setModalConfiguracioEmailsObert(true)}
+                    className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <span className="text-gray-600">📧</span>
+                    <span className="text-xs md:text-sm">Emails</span>
+                  </button>
                 </nav>
               </div>
             </div>
@@ -357,20 +405,40 @@ export default function LayoutGeneral({
                   <div className="mb-3 md:mb-6">
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">ACCIONS RÀPIDES</h3>
                     <nav className="space-y-1">
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                      <button 
+                        onClick={() => setModalBusquedaObert(true)}
+                        className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left">
                         <span className="text-gray-600">🔍</span>
                         <span className="text-xs md:text-sm">Cercar</span>
-                      </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">💬</span>
+                      </button>
+                      <a 
+                        href="/missatges"
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('missatges') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}>
+                        <span className={isActive('missatges') ? 'text-white' : 'text-gray-600'}>💬</span>
                         <span className="text-xs md:text-sm">Missatges</span>
                       </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">🔔</span>
+                      <a 
+                        href="/notificacions"
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('notificacions') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}>
+                        <span className={isActive('notificacions') ? 'text-white' : 'text-gray-600'}>🔔</span>
                         <span className="text-xs md:text-sm">Notificacions</span>
                       </a>
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                        <span className="text-gray-600">📅</span>
+                      <a 
+                        href="/calendari"
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('calendari') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}>
+                        <span className={isActive('calendari') ? 'text-white' : 'text-gray-600'}>📅</span>
                         <span className="text-xs md:text-sm">Calendari</span>
                       </a>
                     </nav>
@@ -380,10 +448,20 @@ export default function LayoutGeneral({
                   <div className="mb-3 md:mb-6">
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">CONFIGURACIÓ</h3>
                     <nav className="space-y-1">
-                      <a href="#" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                      <button 
+                        onClick={() => setModalConfiguracioObert(true)}
+                        className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      >
                         <span className="text-gray-600">⚙️</span>
                         <span className="text-xs md:text-sm">Configuració</span>
-                      </a>
+                      </button>
+                      <button 
+                        onClick={() => setModalConfiguracioEmailsObert(true)}
+                        className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <span className="text-gray-600">📧</span>
+                        <span className="text-xs md:text-sm">Emails</span>
+                      </button>
                     </nav>
                   </div>
 
@@ -449,6 +527,34 @@ export default function LayoutGeneral({
           </button>
         </div>
       </div>
+
+      {/* Modal de búsqueda global */}
+      <ModalBusqueda 
+        isOpen={modalBusquedaObert}
+        onClose={() => {
+          setModalBusquedaObert(false)
+          setTerminiBusqueda('')
+        }}
+        posts={[]}
+      />
+
+      {/* Modal de missatges global */}
+      <ModalMissatgesGlobal
+        isOpen={modalMissatgesObert}
+        onClose={() => setModalMissatgesObert(false)}
+      />
+
+      {/* Modal de configuració d'emails */}
+      <ModalConfiguracioEmails
+        isOpen={modalConfiguracioEmailsObert}
+        onClose={() => setModalConfiguracioEmailsObert(false)}
+      />
+
+      {/* Modal de configuració general */}
+      <ModalConfiguracio
+        isOpen={modalConfiguracioObert}
+        onClose={() => setModalConfiguracioObert(false)}
+      />
     </div>
   )
 }

@@ -254,8 +254,7 @@ export function AIChatInterface() {
               placeholder="Escribe tu mensaje o pregunta..."
               className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 resize-none"
               style={{
-                borderColor: `${tema.primario}20`,
-                focusRingColor: tema.primario
+                borderColor: `${tema.primario}20`
               }}
               disabled={isTyping}
             />

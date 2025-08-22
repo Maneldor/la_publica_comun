@@ -160,7 +160,7 @@ export const NotificacionesPush: React.FC<PropiedadesNotificacionesPush> = ({ cl
                       <Boton
                         onClick={handleTestNotification}
                         disabled={isLoading}
-                        variante="terciario"
+                        variante="secundario"
                         className="flex items-center space-x-2"
                       >
                         <TestTube size={16} />

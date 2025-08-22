@@ -215,7 +215,7 @@ export const Footer: React.FC<PropiedadesFooter> = ({
             <div className="flex items-center mb-4">
               <img
                 className="h-12 w-auto filter brightness-0 invert"
-                src={configuracion.tema.logo}
+                src={(configuracion.tema as any).logo}
                 alt={`Logo ${configuracion.nombre}`}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;

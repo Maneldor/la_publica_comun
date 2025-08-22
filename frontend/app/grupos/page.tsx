@@ -319,9 +319,10 @@ export default function GruposPage() {
           </div>
 
           {/* Groups Grid - Calcado de BuddyBoss */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {gruposFiltrados.map((grupo) => (
-              <div key={grupo.id} className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all hover:shadow-sm overflow-hidden">
+              <div key={grupo.id} className="w-full max-w-sm mx-auto">
+                <div className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all hover:shadow-sm overflow-hidden h-full">
                 {/* Header con imagen/fondo - Estilo BuddyBoss */}
                 <div className="h-32 bg-gradient-to-r from-blue-400 to-purple-500 relative">
                   {grupo.imagen && (
@@ -436,6 +437,7 @@ export default function GruposPage() {
                       </button>
                     )}
                   </div>
+                </div>
                 </div>
               </div>
             ))}

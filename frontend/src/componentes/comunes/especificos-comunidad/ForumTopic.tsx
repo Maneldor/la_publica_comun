@@ -145,7 +145,6 @@ const getMockReplies = (topicId: string): Reply[] => {
         authorRole: 'Cap de Departament',
         createdAt: new Date('2025-08-14T09:45:00'),
         likes: 8,
-        dislikes: 0,
         replies: [
           {
             id: 'r2-1',
@@ -154,8 +153,7 @@ const getMockReplies = (topicId: string): Reply[] => {
             authorAvatar: 'https://ui-avatars.com/api/?name=Admin+Catalunya&background=3b82f6&color=fff',
             authorRole: 'Administrador',
             createdAt: new Date('2025-08-14T09:50:00'),
-            likes: 6,
-            dislikes: 0
+            likes: 6
           }
         ]
       },
@@ -166,7 +164,6 @@ const getMockReplies = (topicId: string): Reply[] => {
         authorRole: 'Arxivera',
         createdAt: new Date('2025-08-14T10:20:00'),
         likes: 4,
-        dislikes: 0
       }
     ],
     '3': [
@@ -177,7 +174,6 @@ const getMockReplies = (topicId: string): Reply[] => {
         authorRole: 'Responsable Legal',
         createdAt: new Date('2025-08-13T15:00:00'),
         likes: 8,
-        dislikes: 0
       },
       {
         id: 'r6',
@@ -186,7 +182,6 @@ const getMockReplies = (topicId: string): Reply[] => {
         authorRole: 'Consultora RGPD',
         createdAt: new Date('2025-08-13T16:30:00'),
         likes: 6,
-        dislikes: 0
       },
       {
         id: 'r7',
@@ -195,7 +190,6 @@ const getMockReplies = (topicId: string): Reply[] => {
         authorRole: 'Tècnic de Seguretat',
         createdAt: new Date('2025-08-14T08:15:00'),
         likes: 7,
-        dislikes: 0,
         replies: [
           {
             id: 'r7-1',
@@ -205,8 +199,7 @@ const getMockReplies = (topicId: string): Reply[] => {
             authorRole: 'Tècnica de Sistemes',
             createdAt: new Date('2025-08-14T08:30:00'),
             likes: 3,
-            dislikes: 0
-          }
+              }
         ]
       }
     ]

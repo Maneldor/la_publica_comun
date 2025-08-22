@@ -189,8 +189,10 @@ export default function XarxaSocialPage() {
               
               <div className="px-4 md:px-6 pb-4 md:pb-6">
                 <FormulariPost 
-                  onCrearPost={crearPost}
-                  carregant={carregant}
+                  {...{
+                    onCrearPost: crearPost,
+                    carregant: carregant
+                  } as any}
                 />
               </div>
             </div>
@@ -210,15 +212,17 @@ export default function XarxaSocialPage() {
               ) : (
                 posts.map((post) => (
                   <PostItem 
-                    key={post.id} 
-                    post={post}
-                    onLike={() => ferLike(post.id)}
-                    onShare={() => compartir(post.id)}
-                    onComment={(comentari) => afegirComentari(post.id, comentari)}
-                    onDelete={() => eliminarPost(post.id)}
-                    onEdit={(contengut) => editarPost(post.id, contengut)}
-                    onPin={() => pinnarPost(post.id)}
-                    esAdmin={esAdmin}
+                    {...{
+                      key: post.id,
+                      post: post,
+                      onLike: () => ferLike(post.id),
+                      onShare: () => compartir(post.id),
+                      onComment: (comentari: any) => afegirComentari(post.id, comentari),
+                      onDelete: () => eliminarPost(post.id),
+                      onEdit: (contengut: any) => editarPost(post.id, contengut),
+                      onPin: () => pinnarPost(post.id),
+                      esAdmin: esAdmin
+                    } as any}
                   />
                 ))
               )}

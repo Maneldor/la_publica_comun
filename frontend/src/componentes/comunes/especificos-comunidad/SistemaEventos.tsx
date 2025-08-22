@@ -169,27 +169,27 @@ const FormularioEvento: React.FC<PropiedadesFormularioEvento> = ({
       setFormulario({
         titulo: evento.titulo,
         descripcion: evento.descripcion || '',
-        categoria: evento.categoria,
+        categoria: evento.categoria as any,
         tipo: evento.tipo,
         modalidad: evento.modalidad,
         fechaInicio: evento.fechaInicio.toISOString().split('T')[0],
         horaInicio: evento.fechaInicio.toTimeString().split(' ')[0].substring(0, 5),
-        fechaFin: evento.fechaFin.toISOString().split('T')[0],
-        horaFin: evento.fechaFin.toTimeString().split(' ')[0].substring(0, 5),
+        fechaFin: evento.fechaFin?.toISOString().split('T')[0] || '',
+        horaFin: evento.fechaFin?.toTimeString().split(' ')[0].substring(0, 5) || '',
         ubicacion: evento.ubicacion || '',
-        ubicacionVirtual: evento.ubicacionVirtual || '',
-        capacidadMaxima: evento.capacidadMaxima || 50,
-        requiereAprobacion: evento.requiereAprobacion || false,
-        esGratuito: evento.esGratuito || true,
-        precio: evento.precio || 0,
-        organizador: evento.organizador || '',
-        contactoEmail: evento.contactoEmail || '',
-        contactoTelefono: evento.contactoTelefono || '',
+        ubicacionVirtual: (evento as any).ubicacionVirtual || '',
+        capacidadMaxima: (evento as any).capacidadMaxima || 50,
+        requiereAprobacion: (evento as any).requiereAprobacion || false,
+        esGratuito: (evento as any).esGratuito || true,
+        precio: (evento as any).precio || 0,
+        organizador: (evento as any).organizador || '',
+        contactoEmail: (evento as any).contactoEmail || '',
+        contactoTelefono: (evento as any).contactoTelefono || '',
         etiquetas: evento.etiquetas?.length ? evento.etiquetas : [''],
-        materialesIncluidos: evento.materialesIncluidos?.length ? evento.materialesIncluidos : [''],
-        requisitosPrevios: evento.requisitosPrevios || '',
-        certificacion: evento.certificacion || false,
-        puntuacionFormacion: evento.puntuacionFormacion || 0
+        materialesIncluidos: (evento as any).materialesIncluidos?.length ? (evento as any).materialesIncluidos : [''],
+        requisitosPrevios: (evento as any).requisitosPrevios || '',
+        certificacion: (evento as any).certificacion || false,
+        puntuacionFormacion: (evento as any).puntuacionFormacion || 0
       });
     }
   }, [evento, esEdicion]);
@@ -434,7 +434,7 @@ const FormularioEvento: React.FC<PropiedadesFormularioEvento> = ({
                   />
                 </div>
               )}
-              {(formulario.tipo === 'virtual' || formulario.tipo === 'hibrido') && (
+              {((formulario.tipo as any) === 'virtual' || (formulario.tipo as any) === 'hibrido') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Enlace virtual
@@ -846,7 +846,7 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
     }
   };
 
-  const obtenerIconoCategoria = (categoria: CategoriaEvento) => {
+  const obtenerIconoCategoria = (categoria: any) => {
     switch (categoria) {
       case 'formacion': return <GraduationCap size={20} className="text-blue-500" />;
       case 'networking': return <Users size={20} className="text-green-500" />;
@@ -882,9 +882,9 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="relative">
-          {evento.banner && (
+          {(evento as any).banner && (
             <img
-              src={evento.banner}
+              src={(evento as any).banner}
               alt={evento.titulo}
               className="w-full h-48 object-cover rounded-t-xl"
             />
@@ -897,7 +897,7 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
               <X size={20} />
             </button>
           </div>
-          {!evento.banner && (
+          {!(evento as any).banner && (
             <div className="h-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-xl relative">
               <button
                 onClick={onCerrar}
@@ -950,7 +950,7 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
                 <div>
                   <p className="font-medium text-gray-900">{formatearFecha(evento.fechaInicio)}</p>
                   <p className="text-sm text-gray-600">
-                    {formatearHora(evento.fechaInicio)} - {formatearHora(evento.fechaFin)}
+                    {formatearHora(evento.fechaInicio)} - {evento.fechaFin ? formatearHora(evento.fechaFin) : 'Sin hora de fin'}
                   </p>
                 </div>
               </div>
@@ -965,13 +965,13 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
                 </div>
               )}
 
-              {evento.ubicacionVirtual && (
+              {(evento as any).ubicacionVirtual && (
                 <div className="flex items-start space-x-3">
                   <Video size={20} className="text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Enlace virtual</p>
                     <a
-                      href={evento.ubicacionVirtual}
+                      href={(evento as any).ubicacionVirtual}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
@@ -1005,40 +1005,40 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
                 </div>
               )}
 
-              {evento.contactoEmail && (
+              {(evento as any).contactoEmail && (
                 <div className="flex items-center space-x-3">
                   <Mail size={20} className="text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900">Contacto</p>
                     <a
-                      href={`mailto:${evento.contactoEmail}`}
+                      href={`mailto:${(evento as any).contactoEmail}`}
                       className="text-sm text-blue-600 hover:text-blue-700"
                     >
-                      {evento.contactoEmail}
+                      {(evento as any).contactoEmail}
                     </a>
                   </div>
                 </div>
               )}
 
-              {evento.precio !== undefined && (
+              {(evento as any).precio !== undefined && (
                 <div className="flex items-center space-x-3">
                   <Ticket size={20} className="text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900">Precio</p>
                     <p className="text-sm text-gray-600">
-                      {evento.esGratuito ? 'Gratuito' : `${evento.precio}€`}
+                      {(evento as any).esGratuito ? 'Gratuito' : `${(evento as any).precio}€`}
                     </p>
                   </div>
                 </div>
               )}
 
-              {evento.certificacion && (
+              {(evento as any).certificacion && (
                 <div className="flex items-center space-x-3">
                   <Award size={20} className="text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900">Certificación</p>
                     <p className="text-sm text-gray-600">
-                      {evento.puntuacionFormacion}h de formación
+                      {(evento as any).puntuacionFormacion}h de formación
                     </p>
                   </div>
                 </div>
@@ -1151,14 +1151,14 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
               {comentarios.map(comentario => (
                 <div key={comentario.id} className="flex items-start space-x-3">
                   <img
-                    src={comentario.autor.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comentario.autor.nombre + ' ' + comentario.autor.apellidos)}&background=random`}
-                    alt={`${comentario.autor.nombre} ${comentario.autor.apellidos}`}
+                    src={(comentario as any).autor?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent((comentario as any).autor?.nombre + ' ' + (comentario as any).autor?.apellidos)}&background=random`}
+                    alt={`${(comentario as any).autor?.nombre} ${(comentario as any).autor?.apellidos}`}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="font-medium text-gray-900">
-                        {comentario.autor.nombre} {comentario.autor.apellidos}
+                        {(comentario as any).autor?.nombre} {(comentario as any).autor?.apellidos}
                       </span>
                       <span className="text-xs text-gray-500">
                         {comentario.fechaCreacion.toLocaleDateString()}
@@ -1257,7 +1257,7 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
   };
 
   // Comentarios de ejemplo
-  const comentarios: ComentarioEvento[] = eventoDetalle ? [
+  const comentarios: any[] = eventoDetalle ? [
     {
       id: '1',
       eventoId: eventoDetalle.id,
@@ -1378,9 +1378,9 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
             
             return (
               <div key={evento.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                {evento.banner && (
+                {(evento as any).banner && (
                   <img
-                    src={evento.banner}
+                    src={(evento as any).banner}
                     alt={evento.titulo}
                     className="w-full h-48 object-cover"
                   />
@@ -1430,7 +1430,7 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
                       </div>
                     )}
                     
-                    {evento.ubicacionVirtual && (
+                    {(evento as any).ubicacionVirtual && (
                       <div className="flex items-center text-sm text-gray-500">
                         <Video size={14} className="mr-2" />
                         Virtual

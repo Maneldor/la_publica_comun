@@ -63,7 +63,7 @@ export default function MenuPost({
               <>
                 {estaPinnat ? (
                   <button
-                    onClick={() => handleAction(onDespinnar)}
+                    onClick={() => handleAction(onDespinnar!)}
                     className="w-full px-4 py-2 text-left text-sm text-purple-600 hover:bg-purple-50 flex items-center space-x-2"
                   >
                     <span>📌</span>
@@ -71,7 +71,7 @@ export default function MenuPost({
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleAction(onPinnar)}
+                    onClick={() => handleAction(onPinnar!)}
                     className="w-full px-4 py-2 text-left text-sm text-purple-600 hover:bg-purple-50 flex items-center space-x-2"
                   >
                     <span>📌</span>
@@ -81,7 +81,7 @@ export default function MenuPost({
                 
                 {!esPropiPost && (
                   <button
-                    onClick={() => handleAction(onEliminar)}
+                    onClick={() => handleAction(onEliminar!)}
                     className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                   >
                     <span>🗑️</span>
@@ -97,7 +97,7 @@ export default function MenuPost({
               <>
                 {/* Opcions del propi post */}
                 <button
-                  onClick={() => handleAction(onEditar)}
+                  onClick={() => handleAction(onEditar!)}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                 >
                   <span>✏️</span>
@@ -105,7 +105,7 @@ export default function MenuPost({
                 </button>
                 
                 <button
-                  onClick={() => handleAction(onEliminar)}
+                  onClick={() => handleAction(onEliminar!)}
                   className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                 >
                   <span>🗑️</span>
@@ -126,7 +126,7 @@ export default function MenuPost({
               <>
                 {/* Opcions per posts d'altres */}
                 <button
-                  onClick={() => handleAction(onReportar)}
+                  onClick={() => handleAction(onReportar!)}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                 >
                   <span>⚠️</span>

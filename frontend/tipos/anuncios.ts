@@ -1,5 +1,5 @@
 // Tipos para el sistema de tablón de anuncios
-import { ContenidoMultiidioma } from '../hooks/useContenidoTraducido';
+import { ContenidoMultiidioma } from '../src/utils/contenidoMultiidioma';
 
 export type CategoriaAnuncio = 
   | 'TRABAJO'

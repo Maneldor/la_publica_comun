@@ -10,8 +10,9 @@ import {
   ExternalLink 
 } from 'lucide-react';
 import { Anuncio, CategoriaAnuncio } from '../../../tipos/anuncios';
-import { useContenidoTraducido } from '../../../hooks/useContenidoTraducido';
+import { useTraduccio } from '../../contextos/TraduccioContext';
 import { useComunidad } from '../../../hooks/useComunidad';
+import { useState, useEffect } from 'react';
 
 interface TarjetaAnuncioProps {
   anuncio: Anuncio;
@@ -40,54 +41,64 @@ export default function TarjetaAnuncio({
   const { configuracion, idioma } = useComunidad();
   const tema = configuracion.tema;
 
-  // Obtener contenido traducido automáticamente
-  const tituloTraducido = useContenidoTraducido(anuncio.titulo);
-  const descripcionTraducida = useContenidoTraducido(anuncio.descripcion);
+  // Obtener sistema de traducción unificado
+  const { t, tDynamic } = useTraduccio();
+  
+  // Estado para contenido dinámico traducido
+  const [tituloTraducido, setTituloTraducido] = useState({ texto: anuncio.titulo.texto, cargando: false });
+  const [descripcionTraducida, setDescripcionTraducida] = useState({ texto: anuncio.descripcion.texto, cargando: false });
+  
+  // Efectos para traducir contenido dinámico
+  useEffect(() => {
+    const traducirTitulo = async () => {
+      setTituloTraducido({ texto: anuncio.titulo.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: anuncio.titulo.texto,
+          idiomaOriginal: anuncio.titulo.idiomaOriginal,
+          tipo: 'anuncio'
+        });
+        setTituloTraducido({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setTituloTraducido({ texto: anuncio.titulo.texto, cargando: false });
+      }
+    };
+    traducirTitulo();
+  }, [anuncio.titulo.texto, anuncio.titulo.idiomaOriginal, tDynamic]);
+  
+  useEffect(() => {
+    const traducirDescripcion = async () => {
+      setDescripcionTraducida({ texto: anuncio.descripcion.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: anuncio.descripcion.texto,
+          idiomaOriginal: anuncio.descripcion.idiomaOriginal,
+          tipo: 'anuncio'
+        });
+        setDescripcionTraducida({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setDescripcionTraducida({ texto: anuncio.descripcion.texto, cargando: false });
+      }
+    };
+    traducirDescripcion();
+  }, [anuncio.descripcion.texto, anuncio.descripcion.idiomaOriginal, tDynamic]);
 
-  // Traducciones para UI
-  const traducciones = {
-    ca: {
-      desde: 'des de',
-      gratis: 'Gratis',
-      negociable: 'Negociable',
-      contactar: 'Contactar',
-      favorito: 'Afegir a favorits',
-      verificado: 'Verificat'
-    },
-    es: {
-      desde: 'desde',
-      gratis: 'Gratis',
-      negociable: 'Negociable',
-      contactar: 'Contactar',
-      favorito: 'Añadir a favoritos',
-      verificado: 'Verificado'
-    },
-    eu: {
-      desde: 'hemendik',
-      gratis: 'Doan',
-      negociable: 'Negozia daiteke',
-      contactar: 'Harremanetan jarri',
-      favorito: 'Gogokoetara gehitu',
-      verificado: 'Egiaztatuta'
-    },
-    gl: {
-      desde: 'desde',
-      gratis: 'Gratis',
-      negociable: 'Negociable',
-      contactar: 'Contactar',
-      favorito: 'Engadir a favoritos',
-      verificado: 'Verificado'
-    }
+  // Funciones helper para traducciones de UI
+  const getTextoUI = {
+    desde: () => t('anuncio.desde', { fallback: 'desde' }),
+    gratis: () => t('anuncio.gratis', { fallback: 'Gratis' }),
+    negociable: () => t('anuncio.negociable', { fallback: 'Negociable' }),
+    contactar: () => t('action.contactar', { fallback: 'Contactar' }),
+    favorito: () => t('anuncio.favorito', { fallback: 'Añadir a favoritos' }),
+    verificado: () => t('status.verificado', { fallback: 'Verificado' })
   };
 
-  const t = (traducciones as any)[idioma] || traducciones.es;
-
   const formatearPrecio = (precio: any) => {
-    if (precio.tipo === 'GRATUITO') return t.gratis;
-    if (precio.tipo === 'INTERCAMBIO') return 'Intercambio';
+    if (precio.tipo === 'GRATUITO') return getTextoUI.gratis();
+    if (precio.tipo === 'INTERCAMBIO') return t('anuncio.intercambio', { fallback: 'Intercambio' });
     
     let texto = `${precio.valor}€`;
-    if (precio.negociable) texto += ` (${t.negociable})`;
+    if (precio.negociable) texto += ` (${getTextoUI.negociable()})`;
     return texto;
   };
 
@@ -214,7 +225,7 @@ export default function TarjetaAnuncio({
                 {anuncio.autor.nombre}
               </div>
               {anuncio.autor.verificado && (
-                <div className="text-green-600">{t.verificado}</div>
+                <div className="text-green-600">{getTextoUI.verificado()}</div>
               )}
             </div>
           </div>
@@ -239,7 +250,7 @@ export default function TarjetaAnuncio({
               onClick={handleContactar}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm font-medium transition-colors"
             >
-              {t.contactar}
+              {getTextoUI.contactar()}
             </button>
           </div>
         )}

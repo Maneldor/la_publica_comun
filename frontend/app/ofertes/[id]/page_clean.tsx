@@ -1,3 +1,25 @@
+// Importar tipos del componente TarjetaOferta
+import { OfertaComercial } from '../../../src/componentes/ofertes/TarjetaOferta';
+
+// Tipos adicionales
+interface MetodosCanjeDisponibles {
+  codigoPromocional?: {
+    codigo: string;
+    instrucciones: string;
+  };
+  reservaAcreditacion?: {
+    telefono: string;
+    email: string;
+    instrucciones: string;
+  };
+}
+
+interface OfertaComercialDetallada extends OfertaComercial {
+  metodosCanjeDisponibles: MetodosCanjeDisponibles;
+  galeria?: string[];
+  descripcionExtendida?: string;
+}
+
   // Función para obtener datos de ofertas detalladas según idioma
   const getAllMockOfertas = (idioma: string): OfertaComercialDetallada[] => {
     const baseDatos = [

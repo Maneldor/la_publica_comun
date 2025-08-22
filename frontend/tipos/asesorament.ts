@@ -1,5 +1,5 @@
 // Tipos para el sistema de asesoramiento
-import { ContenidoMultiidioma } from '../hooks/useContenidoTraducido';
+import { ContenidoMultiidioma } from '../src/utils/contenidoMultiidioma';
 
 export type TipoAsesorament = 
   | 'JURIDIC'

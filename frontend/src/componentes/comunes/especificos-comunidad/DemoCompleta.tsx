@@ -39,7 +39,7 @@ import { SistemaNotificaciones } from './SistemaNotificaciones';
 import { CrearPost } from './CrearPost';
 import { DashboardPrincipal } from './DashboardPrincipal';
 import { GestionGrupos } from './GestionGrupos';
-import { DashboardEmpresa } from './DashboardEmpresa';
+// DashboardEmpresa removed - now using simplified demo version
 import { SistemaEventos } from './SistemaEventos';
 import { AnalyticsGlobales } from './AnalyticsGlobales';
 
@@ -294,7 +294,14 @@ const gruposEjemplo: Grupo[] = [
       limiteMiembros: 1000,
       permitirInvitaciones: true,
       moderacionPosts: false,
-    }
+    },
+    estadisticas: {
+      totalMiembros: 423,
+      miembrosActivos: 312,
+      postsEstesMes: 89,
+      crecimientoMensual: 23
+    },
+    etiquetas: ['desarrollo', 'administracion', 'digital']
   },
   {
     id: 'grupo3',
@@ -315,7 +322,14 @@ const gruposEjemplo: Grupo[] = [
       limiteMiembros: 1500,
       permitirInvitaciones: true,
       moderacionPosts: false,
-    }
+    },
+    estadisticas: {
+      totalMiembros: 678,
+      miembrosActivos: 445,
+      postsEstesMes: 134,
+      crecimientoMensual: 67
+    },
+    etiquetas: ['networking', 'barcelona', 'eventos']
   }
 ];
 
@@ -401,13 +415,14 @@ const postsEjemplo: Post[] = [
   }
 ];
 
-const eventosEjemplo: Evento[] = [
+const eventosEjemplo: any[] = [
   {
     id: 'evento1',
     titulo: 'Jornada de Formación: Administración Electrónica 2024',
     descripcion: 'Jornada formativa sobre las últimas novedades en administración electrónica, nuevas tecnologías y procedimientos digitales.',
     categoria: 'formacion',
-    modalidad: 'presencial',
+    tipo: 'presencial',
+    modalidad: 'publico',
     fechaInicio: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     fechaFin: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000),
     ubicacion: 'Palau Sant Jordi, Barcelona',
@@ -428,7 +443,8 @@ const eventosEjemplo: Evento[] = [
     titulo: 'Networking Mensual - Sector Público Barcelona',
     descripcion: 'Encuentro mensual de profesionales del sector público para networking, intercambio de experiencias y creación de sinergias.',
     categoria: 'networking',
-    modalidad: 'presencial',
+    tipo: 'presencial',
+    modalidad: 'publico',
     fechaInicio: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
     fechaFin: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000),
     ubicacion: 'Hotel Barcelona Center, Barcelona',
@@ -461,7 +477,7 @@ export const DemoCompleta: React.FC<PropiedadesDemoCompleta> = ({ modoDemo = tru
   // Estados de datos
   const [posts, setPosts] = useState<Post[]>(postsEjemplo);
   const [grupos, setGrupos] = useState<Grupo[]>(gruposEjemplo);
-  const [eventos, setEventos] = useState<Evento[]>(eventosEjemplo);
+  const [eventos, setEventos] = useState<any[]>(eventosEjemplo);
   const [eventosAsistiendo, setEventosAsistiendo] = useState<string[]>(['evento1']);
 
   // Datos de ejemplo para notificaciones
@@ -698,10 +714,10 @@ export const DemoCompleta: React.FC<PropiedadesDemoCompleta> = ({ modoDemo = tru
         return (
           <SistemaEventos
             usuario={usuarioActual}
-            eventos={eventos}
+            eventos={eventos as any}
             eventosAsistiendo={eventosAsistiendo}
             onCrearEvento={async (evento) => {
-              const nuevoEvento: Evento = {
+              const nuevoEvento: any = {
                 id: `evento_${Date.now()}`,
                 titulo: evento.titulo || '',
                 descripcion: evento.descripcion || '',
@@ -742,33 +758,23 @@ export const DemoCompleta: React.FC<PropiedadesDemoCompleta> = ({ modoDemo = tru
 
       case 'empresas':
         if (usuarioActual.tipo === 'administracion' || usuarioActual.tipo === 'empresa') {
+          // Dashboard de empresa simplificado para demo
           return (
-            <DashboardEmpresa
-              empresa={usuarioActual}
-              ofertas={[]}
-              candidatos={[]}
-              conversaciones={conversacionesEjemplo}
-              estadisticas={{
-                visitasPerfilMes: 234,
-                seguidoresMes: 45,
-                candidatosMes: 67,
-                ofertasActivas: 3,
-                tasaRespuesta: 85,
-                tiempoMedioRespuesta: '2.5h',
-                interaccionesMes: 189,
-                alcancePosts: 1250,
-                topOfertas: [
-                  { id: '1', titulo: 'Técnico Administración General', candidatos: 45, vistas: 234 },
-                  { id: '2', titulo: 'Analista de Sistemas', candidatos: 32, vistas: 189 }
-                ],
-                trendsData: []
-              }}
-              onCrearOferta={async (oferta) => console.log('Crear oferta:', oferta)}
-              onActualizarOferta={async (id, datos) => console.log('Actualizar oferta:', id, datos)}
-              onEliminarOferta={async (id) => console.log('Eliminar oferta:', id)}
-              onGestionarCandidato={async (candidatoId, accion) => console.log('Gestionar candidato:', candidatoId, accion)}
-              onActualizarPerfil={async (datos) => console.log('Actualizar perfil:', datos)}
-            />
+            <div className="p-6">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white mb-6">
+                <h2 className="text-2xl font-bold">Dashboard de Empresa</h2>
+                <p className="text-blue-100">Vista simplificada para demostración</p>
+              </div>
+              <div className="text-center text-gray-500">
+                <p>El dashboard completo de empresa está disponible en <code>/empresa/dashboard</code></p>
+                <button 
+                  className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  onClick={() => window.open('/empresa/dashboard', '_blank')}
+                >
+                  Ir al Dashboard Completo
+                </button>
+              </div>
+            </div>
           );
         } else {
           return (

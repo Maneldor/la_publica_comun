@@ -128,11 +128,11 @@ export default function TarjetaMiembro({
     if (usuario.nick) return usuario.nick.charAt(1)?.toUpperCase() || 'U'
     
     const nombreCompleto = obtenerNombreCompleto()
-    const palabras = nombreCompleto.split(' ')
+    const palabras = nombreCompleto?.split(' ') || []
     if (palabras.length >= 2) {
       return `${palabras[0].charAt(0)}${palabras[1].charAt(0)}`.toUpperCase()
     }
-    return nombreCompleto.charAt(0).toUpperCase()
+    return nombreCompleto?.charAt(0).toUpperCase() || 'U'
   }
 
   const manejarClickPerfil = () => {
@@ -181,7 +181,7 @@ export default function TarjetaMiembro({
         obrirInterficieMissatges(conversaId)
       } catch (error) {
         console.error('Error creant conversa:', error)
-        alert('Error creant la conversa: ' + error.message)
+        alert('Error creant la conversa: ' + (error as Error).message)
       }
     } else {
       console.log('No es pot enviar missatges - no connectat')

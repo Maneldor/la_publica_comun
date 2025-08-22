@@ -29,13 +29,15 @@ export interface EmpresaCardProps {
   isFollowing?: boolean;
   onFollow?: (empresaId: string) => Promise<void>;
   onViewMore?: (empresaId: string) => void;
+  viewMode?: 'grid' | 'list'; // Nueva prop para manejar vistas
 }
 
 export function TarjetaEmpresa({ 
   empresa, 
   isFollowing = false,
   onFollow,
-  onViewMore 
+  onViewMore,
+  viewMode = 'grid'
 }: EmpresaCardProps) {
   const contexto = useContext(ComunidadContext);
   
@@ -85,6 +87,74 @@ export function TarjetaEmpresa({
   const parsedTags = empresa.tags ? 
     (typeof empresa.tags === 'string' ? JSON.parse(empresa.tags) : empresa.tags) 
     : [];
+
+  // Vista lista - Compacta horizontal
+  if (viewMode === 'list') {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-4 flex-1">
+            <img 
+              src={empresa.logo}
+              alt={empresa.name}
+              className="w-16 h-16 rounded-lg object-cover cursor-pointer"
+              onClick={handleViewMore}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 
+                  className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                  onClick={handleViewMore}
+                >
+                  {empresa.name}
+                </h3>
+                {empresa.estadoPerfil === 'VERIFICADO' && (
+                  <CheckCircle size={16} className="text-green-500" />
+                )}
+                {empresa.destacada && (
+                  <Star size={16} className="text-yellow-500" />
+                )}
+              </div>
+              <p className="text-gray-600 mb-3 line-clamp-2">{empresa.descripcionPublica}</p>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-medium">
+                  {empresa.sector}
+                </span>
+                <span className="flex items-center">
+                  <MapPin size={14} className="mr-1" />
+                  {[empresa.city, empresa.province].filter(Boolean).join(', ')}
+                </span>
+                {empresa.employeeCount && (
+                  <span className="flex items-center">
+                    <Users size={14} className="mr-1" />
+                    {empresa.employeeCount} empleats
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="ml-4">
+            <button
+              onClick={handleViewMore}
+              className="px-4 py-2 text-sm font-medium rounded-md border transition-colors"
+              style={{ 
+                borderColor: tema.colorPrimario,
+                color: tema.colorPrimario
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = `${tema.colorPrimario}10`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              Ver más
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Imágenes placeholder por sector
   const getImagenPorSector = (sector: string): string => {

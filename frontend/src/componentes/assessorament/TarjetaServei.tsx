@@ -12,8 +12,9 @@ import {
   DollarSign,
   Gift
 } from 'lucide-react';
-import { useContenidoTraducido } from '../../../hooks/useContenidoTraducido';
+import { useTraduccio } from '../../contextos/TraduccioContext';
 import { ServeiAsesorament, ModalitatiAsesorament } from '../../../tipos/asesorament';
+import { useState, useEffect } from 'react';
 
 interface TarjetaServeiProps {
   servei: ServeiAsesorament;
@@ -29,10 +30,47 @@ const iconosModalitat = {
   CHAT: MessageCircle
 };
 
-export default function TarjetaServei({ servei, onSolicitar, translations: t }: TarjetaServeiProps) {
-  // Los hooks siempre se ejecutan en el mismo orden
-  const tituloTraducido = useContenidoTraducido(servei.titol);
-  const descripcionTraducida = useContenidoTraducido(servei.descripcio);
+export default function TarjetaServei({ servei, onSolicitar, translations: tLegacy }: TarjetaServeiProps) {
+  const { t, tDynamic } = useTraduccio();
+  
+  // Estado para contenido dinámico traducido
+  const [tituloTraducido, setTituloTraducido] = useState({ texto: servei.titol.texto, cargando: false });
+  const [descripcionTraducida, setDescripcionTraducida] = useState({ texto: servei.descripcio.texto, cargando: false });
+  
+  // Efectos para traducir contenido dinámico
+  useEffect(() => {
+    const traducirTitulo = async () => {
+      setTituloTraducido({ texto: servei.titol.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: servei.titol.texto,
+          idiomaOriginal: servei.titol.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setTituloTraducido({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setTituloTraducido({ texto: servei.titol.texto, cargando: false });
+      }
+    };
+    traducirTitulo();
+  }, [servei.titol.texto, servei.titol.idiomaOriginal, tDynamic]);
+  
+  useEffect(() => {
+    const traducirDescripcion = async () => {
+      setDescripcionTraducida({ texto: servei.descripcio.texto, cargando: true });
+      try {
+        const textoTraducido = await tDynamic({
+          texto: servei.descripcio.texto,
+          idiomaOriginal: servei.descripcio.idiomaOriginal,
+          tipo: 'institucional'
+        });
+        setDescripcionTraducida({ texto: textoTraducido, cargando: false });
+      } catch (error) {
+        setDescripcionTraducida({ texto: servei.descripcio.texto, cargando: false });
+      }
+    };
+    traducirDescripcion();
+  }, [servei.descripcio.texto, servei.descripcio.idiomaOriginal, tDynamic]);
 
   const handleVerDetalle = () => {
     window.location.href = `/assessorament/${servei.id}`;
@@ -57,7 +95,7 @@ export default function TarjetaServei({ servei, onSolicitar, translations: t }: 
         {/* Badge de tipo */}
         <div className="absolute top-2 left-2">
           <span className="inline-block px-2 py-1 rounded text-xs font-medium text-white bg-blue-600">
-            {t.tipusAssessorament?.[servei.tipus] || servei.tipus}
+            {tLegacy.tipusAssessorament?.[servei.tipus] || servei.tipus}
           </span>
         </div>
         

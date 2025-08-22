@@ -159,9 +159,9 @@ export default function FeedGrupoPrivado({ grupoId }: FeedGrupoPrivadoProps) {
     const haReaccionat = post.reacciones.some(r => r.usuarioId === 'user-1')
 
     return (
-      <div key={post.id} className="bg-white rounded-lg shadow-sm border mb-4">
+      <div key={post.id} className="bg-white rounded-xl shadow-sm border border-gray-200">
         {/* Header del post */}
-        <div className="p-4 pb-2">
+        <div className="p-6 pb-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
@@ -289,7 +289,7 @@ export default function FeedGrupoPrivado({ grupoId }: FeedGrupoPrivadoProps) {
                 {totalReaccions > 0 && (
                   <span className="flex items-center space-x-1">
                     <div className="flex -space-x-1">
-                      {[...new Set(post.reacciones.map(r => r.tipo))].slice(0, 3).map((tipus, index) => (
+                      {Array.from(new Set(post.reacciones.map((r: any) => r.tipo))).slice(0, 3).map((tipus: any, index: any) => (
                         <div key={index} className="flex items-center justify-center w-5 h-5 bg-white border border-white rounded-full">
                           {getReaccionIcon(tipus)}
                         </div>
@@ -445,9 +445,9 @@ export default function FeedGrupoPrivado({ grupoId }: FeedGrupoPrivadoProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Formulari per crear nou post */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-start space-x-3">
           <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-medium text-gray-700">Tu</span>

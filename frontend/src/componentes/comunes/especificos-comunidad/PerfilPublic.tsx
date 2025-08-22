@@ -149,8 +149,6 @@ const PERFIL_MOCK: PerfilUsuari = {
       avatar: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=100&h=100&fit=crop',
       rol: 'embaixador',
       dataUnio: new Date('2024-02-01'),
-      tipus: 'públic',
-      grupPare: null
     },
     {
       id: 'grup-2',
@@ -158,8 +156,6 @@ const PERFIL_MOCK: PerfilUsuari = {
       avatar: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=100&h=100&fit=crop',
       rol: 'membre',
       dataUnio: new Date('2024-07-15'),
-      tipus: 'públic',
-      grupPare: null
     },
     {
       id: 'subgrup-1',
@@ -167,8 +163,6 @@ const PERFIL_MOCK: PerfilUsuari = {
       avatar: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=100&h=100&fit=crop',
       rol: 'membre',
       dataUnio: new Date('2024-03-10'),
-      tipus: 'públic',
-      grupPare: 'grup-1'
     }
   ]
   // NOTA: Els subgrups de grups privats/professionals/ocults NO apareixen aquí
@@ -217,22 +211,22 @@ export default function PerfilPublic({ usuariId }: PerfilPublicProps) {
             nom: datosUsuario.nombre?.valor || datosUsuario.nombre || '',
             cognoms: datosUsuario.apellidos?.valor || datosUsuario.apellidos || '',
             email: datosUsuario.email,
-            telefon: datosUsuario.telefono?.valor || datosUsuario.telefono || '',
+            telefon: (datosUsuario as any).telefono?.valor || (datosUsuario as any).telefono || '',
             
             organitzacio: datosUsuario.organizacion?.valor || datosUsuario.organizacion || 'Ajuntament de Barcelona',
-            carrec: datosUsuario.cargo?.valor || datosUsuario.cargo || 'Funcionari Públic',
-            departament: datosUsuario.departamento?.valor || datosUsuario.departamento || 'Administració',
-            ubicacioTreball: `${datosUsuario.provincia?.valor || datosUsuario.provincia || 'Barcelona'}, Catalunya`,
+            carrec: (datosUsuario as any).cargo?.valor || (datosUsuario as any).cargo || 'Funcionari Públic',
+            departament: (datosUsuario as any).departamento?.valor || (datosUsuario as any).departamento || 'Administració',
+            ubicacioTreball: `${(datosUsuario as any).provincia?.valor || (datosUsuario as any).provincia || 'Barcelona'}, Catalunya`,
             
-            biografiaBrevu: datosUsuario.biografia?.valor || datosUsuario.biografia || 'Funcionari públic',
-            biografiaCompleta: datosUsuario.biografia?.valor || datosUsuario.biografia || 'Funcionari públic de l\'administració catalana.',
-            interessos: datosUsuario.intereses || ['Tecnologia', 'Innovació', 'Sostenibilitat'],
-            habilitats: datosUsuario.habilidades || ['Gestió', 'Administració', 'Atenció al ciutadà'],
-            idiomes: datosUsuario.idiomas || ['Català', 'Castellà'],
+            biografiaBrevu: (datosUsuario as any).biografia?.valor || (datosUsuario as any).biografia || 'Funcionari públic',
+            biografiaCompleta: (datosUsuario as any).biografia?.valor || (datosUsuario as any).biografia || 'Funcionari públic de l\'administració catalana.',
+            interessos: (datosUsuario as any).intereses || ['Tecnologia', 'Innovació', 'Sostenibilitat'],
+            habilitats: (datosUsuario as any).habilidades || ['Gestió', 'Administració', 'Atenció al ciutadà'],
+            idiomes: (datosUsuario as any).idiomas || ['Català', 'Castellà'],
             
-            provincia: datosUsuario.provincia?.valor || datosUsuario.provincia || 'Barcelona',
-            ciutat: datosUsuario.ciudad?.valor || datosUsuario.ciudad || 'Barcelona',
-            codiPostal: datosUsuario.codigoPostal?.valor || datosUsuario.codigoPostal || '08001',
+            provincia: (datosUsuario as any).provincia?.valor || (datosUsuario as any).provincia || 'Barcelona',
+            ciutat: (datosUsuario as any).ciudad?.valor || (datosUsuario as any).ciudad || 'Barcelona',
+            codiPostal: (datosUsuario as any).codigoPostal?.valor || (datosUsuario as any).codigoPostal || '08001',
             
             enllaçosExterns: [],
             
@@ -553,7 +547,7 @@ export default function PerfilPublic({ usuariId }: PerfilPublicProps) {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Informació Personal</h3>
                   
-                  {perfil.biografia && (
+                  {(perfil as any).biografia && (
                     <div>
                       <dt className="text-sm font-medium text-gray-500">Biografia</dt>
                       <dd className="text-sm text-gray-900">{perfil.biografiaCompleta}</dd>
