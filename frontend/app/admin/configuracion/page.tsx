@@ -2467,7 +2467,7 @@ export default function AdminConfiguracion() {
                         </div>
 
                         {/* Botón de guardar configuración */}
-                        <div className="flex justify-end pt-6 border-t border-gray-200 mt-6">
+                        <div className="flex justify-end pt-6 border-t border-gray-200 mt-6 mr-4">
                           <button className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">
                             Guardar Configuració d'Alertes
                           </button>
