@@ -144,7 +144,7 @@ const eventosMock = [
     capacidadMaxima: 50,
     asistentes: 32,
     fechaCreacion: new Date('2024-09-01T16:20:00'),
-    creadorId: 'user-1',
+    creadorId: 'admin-1',
     comunidadId: 'catalunya',
     estado: 'programado' as const,
     esGratuito: true,
@@ -195,18 +195,20 @@ export default function CalendariPage() {
   }
 
   return (
-    <LayoutGeneral paginaActual="calendari">
-      <div className="p-6">
-        <SistemaEventos
-          usuario={usuario}
-          eventos={eventosMock}
-          eventosAsistiendo={eventosAsistiendo}
-          onCrearEvento={onCrearEvento}
-          onActualizarEvento={onActualizarEvento}
-          onEliminarEvento={onEliminarEvento}
-          onGestionarAsistencia={onGestionarAsistencia}
-          onComentarEvento={onComentarEvento}
-        />
+    <LayoutGeneral paginaActual="calendari" showPadding={false}>
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <SistemaEventos
+            usuario={usuario}
+            eventos={eventosMock}
+            eventosAsistiendo={eventosAsistiendo}
+            onCrearEvento={onCrearEvento}
+            onActualizarEvento={onActualizarEvento}
+            onEliminarEvento={onEliminarEvento}
+            onGestionarAsistencia={onGestionarAsistencia}
+            onComentarEvento={onComentarEvento}
+          />
+        </div>
       </div>
     </LayoutGeneral>
   )

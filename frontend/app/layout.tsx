@@ -13,6 +13,7 @@ import { UsuarioProvider } from '../src/contextos/UsuarioContext'
 import { GroupMembershipProvider } from '../src/contextos/GroupMembershipContext'
 import { GruposAvanzadosProvider } from '../src/contextos/GruposAvanzadosContext'
 import { ConexionesProvider } from '../src/contextos/ConexionesContext'
+import { FavoritosProvider } from '../src/contextos/FavoritosContext'
 // MensajeriaGrupoProvider eliminado
 
 const inter = Inter({ subsets: ['latin'] })
@@ -29,21 +30,23 @@ export default function RootLayout({
           <ComunidadProvider>
             <TraduccioProvider>
               <UsuarioProvider>
-              <PostsProvider>
-                <NotificationsProvider>
-                  <NotificacionsProvider>
-                    <ConexionesProvider>
-                      <MissatgesProvider>
-                        <GroupMembershipProvider>
-                          <GruposAvanzadosProvider>
-                            {children}
-                          </GruposAvanzadosProvider>
-                        </GroupMembershipProvider>
-                      </MissatgesProvider>
-                    </ConexionesProvider>
-                  </NotificacionsProvider>
-                </NotificationsProvider>
-              </PostsProvider>
+                <PostsProvider>
+                  <NotificationsProvider>
+                    <NotificacionsProvider>
+                      <ConexionesProvider>
+                        <FavoritosProvider usuarioId="user-1">
+                          <MissatgesProvider>
+                            <GroupMembershipProvider>
+                              <GruposAvanzadosProvider>
+                                {children}
+                              </GruposAvanzadosProvider>
+                            </GroupMembershipProvider>
+                          </MissatgesProvider>
+                        </FavoritosProvider>
+                      </ConexionesProvider>
+                    </NotificacionsProvider>
+                  </NotificationsProvider>
+                </PostsProvider>
               </UsuarioProvider>
             </TraduccioProvider>
           </ComunidadProvider>

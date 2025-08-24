@@ -3,6 +3,7 @@
 import React, { useState, useContext } from 'react';
 import { MapPin, CheckCircle, Star, Building2, Users } from 'lucide-react';
 import { ComunidadContext } from '../../../app/ComunidadContext';
+import { useFavoritos } from '../../contextos/FavoritosContext';
 
 // Tipos
 export type EstadoPerfil = 'BORRADOR' | 'ACTIVO' | 'PAUSADO' | 'VERIFICADO';
@@ -34,12 +35,16 @@ export interface EmpresaCardProps {
 
 export function TarjetaEmpresa({ 
   empresa, 
-  isFollowing = false,
+  isFollowing,
   onFollow,
   onViewMore,
   viewMode = 'grid'
 }: EmpresaCardProps) {
   const contexto = useContext(ComunidadContext);
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
+  
+  // Determinar si es favorito usando el contexto de favoritos
+  const esEmpresaSeguida = isFollowing !== undefined ? isFollowing : esFavorito('empresa', empresa.id);
   
   // Si el contexto no está disponible, mostrar un placeholder
   if (!contexto) {
@@ -61,15 +66,33 @@ export function TarjetaEmpresa({
   const tema = contexto.configuracion.tema;
   
   const [isLoading, setIsLoading] = useState(false);
-  const [following, setFollowing] = useState(isFollowing);
+
+  // Parsear tags si vienen como string JSON
+  const parsedTags = empresa.tags ? 
+    (typeof empresa.tags === 'string' ? JSON.parse(empresa.tags) : empresa.tags) 
+    : [];
 
   const handleFollow = async () => {
-    if (!onFollow) return;
-    
     setIsLoading(true);
     try {
-      await onFollow(empresa.id);
-      setFollowing(!following);
+      if (esEmpresaSeguida) {
+        await eliminarFavorito('empresa', empresa.id);
+      } else {
+        await agregarFavorito('empresa', empresa.id, {
+          nombre: empresa.name,
+          descripcion: empresa.descripcionPublica,
+          logo: empresa.logo,
+          sector: empresa.sector,
+          ubicacion: `${empresa.city}, ${empresa.province}`,
+          verificada: empresa.estadoPerfil === 'VERIFICADO',
+          tags: parsedTags
+        });
+      }
+      
+      // Si hay callback externo, también llamarlo
+      if (onFollow) {
+        await onFollow(empresa.id);
+      }
     } catch (error) {
       console.error('Error al seguir empresa:', error);
     } finally {
@@ -82,11 +105,6 @@ export function TarjetaEmpresa({
       onViewMore(empresa.id);
     }
   };
-
-  // Parsear tags si vienen como string JSON
-  const parsedTags = empresa.tags ? 
-    (typeof empresa.tags === 'string' ? JSON.parse(empresa.tags) : empresa.tags) 
-    : [];
 
   // Vista lista - Compacta horizontal
   if (viewMode === 'list') {
@@ -332,9 +350,9 @@ export function TarjetaEmpresa({
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
             style={{ 
-              backgroundColor: following ? '#f3f4f6' : tema.colorPrimario,
-              color: following ? '#374151' : 'white',
-              border: following ? '1px solid #e5e7eb' : 'none'
+              backgroundColor: esEmpresaSeguida ? '#f3f4f6' : tema.colorPrimario,
+              color: esEmpresaSeguida ? '#374151' : 'white',
+              border: esEmpresaSeguida ? '1px solid #e5e7eb' : 'none'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
@@ -355,7 +373,7 @@ export function TarjetaEmpresa({
                 </svg>
               </span>
             ) : (
-              following ? 'Siguiendo' : 'Seguir'
+              esEmpresaSeguida ? 'Siguiendo' : 'Seguir'
             )}
           </button>
         )}

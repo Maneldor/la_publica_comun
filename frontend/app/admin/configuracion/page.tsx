@@ -122,6 +122,42 @@ export default function AdminConfiguracion() {
   const [showConversationModal, setShowConversationModal] = useState(false)
   const [selectedConversation, setSelectedConversation] = useState<any>(null)
   
+  // Estados para edición básica de agentes
+  const [showAgentEditModal, setShowAgentEditModal] = useState(false)
+  const [editingBasicAgent, setEditingBasicAgent] = useState<any>(null)
+  
+  // Estados para crear nuevo agente
+  const [showNewAgentModal, setShowNewAgentModal] = useState(false)
+  const [newAgentData, setNewAgentData] = useState<any>({
+    name: '',
+    model: 'GPT-4 Turbo',
+    description: '',
+    status: 'Actiu',
+    systemPrompt: '',
+    usageLimit: 100,
+    activeCommunities: ['Catalunya'],
+    usageLimitsByPlan: {
+      'Bàsic': 50,
+      'Pro': 100,
+      'Premium': 200,
+      'Enterprise': 500
+    },
+    allowedRoles: ['miembro'],
+    humanEscalation: {
+      enabled: false,
+      threshold: 3,
+      departments: []
+    }
+  })
+  
+  // Estados para configuración global de agentes
+  const [globalConfig, setGlobalConfig] = useState({
+    defaultProvider: 'OpenAI GPT-4',
+    maxRequestsPerUser: 50,
+    maxResponseTime: 30,
+    moderationMode: 'Moderat'
+  })
+  
   // Estados para configuración de alertas
   const [alertsConfig, setAlertsConfig] = useState({
     responseTime: {
@@ -266,6 +302,8 @@ export default function AdminConfiguracion() {
     'empresarial': {
       name: 'Agent Empresarial',
       model: 'GPT-4 Turbo',
+      description: 'Consultes comercials, vendes i màrqueting per a empreses col·laboradores. Optimització de processos de negoci i estratègies de mercat',
+      status: 'Actiu',
       systemPrompt: 'Ets un assistent especialitzat en consultes comercials i màrqueting per a empreses col·laboradores. Proporciona assessorament estratègic en vendes, processos de negoci i desenvolupament comercial.',
       usageLimit: 100,
       activeCommunities: ['Catalunya', 'Madrid', 'Euskadi'],
@@ -287,6 +325,8 @@ export default function AdminConfiguracion() {
     'administracio': {
       name: 'Agent Administració Pública',
       model: 'Claude 3 Opus',
+      description: 'Gestió administrativa, transparència i eficiència per a administracions. Suport en processos burocràtics i normativa pública',
+      status: 'Actiu',
       systemPrompt: 'Ets un expert en gestió administrativa del sector públic. Ajuda amb processos burocràtics, transparència, eficiència i normativa de les administracions públiques.',
       usageLimit: 200,
       activeCommunities: ['Catalunya', 'Madrid', 'Euskadi', 'Galicia'],
@@ -308,6 +348,8 @@ export default function AdminConfiguracion() {
     'contingut': {
       name: 'Agent Contingut Web',
       model: 'GPT-4',
+      description: 'Suport per a blogs, cursos i creació de contingut. Generació d\'articles, materials formatius i contingut educatiu especialitzat',
+      status: 'Actiu',
       systemPrompt: 'Especialista en creació de contingut web, blogs i materials formatius. Genera contingut educatiu de qualitat, articles especialitzats i materials per a cursos del sector públic.',
       usageLimit: 75,
       activeCommunities: ['Catalunya', 'Madrid'],
@@ -329,6 +371,8 @@ export default function AdminConfiguracion() {
     'general': {
       name: 'Assistent General',
       model: 'GPT-3.5 Turbo',
+      description: 'Preguntes freqüents i consultes generals per a tots els usuaris. Informació bàsica, orientació i suport inicial',
+      status: 'Actiu',
       systemPrompt: 'Ets un assistent general per a usuaris de La Pública. Respon preguntes freqüents, proporciona orientació bàsica i ofereix suport inicial sobre els serveis de la plataforma.',
       usageLimit: 50,
       activeCommunities: ['Catalunya', 'Madrid', 'Euskadi', 'Galicia', 'Andalucía'],
@@ -488,6 +532,95 @@ export default function AdminConfiguracion() {
       ...agentsConfig[agentKey as keyof typeof agentsConfig]
     })
     setShowAgentConfigModal(true)
+  }
+
+  const handleEditBasicAgent = (agentKey: string) => {
+    const agent = agentsConfig[agentKey as keyof typeof agentsConfig]
+    setEditingBasicAgent({
+      key: agentKey,
+      name: agent.name,
+      model: agent.model,
+      description: agent.description || '',
+      status: agent.status || 'Actiu'
+    })
+    setShowAgentEditModal(true)
+  }
+
+  const handleSaveBasicAgent = (agentData: any) => {
+    setAgentsConfig({
+      ...agentsConfig,
+      [agentData.key]: {
+        ...agentsConfig[agentData.key as keyof typeof agentsConfig],
+        name: agentData.name,
+        model: agentData.model,
+        description: agentData.description,
+        status: agentData.status
+      }
+    })
+    setShowAgentEditModal(false)
+    setEditingBasicAgent(null)
+  }
+
+  const handleCreateNewAgent = () => {
+    setShowNewAgentModal(true)
+  }
+
+  const handleSaveNewAgent = (agentData: any) => {
+    // Generar una clave única para el nuevo agente
+    const agentKey = agentData.name.toLowerCase().replace(/\s+/g, '-').replace(/[àáäâ]/g, 'a').replace(/[èéëê]/g, 'e').replace(/[ìíïî]/g, 'i').replace(/[òóöô]/g, 'o').replace(/[ùúüû]/g, 'u').replace(/[ç]/g, 'c').replace(/[^a-z0-9-]/g, '')
+    
+    const newAgent = {
+      name: agentData.name,
+      model: agentData.model,
+      description: agentData.description,
+      status: agentData.status,
+      systemPrompt: agentData.systemPrompt,
+      usageLimit: agentData.usageLimit,
+      activeCommunities: agentData.activeCommunities,
+      usageLimitsByPlan: agentData.usageLimitsByPlan,
+      allowedRoles: agentData.allowedRoles,
+      humanEscalation: agentData.humanEscalation,
+      requestsToday: 0
+    }
+
+    setAgentsConfig({
+      ...agentsConfig,
+      [agentKey]: newAgent
+    })
+
+    // Reset del formulario
+    setNewAgentData({
+      name: '',
+      model: 'GPT-4 Turbo',
+      description: '',
+      status: 'Actiu',
+      systemPrompt: '',
+      usageLimit: 100,
+      activeCommunities: ['Catalunya'],
+      usageLimitsByPlan: {
+        'Bàsic': 50,
+        'Pro': 100,
+        'Premium': 200,
+        'Enterprise': 500
+      },
+      allowedRoles: ['miembro'],
+      humanEscalation: {
+        enabled: false,
+        threshold: 3,
+        departments: []
+      }
+    })
+
+    setShowNewAgentModal(false)
+  }
+
+  const handleSaveGlobalConfig = () => {
+    // Aquí guardaríamos la configuración global en el backend
+    // Por ahora mostramos un mensaje de confirmación
+    alert('Configuració global guardada correctament!')
+    
+    // Simular guardado exitoso
+    console.log('Configuración global guardada:', globalConfig)
   }
 
   const handleSaveAgentConfig = (updatedConfig: any) => {
@@ -1087,7 +1220,10 @@ export default function AdminConfiguracion() {
                       </h2>
                       <p className="text-gray-600 mt-1">Configura i gestiona els agents d'intel·ligència artificial del sistema</p>
                     </div>
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <button 
+                      onClick={handleCreateNewAgent}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
                       <Plus className="w-4 h-4" />
                       Nou Agent
                     </button>
@@ -1200,7 +1336,11 @@ export default function AdminConfiguracion() {
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>342 peticions avui</span>
                           <div className="flex gap-1">
-                            <button className="p-1 hover:bg-gray-100 rounded">
+                            <button 
+                              onClick={() => handleEditBasicAgent('empresarial')}
+                              className="p-1 hover:bg-gray-100 rounded"
+                              title="Editar dades bàsiques"
+                            >
                               <Edit className="w-3 h-3" />
                             </button>
                             <button 
@@ -1232,7 +1372,11 @@ export default function AdminConfiguracion() {
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>567 peticions avui</span>
                           <div className="flex gap-1">
-                            <button className="p-1 hover:bg-gray-100 rounded">
+                            <button 
+                              onClick={() => handleEditBasicAgent('administracio')}
+                              className="p-1 hover:bg-gray-100 rounded"
+                              title="Editar dades bàsiques"
+                            >
                               <Edit className="w-3 h-3" />
                             </button>
                             <button 
@@ -1264,7 +1408,11 @@ export default function AdminConfiguracion() {
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>189 peticions avui</span>
                           <div className="flex gap-1">
-                            <button className="p-1 hover:bg-gray-100 rounded">
+                            <button 
+                              onClick={() => handleEditBasicAgent('contingut')}
+                              className="p-1 hover:bg-gray-100 rounded"
+                              title="Editar dades bàsiques"
+                            >
                               <Edit className="w-3 h-3" />
                             </button>
                             <button 
@@ -1296,7 +1444,11 @@ export default function AdminConfiguracion() {
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>150 peticions avui</span>
                           <div className="flex gap-1">
-                            <button className="p-1 hover:bg-gray-100 rounded">
+                            <button 
+                              onClick={() => handleEditBasicAgent('general')}
+                              className="p-1 hover:bg-gray-100 rounded"
+                              title="Editar dades bàsiques"
+                            >
                               <Edit className="w-3 h-3" />
                             </button>
                             <button 
@@ -1318,7 +1470,14 @@ export default function AdminConfiguracion() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Proveïdor IA per defecte</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select 
+                          value={globalConfig.defaultProvider}
+                          onChange={(e) => setGlobalConfig({
+                            ...globalConfig,
+                            defaultProvider: e.target.value
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
                           <option>OpenAI GPT-4</option>
                           <option>Anthropic Claude 3</option>
                           <option>OpenAI GPT-3.5</option>
@@ -1329,21 +1488,40 @@ export default function AdminConfiguracion() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Límit de peticions per usuari/dia</label>
                         <input 
                           type="number" 
-                          defaultValue="50"
+                          value={globalConfig.maxRequestsPerUser}
+                          onChange={(e) => setGlobalConfig({
+                            ...globalConfig,
+                            maxRequestsPerUser: parseInt(e.target.value) || 0
+                          })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          min="1"
+                          max="500"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Temps màxim de resposta (segons)</label>
                         <input 
                           type="number" 
-                          defaultValue="30"
+                          value={globalConfig.maxResponseTime}
+                          onChange={(e) => setGlobalConfig({
+                            ...globalConfig,
+                            maxResponseTime: parseInt(e.target.value) || 0
+                          })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          min="5"
+                          max="120"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Mode de moderació</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select 
+                          value={globalConfig.moderationMode}
+                          onChange={(e) => setGlobalConfig({
+                            ...globalConfig,
+                            moderationMode: e.target.value
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
                           <option>Estricte</option>
                           <option>Moderat</option>
                           <option>Permissiu</option>
@@ -1351,7 +1529,10 @@ export default function AdminConfiguracion() {
                       </div>
                     </div>
                     <div className="mt-6 flex justify-end">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                      <button 
+                        onClick={handleSaveGlobalConfig}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
                         Guardar Configuració
                       </button>
                     </div>
@@ -1554,6 +1735,459 @@ export default function AdminConfiguracion() {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pestaña de Alertes Automàtiques */}
+                {activeAgentTab === 'alerts' && (
+                  <div className="p-6">
+                    <div className="space-y-6">
+                      {/* Panel de Configuració d'Alertes */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-6">Configuració d'Alertes Automàtiques</h3>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Umbrals d'Alerta */}
+                          <div className="space-y-4">
+                            <h4 className="text-md font-medium text-gray-900">Umbrals d'Alerta</h4>
+                            
+                            {/* Temps de resposta */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Temps de Resposta</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={alertsConfig.responseTime.enabled}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      responseTime: { ...alertsConfig.responseTime, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Llindar (minuts)</label>
+                                  <input
+                                    type="number"
+                                    value={alertsConfig.responseTime.threshold}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      responseTime: { ...alertsConfig.responseTime, threshold: Number(e.target.value) }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    min="1"
+                                    max="60"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
+                                  <select
+                                    value={alertsConfig.responseTime.urgency}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      responseTime: { ...alertsConfig.responseTime, urgency: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                  >
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Mitjana</option>
+                                    <option value="high">Alta</option>
+                                    <option value="critical">Crítica</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Errors per hora */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Errors per Hora</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={alertsConfig.errorsPerHour.enabled}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      errorsPerHour: { ...alertsConfig.errorsPerHour, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Llindar (errors/h)</label>
+                                  <input
+                                    type="number"
+                                    value={alertsConfig.errorsPerHour.threshold}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      errorsPerHour: { ...alertsConfig.errorsPerHour, threshold: Number(e.target.value) }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    min="1"
+                                    max="100"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
+                                  <select
+                                    value={alertsConfig.errorsPerHour.urgency}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      errorsPerHour: { ...alertsConfig.errorsPerHour, urgency: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                  >
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Mitjana</option>
+                                    <option value="high">Alta</option>
+                                    <option value="critical">Crítica</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Ús anòmal */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Ús Anòmal</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={alertsConfig.abnormalUsage.enabled}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      abnormalUsage: { ...alertsConfig.abnormalUsage, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Llindar (% sobre mitjana)</label>
+                                  <input
+                                    type="number"
+                                    value={alertsConfig.abnormalUsage.threshold}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      abnormalUsage: { ...alertsConfig.abnormalUsage, threshold: Number(e.target.value) }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    min="50"
+                                    max="500"
+                                    step="10"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
+                                  <select
+                                    value={alertsConfig.abnormalUsage.urgency}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      abnormalUsage: { ...alertsConfig.abnormalUsage, urgency: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                  >
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Mitjana</option>
+                                    <option value="high">Alta</option>
+                                    <option value="critical">Crítica</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Temps d'inactivitat */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Temps d'Inactivitat</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={alertsConfig.downtime.enabled}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      downtime: { ...alertsConfig.downtime, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Llindar (minuts)</label>
+                                  <input
+                                    type="number"
+                                    value={alertsConfig.downtime.threshold}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      downtime: { ...alertsConfig.downtime, threshold: Number(e.target.value) }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    min="1"
+                                    max="30"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
+                                  <select
+                                    value={alertsConfig.downtime.urgency}
+                                    onChange={(e) => setAlertsConfig({
+                                      ...alertsConfig,
+                                      downtime: { ...alertsConfig.downtime, urgency: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                  >
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Mitjana</option>
+                                    <option value="high">Alta</option>
+                                    <option value="critical">Crítica</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Opcions de Notificació */}
+                          <div className="space-y-4">
+                            <h4 className="text-md font-medium text-gray-900">Opcions de Notificació</h4>
+                            
+                            {/* Email */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Notificacions per Email</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={notificationConfig.email.enabled}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
+                                      email: { ...notificationConfig.email, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">Adreces de destinació</label>
+                                <div className="space-y-2">
+                                  {notificationConfig.email.addresses.map((email, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                      <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => {
+                                          const newAddresses = [...notificationConfig.email.addresses]
+                                          newAddresses[index] = e.target.value
+                                          setNotificationConfig({
+                                            ...notificationConfig,
+                                            email: { ...notificationConfig.email, addresses: newAddresses }
+                                          })
+                                        }}
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                        placeholder="email@example.com"
+                                      />
+                                      <button
+                                        onClick={() => {
+                                          const newAddresses = notificationConfig.email.addresses.filter((_, i) => i !== index)
+                                          setNotificationConfig({
+                                            ...notificationConfig,
+                                            email: { ...notificationConfig.email, addresses: newAddresses }
+                                          })
+                                        }}
+                                        className="px-2 py-2 text-red-600 hover:bg-red-50 rounded-md"
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                  <button
+                                    onClick={() => {
+                                      setNotificationConfig({
+                                        ...notificationConfig,
+                                        email: {
+                                          ...notificationConfig.email,
+                                          addresses: [...notificationConfig.email.addresses, '']
+                                        }
+                                      })
+                                    }}
+                                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                    Afegir adreça
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Dashboard */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Notificacions al Dashboard</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={notificationConfig.dashboard.enabled}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
+                                      dashboard: { ...notificationConfig.dashboard, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={notificationConfig.dashboard.showPopups}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
+                                      dashboard: { ...notificationConfig.dashboard, showPopups: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-700">Mostrar pop-ups emergents</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Webhook */}
+                            <div className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-gray-700">Webhook</label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={notificationConfig.webhook.enabled}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
+                                      webhook: { ...notificationConfig.webhook, enabled: e.target.checked }
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 mr-2"
+                                  />
+                                  <span className="text-sm text-gray-600">Activat</span>
+                                </label>
+                              </div>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">URL del webhook</label>
+                                  <input
+                                    type="url"
+                                    value={notificationConfig.webhook.url}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
+                                      webhook: { ...notificationConfig.webhook, url: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    placeholder="https://example.com/webhook"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Secret (opcional)</label>
+                                  <input
+                                    type="password"
+                                    value={notificationConfig.webhook.secret}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
+                                      webhook: { ...notificationConfig.webhook, secret: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    placeholder="••••••••••••"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Historial d'Alertes */}
+                      <div className="bg-white border border-gray-200 rounded-lg">
+                        <div className="px-6 py-4 border-b border-gray-200">
+                          <h3 className="text-lg font-medium text-gray-900">Historial d'Alertes Enviades</h3>
+                          <p className="mt-1 text-sm text-gray-500">Registre complet amb timestamps i accions preses</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Timestamp</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Agent</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipus</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Missatge</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Urgència</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estat</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acció Presa</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {alertsHistory.map((alert) => (
+                                <tr key={alert.id} className="hover:bg-gray-50">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {new Date(alert.timestamp).toLocaleString('ca-ES')}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {alert.agent}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                      alert.type === 'responseTime' ? 'bg-blue-100 text-blue-800' :
+                                      alert.type === 'errorsPerHour' ? 'bg-red-100 text-red-800' :
+                                      alert.type === 'abnormalUsage' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-purple-100 text-purple-800'
+                                    }`}>
+                                      {alert.type === 'responseTime' ? 'Temps Resposta' :
+                                       alert.type === 'errorsPerHour' ? 'Errors/Hora' :
+                                       alert.type === 'abnormalUsage' ? 'Ús Anòmal' : 'Inactivitat'}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                                    {alert.message}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                      alert.urgency === 'critical' ? 'bg-red-100 text-red-800' :
+                                      alert.urgency === 'high' ? 'bg-orange-100 text-orange-800' :
+                                      alert.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-green-100 text-green-800'
+                                    }`}>
+                                      {alert.urgency === 'critical' ? 'Crítica' :
+                                       alert.urgency === 'high' ? 'Alta' :
+                                       alert.urgency === 'medium' ? 'Mitjana' : 'Baixa'}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                      alert.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                                      alert.status === 'acknowledged' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {alert.status === 'resolved' ? 'Resolta' :
+                                       alert.status === 'acknowledged' ? 'Confirmada' : 'Pendent'}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-sm text-gray-900">
+                                    {alert.actionTaken}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2083,487 +2717,6 @@ export default function AdminConfiguracion() {
               </div>
             </div>
           )}
-
-                {/* Pestaña de Alertes Automàtiques */}
-                {activeAgentTab === 'alerts' && (
-                  <div className="p-6 space-y-6">
-                    {/* Configuración de alertas */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                      <div className="px-6 py-4 border-b border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                          <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                          Configuració d'Alertes Automàtiques
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          Defineix umbrals personalitzables i opcions de notificació per monitoritzar el rendiment dels agents IA
-                        </p>
-                      </div>
-                      
-                      <div className="p-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          {/* Configuración de umbrales */}
-                          <div className="space-y-6">
-                            <h4 className="text-md font-medium text-gray-900">Umbrals d'Alerta</h4>
-                            
-                            {/* Temps de resposta */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Temps de Resposta</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={alertsConfig.responseTime.enabled}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      responseTime: { ...alertsConfig.responseTime, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Llindar (minuts)</label>
-                                  <input
-                                    type="number"
-                                    value={alertsConfig.responseTime.threshold}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      responseTime: { ...alertsConfig.responseTime, threshold: Number(e.target.value) }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                    min="1"
-                                    max="60"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
-                                  <select
-                                    value={alertsConfig.responseTime.urgency}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      responseTime: { ...alertsConfig.responseTime, urgency: e.target.value }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                  >
-                                    <option value="low">Baixa</option>
-                                    <option value="medium">Mitjana</option>
-                                    <option value="high">Alta</option>
-                                    <option value="critical">Crítica</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Errors per hora */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Errors per Hora</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={alertsConfig.errorsPerHour.enabled}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      errorsPerHour: { ...alertsConfig.errorsPerHour, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Llindar (errors/h)</label>
-                                  <input
-                                    type="number"
-                                    value={alertsConfig.errorsPerHour.threshold}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      errorsPerHour: { ...alertsConfig.errorsPerHour, threshold: Number(e.target.value) }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                    min="1"
-                                    max="100"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
-                                  <select
-                                    value={alertsConfig.errorsPerHour.urgency}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      errorsPerHour: { ...alertsConfig.errorsPerHour, urgency: e.target.value }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                  >
-                                    <option value="low">Baixa</option>
-                                    <option value="medium">Mitjana</option>
-                                    <option value="high">Alta</option>
-                                    <option value="critical">Crítica</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Ús anòmal */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Ús Anòmal</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={alertsConfig.abnormalUsage.enabled}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      abnormalUsage: { ...alertsConfig.abnormalUsage, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Llindar (% sobre mitjana)</label>
-                                  <input
-                                    type="number"
-                                    value={alertsConfig.abnormalUsage.threshold}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      abnormalUsage: { ...alertsConfig.abnormalUsage, threshold: Number(e.target.value) }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                    min="50"
-                                    max="500"
-                                    step="10"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
-                                  <select
-                                    value={alertsConfig.abnormalUsage.urgency}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      abnormalUsage: { ...alertsConfig.abnormalUsage, urgency: e.target.value }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                  >
-                                    <option value="low">Baixa</option>
-                                    <option value="medium">Mitjana</option>
-                                    <option value="high">Alta</option>
-                                    <option value="critical">Crítica</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Temps d'inactivitat */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Temps d'Inactivitat</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={alertsConfig.downtime.enabled}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      downtime: { ...alertsConfig.downtime, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Llindar (minuts)</label>
-                                  <input
-                                    type="number"
-                                    value={alertsConfig.downtime.threshold}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      downtime: { ...alertsConfig.downtime, threshold: Number(e.target.value) }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                    min="1"
-                                    max="30"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Urgència</label>
-                                  <select
-                                    value={alertsConfig.downtime.urgency}
-                                    onChange={(e) => setAlertsConfig({
-                                      ...alertsConfig,
-                                      downtime: { ...alertsConfig.downtime, urgency: e.target.value }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                  >
-                                    <option value="low">Baixa</option>
-                                    <option value="medium">Mitjana</option>
-                                    <option value="high">Alta</option>
-                                    <option value="critical">Crítica</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Configuración de notificaciones */}
-                          <div className="space-y-6">
-                            <h4 className="text-md font-medium text-gray-900">Opcions de Notificació</h4>
-                            
-                            {/* Email */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Notificacions per Email</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={notificationConfig.email.enabled}
-                                    onChange={(e) => setNotificationConfig({
-                                      ...notificationConfig,
-                                      email: { ...notificationConfig.email, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div>
-                                <label className="block text-xs text-gray-500 mb-1">Adreces de destinació</label>
-                                <div className="space-y-2">
-                                  {notificationConfig.email.addresses.map((email, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                      <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => {
-                                          const newAddresses = [...notificationConfig.email.addresses]
-                                          newAddresses[index] = e.target.value
-                                          setNotificationConfig({
-                                            ...notificationConfig,
-                                            email: { ...notificationConfig.email, addresses: newAddresses }
-                                          })
-                                        }}
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                        placeholder="email@example.com"
-                                      />
-                                      <button
-                                        onClick={() => {
-                                          const newAddresses = notificationConfig.email.addresses.filter((_, i) => i !== index)
-                                          setNotificationConfig({
-                                            ...notificationConfig,
-                                            email: { ...notificationConfig.email, addresses: newAddresses }
-                                          })
-                                        }}
-                                        className="px-2 py-2 text-red-600 hover:bg-red-50 rounded-md"
-                                      >
-                                        <X className="w-4 h-4" />
-                                      </button>
-                                    </div>
-                                  ))}
-                                  <button
-                                    onClick={() => {
-                                      setNotificationConfig({
-                                        ...notificationConfig,
-                                        email: {
-                                          ...notificationConfig.email,
-                                          addresses: [...notificationConfig.email.addresses, '']
-                                        }
-                                      })
-                                    }}
-                                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                    Afegir adreça
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Dashboard */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Notificacions al Dashboard</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={notificationConfig.dashboard.enabled}
-                                    onChange={(e) => setNotificationConfig({
-                                      ...notificationConfig,
-                                      dashboard: { ...notificationConfig.dashboard, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={notificationConfig.dashboard.showPopups}
-                                    onChange={(e) => setNotificationConfig({
-                                      ...notificationConfig,
-                                      dashboard: { ...notificationConfig.dashboard, showPopups: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-700">Mostrar pop-ups emergents</span>
-                                </label>
-                              </div>
-                            </div>
-
-                            {/* Webhook */}
-                            <div className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-700">Webhook</label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={notificationConfig.webhook.enabled}
-                                    onChange={(e) => setNotificationConfig({
-                                      ...notificationConfig,
-                                      webhook: { ...notificationConfig.webhook, enabled: e.target.checked }
-                                    })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                                  />
-                                  <span className="text-sm text-gray-600">Activat</span>
-                                </label>
-                              </div>
-                              <div className="space-y-3">
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">URL del webhook</label>
-                                  <input
-                                    type="url"
-                                    value={notificationConfig.webhook.url}
-                                    onChange={(e) => setNotificationConfig({
-                                      ...notificationConfig,
-                                      webhook: { ...notificationConfig.webhook, url: e.target.value }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                    placeholder="https://example.com/webhook"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">Secret (opcional)</label>
-                                  <input
-                                    type="password"
-                                    value={notificationConfig.webhook.secret}
-                                    onChange={(e) => setNotificationConfig({
-                                      ...notificationConfig,
-                                      webhook: { ...notificationConfig.webhook, secret: e.target.value }
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••••••"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Botón de guardar configuración */}
-                        <div className="flex justify-end pt-6 border-t border-gray-200 mt-6 mr-4">
-                          <button className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">
-                            Guardar Configuració d'Alertes
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Historial de alertas */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                      <div className="px-6 py-4 border-b border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                          <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                          Historial d'Alertes
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          Registre complet de totes les alertes enviades amb timestamps i accions preses
-                        </p>
-                      </div>
-                      
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipus</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Missatge</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Urgència</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estat</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acció Presa</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolt per</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {alertsHistory.map((alert) => (
-                              <tr key={alert.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {new Date(alert.timestamp).toLocaleString('ca-ES')}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                  {alert.agent}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    alert.type === 'responseTime' ? 'bg-blue-100 text-blue-800' :
-                                    alert.type === 'errorsPerHour' ? 'bg-red-100 text-red-800' :
-                                    alert.type === 'abnormalUsage' ? 'bg-yellow-100 text-yellow-800' :
-                                    alert.type === 'downtime' ? 'bg-purple-100 text-purple-800' :
-                                    'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {alert.type === 'responseTime' ? 'Temps Resposta' :
-                                     alert.type === 'errorsPerHour' ? 'Errors/Hora' :
-                                     alert.type === 'abnormalUsage' ? 'Ús Anòmal' :
-                                     alert.type === 'downtime' ? 'Inactivitat' : alert.type}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                                  {alert.message}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    alert.urgency === 'critical' ? 'bg-red-100 text-red-800' :
-                                    alert.urgency === 'high' ? 'bg-orange-100 text-orange-800' :
-                                    alert.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-green-100 text-green-800'
-                                  }`}>
-                                    {alert.urgency === 'critical' ? 'Crítica' :
-                                     alert.urgency === 'high' ? 'Alta' :
-                                     alert.urgency === 'medium' ? 'Mitjana' : 'Baixa'}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    alert.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                                    alert.status === 'acknowledged' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-red-100 text-red-800'
-                                  }`}>
-                                    {alert.status === 'resolved' ? 'Resolta' :
-                                     alert.status === 'acknowledged' ? 'Confirmada' : 'Pendent'}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                                  {alert.actionTaken}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {alert.resolvedBy || '-'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
           {/* Modal de Configuració d'Agents IA */}
           {showAgentConfigModal && editingAgent && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -2841,6 +2994,321 @@ export default function AdminConfiguracion() {
                           Guardar Configuració
                         </button>
                       </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal de Nou Agent */}
+          {showNewAgentModal && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+              <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-medium text-gray-900 flex items-center gap-2">
+                      <Plus className="w-6 h-6 text-blue-600" />
+                      Crear Nou Agent IA
+                    </h3>
+                    <button
+                      onClick={() => setShowNewAgentModal(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={(e) => { 
+                    e.preventDefault()
+                    handleSaveNewAgent(newAgentData)
+                  }} className="space-y-6">
+                    
+                    {/* Informació bàsica */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Nom de l'Agent *</label>
+                        <input
+                          type="text"
+                          value={newAgentData.name}
+                          onChange={(e) => setNewAgentData({...newAgentData, name: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Agent Personalitzat"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Model IA</label>
+                        <select 
+                          value={newAgentData.model}
+                          onChange={(e) => setNewAgentData({...newAgentData, model: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option>GPT-4 Turbo</option>
+                          <option>GPT-4</option>
+                          <option>GPT-3.5 Turbo</option>
+                          <option>Claude 3 Opus</option>
+                          <option>Claude 3 Sonnet</option>
+                          <option>Gemini Pro</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Descripció *</label>
+                      <textarea
+                        value={newAgentData.description}
+                        onChange={(e) => setNewAgentData({...newAgentData, description: e.target.value})}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Descripció breu de la funcionalitat i especialització de l'agent..."
+                        required
+                      />
+                    </div>
+
+                    {/* Prompt del Sistema */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Prompt del Sistema *</label>
+                      <textarea
+                        value={newAgentData.systemPrompt}
+                        onChange={(e) => setNewAgentData({...newAgentData, systemPrompt: e.target.value})}
+                        rows={4}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ets un assistent especialitzat en... Defineix el comportament i especialització de l'agent..."
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Aquest prompt defineix la personalitat i especialització de l'agent</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Límit d'ús diari</label>
+                        <input
+                          type="number"
+                          value={newAgentData.usageLimit}
+                          onChange={(e) => setNewAgentData({...newAgentData, usageLimit: parseInt(e.target.value)})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          min="1"
+                          max="1000"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Estat inicial</label>
+                        <select 
+                          value={newAgentData.status}
+                          onChange={(e) => setNewAgentData({...newAgentData, status: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="Actiu">Actiu</option>
+                          <option value="Inactiu">Inactiu</option>
+                          <option value="Manteniment">Manteniment</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Límits per pla de suscripció */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Límits per pla de suscripció</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {Object.entries(newAgentData.usageLimitsByPlan).map(([plan, limit]) => (
+                          <div key={plan}>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">{plan}</label>
+                            <input
+                              type="number"
+                              value={limit}
+                              onChange={(e) => setNewAgentData({
+                                ...newAgentData,
+                                usageLimitsByPlan: {
+                                  ...newAgentData.usageLimitsByPlan,
+                                  [plan]: parseInt(e.target.value)
+                                }
+                              })}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              min="1"
+                              max="2000"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">Peticions per usuari/dia segons el pla de subscripció de l'empresa</p>
+                    </div>
+
+                    {/* Comunitats actives */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Comunitats on estarà actiu</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-32 overflow-y-auto border border-gray-200 rounded-md p-3">
+                        {['Catalunya', 'Madrid', 'Euskadi', 'Galicia', 'Andalucía', 'València', 'Baleares', 'Aragón', 'Asturias', 'Canarias', 'Cantabria', 'Castilla-La Mancha', 'Castilla y León', 'Extremadura', 'La Rioja', 'Murcia', 'Navarra'].map((comunitat) => (
+                          <label key={comunitat} className="flex items-center text-sm">
+                            <input
+                              type="checkbox"
+                              checked={newAgentData.activeCommunities.includes(comunitat)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewAgentData({
+                                    ...newAgentData,
+                                    activeCommunities: [...newAgentData.activeCommunities, comunitat]
+                                  })
+                                } else {
+                                  setNewAgentData({
+                                    ...newAgentData,
+                                    activeCommunities: newAgentData.activeCommunities.filter((c: string) => c !== comunitat)
+                                  })
+                                }
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                            />
+                            <span className="text-gray-700">{comunitat}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Rols que poden accedir */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Rols d'usuari que poden accedir</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-32 overflow-y-auto border border-gray-200 rounded-md p-3">
+                        {availableRoles.map((rol) => (
+                          <label key={rol} className="flex items-center text-sm">
+                            <input
+                              type="checkbox"
+                              checked={newAgentData.allowedRoles.includes(rol)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewAgentData({
+                                    ...newAgentData,
+                                    allowedRoles: [...newAgentData.allowedRoles, rol]
+                                  })
+                                } else {
+                                  setNewAgentData({
+                                    ...newAgentData,
+                                    allowedRoles: newAgentData.allowedRoles.filter((r: string) => r !== rol)
+                                  })
+                                }
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                            />
+                            <span className="text-gray-700">{rol}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between pt-6 border-t border-gray-200">
+                      <button
+                        type="button"
+                        onClick={() => setShowNewAgentModal(false)}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                      >
+                        Cancel·lar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                      >
+                        Crear Agent
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal d'Edició Bàsica d'Agents */}
+          {showAgentEditModal && editingBasicAgent && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+              <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-medium text-gray-900 flex items-center gap-2">
+                      <Edit className="w-6 h-6 text-blue-600" />
+                      Editar Dades Bàsiques - {editingBasicAgent.name}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setShowAgentEditModal(false)
+                        setEditingBasicAgent(null)
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={(e) => { 
+                    e.preventDefault()
+                    handleSaveBasicAgent(editingBasicAgent)
+                  }} className="space-y-4">
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Nom de l'Agent</label>
+                        <input
+                          type="text"
+                          value={editingBasicAgent.name}
+                          onChange={(e) => setEditingBasicAgent({...editingBasicAgent, name: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Model IA</label>
+                        <select 
+                          value={editingBasicAgent.model}
+                          onChange={(e) => setEditingBasicAgent({...editingBasicAgent, model: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option>GPT-4 Turbo</option>
+                          <option>GPT-4</option>
+                          <option>GPT-3.5 Turbo</option>
+                          <option>Claude 3 Opus</option>
+                          <option>Claude 3 Sonnet</option>
+                          <option>Gemini Pro</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Descripció</label>
+                      <textarea
+                        value={editingBasicAgent.description}
+                        onChange={(e) => setEditingBasicAgent({...editingBasicAgent, description: e.target.value})}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Descripció breu de la funcionalitat de l'agent..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Estat</label>
+                      <select 
+                        value={editingBasicAgent.status}
+                        onChange={(e) => setEditingBasicAgent({...editingBasicAgent, status: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Actiu">Actiu</option>
+                        <option value="Inactiu">Inactiu</option>
+                        <option value="Manteniment">Manteniment</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex justify-between pt-6 border-t border-gray-200">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAgentEditModal(false)
+                          setEditingBasicAgent(null)
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                      >
+                        Cancel·lar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                      >
+                        Guardar Canvis
+                      </button>
                     </div>
                   </form>
                 </div>

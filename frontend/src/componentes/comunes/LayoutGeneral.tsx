@@ -12,12 +12,16 @@ import { useT } from '../../contextos/TraduccioContext'
 
 interface LayoutGeneralProps {
   children: ReactNode
-  paginaActual?: 'dashboard' | 'xarxa-social' | 'membres' | 'grups' | 'forums' | 'blogs' | 'perfil' | 'empresas' | 'tauler-anuncis' | 'ofertes' | 'assessorament' | 'enllcos-interes' | 'missatges' | 'notificacions' | 'calendari'
+  paginaActual?: 'dashboard' | 'xarxa-social' | 'membres' | 'grups' | 'forums' | 'blogs' | 'perfil' | 'empresas' | 'tauler-anuncis' | 'ofertes' | 'assessorament' | 'enllcos-interes' | 'missatges' | 'notificacions' | 'calendari' | 'formacio'
+  showPadding?: boolean // Opción para mostrar padding estándar
+  className?: string // Clases adicionales para el contenedor
 }
 
 export default function LayoutGeneral({ 
   children, 
-  paginaActual = 'dashboard' 
+  paginaActual = 'dashboard',
+  showPadding = true,
+  className = ''
 }: LayoutGeneralProps) {
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -72,7 +76,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={(isActive('dashboard') || isActive('xarxa-social')) ? 'text-white' : 'text-gray-600'}>🏠</span>
                     <span className="text-sm font-medium">Xarxa Social</span>
                   </a>
                   <button 
@@ -81,9 +84,14 @@ export default function LayoutGeneral({
                     }}
                     className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
                   >
-                    <span className="text-gray-600">👤</span>
                     <span className="text-xs md:text-sm">El Meu Perfil</span>
                   </button>
+                  <a 
+                    href="/perfil/favoritos"
+                    className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="text-xs md:text-sm">Mis Favoritos</span>
+                  </a>
                   <a 
                     href="/membres" 
                     className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
@@ -92,7 +100,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('membres') ? 'text-white' : 'text-gray-600'}>👥</span>
                     <span className="text-xs md:text-sm">Membres</span>
                   </a>
                   <a 
@@ -103,7 +110,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('grups') ? 'text-white' : 'text-gray-600'}>👥</span>
                     <span className="text-xs md:text-sm">Grups</span>
                   </a>
                   <a 
@@ -114,7 +120,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('forums') ? 'text-white' : 'text-gray-600'}>💬</span>
                     <span className="text-xs md:text-sm">Fòrums</span>
                   </a>
                   <a 
@@ -125,7 +130,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('blogs') ? 'text-white' : 'text-gray-600'}>📝</span>
                     <span className="text-xs md:text-sm">Blogs</span>
                   </a>
                 </nav>
@@ -136,7 +140,6 @@ export default function LayoutGeneral({
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">SERVEIS</h3>
                 <nav className="space-y-1">
                   <a href="/dashboard/empresas" className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-600">🏢</span>
                     <span className="text-xs md:text-sm">Empreses Col·laboradores</span>
                   </a>
                   <a 
@@ -147,7 +150,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('ofertes') ? 'text-white' : 'text-gray-600'}>💼</span>
                     <span className="text-xs md:text-sm">Ofertes</span>
                   </a>
                   <a 
@@ -158,7 +160,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('tauler-anuncis') ? 'text-white' : 'text-gray-600'}>📄</span>
                     <span className="text-xs md:text-sm">Taulell d'Anuncis</span>
                   </a>
                   <a 
@@ -169,7 +170,6 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('assessorament') ? 'text-white' : 'text-gray-600'}>👁️</span>
                     <span className="text-xs md:text-sm">Assessorament</span>
                   </a>
                   <a 
@@ -180,8 +180,17 @@ export default function LayoutGeneral({
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={isActive('enllcos-interes') ? 'text-white' : 'text-gray-600'}>🔗</span>
                     <span className="text-xs md:text-sm">Enllaços d'Interès</span>
+                  </a>
+                  <a 
+                    href="/formacio" 
+                    className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                      isActive('formacio') 
+                        ? 'text-white bg-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-xs md:text-sm">Formació</span>
                   </a>
                 </nav>
               </div>
@@ -193,7 +202,6 @@ export default function LayoutGeneral({
                   <button 
                     onClick={() => setModalBusquedaObert(true)}
                     className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left">
-                    <span className="text-gray-600">🔍</span>
                     <span className="text-xs md:text-sm">Cercar</span>
                   </button>
                   <a 
@@ -203,7 +211,6 @@ export default function LayoutGeneral({
                         ? 'text-white bg-blue-500' 
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}>
-                    <span className={isActive('missatges') ? 'text-white' : 'text-gray-600'}>💬</span>
                     <span className="text-xs md:text-sm">Missatges</span>
                   </a>
                   <a 
@@ -213,7 +220,6 @@ export default function LayoutGeneral({
                         ? 'text-white bg-blue-500' 
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}>
-                    <span className={isActive('notificacions') ? 'text-white' : 'text-gray-600'}>🔔</span>
                     <span className="text-xs md:text-sm">Notificacions</span>
                   </a>
                   <a 
@@ -223,7 +229,6 @@ export default function LayoutGeneral({
                         ? 'text-white bg-blue-500' 
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}>
-                    <span className={isActive('calendari') ? 'text-white' : 'text-gray-600'}>📅</span>
                     <span className="text-xs md:text-sm">Calendari</span>
                   </a>
                 </nav>
@@ -237,14 +242,12 @@ export default function LayoutGeneral({
                     onClick={() => setModalConfiguracioObert(true)}
                     className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
                   >
-                    <span className="text-gray-600">⚙️</span>
                     <span className="text-xs md:text-sm">Configuració</span>
                   </button>
                   <button 
                     onClick={() => setModalConfiguracioEmailsObert(true)}
                     className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
                   >
-                    <span className="text-gray-600">📧</span>
                     <span className="text-xs md:text-sm">Emails</span>
                   </button>
                 </nav>
@@ -276,7 +279,6 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={(isActive('dashboard') || isActive('xarxa-social')) ? 'text-white' : 'text-gray-600'}>🏠</span>
                         <span className="text-xs md:text-sm font-medium">Xarxa Social</span>
                       </a>
                       <button 
@@ -289,9 +291,14 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('perfil') ? 'text-white' : 'text-gray-600'}>👤</span>
                         <span className="text-xs md:text-sm">El Meu Perfil</span>
                       </button>
+                      <a 
+                        href="/perfil/favoritos"
+                        className="flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <span className="text-xs md:text-sm">Mis Favoritos</span>
+                      </a>
                       <a 
                         href="/membres" 
                         className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
@@ -300,8 +307,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('membres') ? 'text-white' : 'text-gray-600'}>👥</span>
-                        <span className="text-xs md:text-sm">Membres</span>
+                            <span className="text-xs md:text-sm">Membres</span>
                       </a>
                       <a 
                         href="/grupos-avanzados" 
@@ -311,8 +317,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('grups') ? 'text-white' : 'text-gray-600'}>👥</span>
-                        <span className="text-xs md:text-sm">Grups</span>
+                            <span className="text-xs md:text-sm">Grups</span>
                       </a>
                       <a 
                         href="/forums" 
@@ -322,8 +327,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('forums') ? 'text-white' : 'text-gray-600'}>💬</span>
-                        <span className="text-xs md:text-sm">Fòrums</span>
+                            <span className="text-xs md:text-sm">Fòrums</span>
                       </a>
                       <a 
                         href="/blogs" 
@@ -333,8 +337,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('blogs') ? 'text-white' : 'text-gray-600'}>📝</span>
-                        <span className="text-xs md:text-sm">Blogs</span>
+                            <span className="text-xs md:text-sm">Blogs</span>
                       </a>
                     </nav>
                   </div>
@@ -351,7 +354,6 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('empresas') ? 'text-white' : 'text-gray-600'}>🏢</span>
                         <span className="text-xs md:text-sm">Empreses Col·laboradores</span>
                       </a>
                       <a 
@@ -362,8 +364,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('ofertes') ? 'text-white' : 'text-gray-600'}>💼</span>
-                        <span className="text-xs md:text-sm">Ofertes</span>
+                            <span className="text-xs md:text-sm">Ofertes</span>
                       </a>
                       <a 
                         href="/tauler-anuncis" 
@@ -373,8 +374,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('tauler-anuncis') ? 'text-white' : 'text-gray-600'}>📄</span>
-                        <span className="text-xs md:text-sm">Taulell d'Anuncis</span>
+                            <span className="text-xs md:text-sm">Taulell d'Anuncis</span>
                       </a>
                       <a 
                         href="/assessorament" 
@@ -384,8 +384,7 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('assessorament') ? 'text-white' : 'text-gray-600'}>👁️</span>
-                        <span className="text-xs md:text-sm">Assessorament</span>
+                            <span className="text-xs md:text-sm">Assessorament</span>
                       </a>
                       <a 
                         href="/enllcos-interes" 
@@ -395,8 +394,17 @@ export default function LayoutGeneral({
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        <span className={isActive('enllcos-interes') ? 'text-white' : 'text-gray-600'}>🔗</span>
-                        <span className="text-xs md:text-sm">Enllaços d'Interès</span>
+                            <span className="text-xs md:text-sm">Enllaços d'Interès</span>
+                      </a>
+                      <a 
+                        href="/formacio" 
+                        className={`flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors ${
+                          isActive('formacio') 
+                            ? 'text-white bg-blue-500' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                            <span className="text-xs md:text-sm">Formació</span>
                       </a>
                     </nav>
                   </div>
@@ -408,8 +416,7 @@ export default function LayoutGeneral({
                       <button 
                         onClick={() => setModalBusquedaObert(true)}
                         className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left">
-                        <span className="text-gray-600">🔍</span>
-                        <span className="text-xs md:text-sm">Cercar</span>
+                            <span className="text-xs md:text-sm">Cercar</span>
                       </button>
                       <a 
                         href="/missatges"
@@ -418,8 +425,7 @@ export default function LayoutGeneral({
                             ? 'text-white bg-blue-500' 
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}>
-                        <span className={isActive('missatges') ? 'text-white' : 'text-gray-600'}>💬</span>
-                        <span className="text-xs md:text-sm">Missatges</span>
+                            <span className="text-xs md:text-sm">Missatges</span>
                       </a>
                       <a 
                         href="/notificacions"
@@ -428,8 +434,7 @@ export default function LayoutGeneral({
                             ? 'text-white bg-blue-500' 
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}>
-                        <span className={isActive('notificacions') ? 'text-white' : 'text-gray-600'}>🔔</span>
-                        <span className="text-xs md:text-sm">Notificacions</span>
+                            <span className="text-xs md:text-sm">Notificacions</span>
                       </a>
                       <a 
                         href="/calendari"
@@ -438,8 +443,7 @@ export default function LayoutGeneral({
                             ? 'text-white bg-blue-500' 
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}>
-                        <span className={isActive('calendari') ? 'text-white' : 'text-gray-600'}>📅</span>
-                        <span className="text-xs md:text-sm">Calendari</span>
+                            <span className="text-xs md:text-sm">Calendari</span>
                       </a>
                     </nav>
                   </div>
@@ -452,15 +456,13 @@ export default function LayoutGeneral({
                         onClick={() => setModalConfiguracioObert(true)}
                         className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
                       >
-                        <span className="text-gray-600">⚙️</span>
-                        <span className="text-xs md:text-sm">Configuració</span>
+                            <span className="text-xs md:text-sm">Configuració</span>
                       </button>
                       <button 
                         onClick={() => setModalConfiguracioEmailsObert(true)}
                         className="w-full flex items-center space-x-2 md:space-x-3 px-2 md:px-3 py-1.5 md:py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-left"
                       >
-                        <span className="text-gray-600">📧</span>
-                        <span className="text-xs md:text-sm">Emails</span>
+                            <span className="text-xs md:text-sm">Emails</span>
                       </button>
                     </nav>
                   </div>
@@ -483,7 +485,9 @@ export default function LayoutGeneral({
           </div>
 
           {/* CONTENIDO PRINCIPAL - Ocupa todo el espacio restante */}
-          <div className="lg:flex-1 lg:ml-0">
+          <div className={`lg:flex-1 lg:ml-0 ${
+            showPadding ? 'px-4 sm:px-6 lg:px-8 py-6' : ''
+          } ${className}`}>
             {children}
           </div>
 
@@ -497,7 +501,6 @@ export default function LayoutGeneral({
             href="/xarxa-social"
             className={`py-3 text-xs text-center ${(isActive('dashboard') || isActive('xarxa-social')) ? 'text-blue-600' : 'text-gray-600'}`}
           >
-            <span className="block text-xl mb-1">🏠</span>
             Inici
           </a>
           <a 
@@ -522,7 +525,6 @@ export default function LayoutGeneral({
             Blogs
           </a>
           <button className="py-3 text-xs text-gray-600 text-center">
-            <span className="block text-xl mb-1">⚙️</span>
             Més
           </button>
         </div>

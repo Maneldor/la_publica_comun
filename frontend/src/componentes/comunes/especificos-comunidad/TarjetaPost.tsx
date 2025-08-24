@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTema } from '../../../../hooks/useComunidad';
 import { Post, Comentario, TipoPost } from '../../../../tipos/redSocial';
+import { formatearTiempoRelativo } from '../../../utils/formateoFechas';
+import { useFavoritos } from '../../../contextos/FavoritosContext';
 import { 
   Heart, 
   MessageCircle, 
@@ -52,10 +54,14 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
   className = ''
 }) => {
   const { colores } = useTema();
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
   const [mostrarComentarios, setMostrarComentarios] = useState(false);
   const [nuevoComentario, setNuevoComentario] = useState('');
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [reaccionSeleccionada, setReaccionSeleccionada] = useState<string | null>(null);
+  
+  // Determinar si el post es favorito
+  const esPostFavorito = esFavorito('post', post.id);
 
   // Obtener icono según tipo de post
   const obtenerIconoTipo = () => {
@@ -87,20 +93,7 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
     return textos[post.tipo] || 'Publicación';
   };
 
-  // Formatear fecha relativa
-  const formatearFecha = (fecha: Date) => {
-    const ahora = new Date();
-    const diferencia = ahora.getTime() - fecha.getTime();
-    const minutos = Math.floor(diferencia / 60000);
-    const horas = Math.floor(diferencia / 3600000);
-    const dias = Math.floor(diferencia / 86400000);
-
-    if (minutos < 1) return 'Ahora';
-    if (minutos < 60) return `${minutos}m`;
-    if (horas < 24) return `${horas}h`;
-    if (dias < 7) return `${dias}d`;
-    return fecha.toLocaleDateString();
-  };
+  // ✅ USANDO FUNCIÓN CENTRALIZADA DE FORMATEO
 
   // Manejar reacción
   const manejarReaccion = (emoji: string) => {
@@ -335,7 +328,7 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
                 )}
                 <span className="flex items-center">
                   <Clock size={12} className="mr-1" />
-                  {formatearFecha(post.fechaCreacion)}
+                  {formatearTiempoRelativo(post.fechaCreacion, 'es')}
                 </span>
               </div>
             </div>
@@ -353,18 +346,36 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
             {menuAbierto && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-10">
                 <div className="py-1">
-                  {onSave && (
-                    <button
-                      onClick={() => {
-                        onSave(post.id);
-                        setMenuAbierto(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      <Bookmark size={16} className="mr-2" />
-                      Guardar post
-                    </button>
-                  )}
+                  <button
+                    onClick={async () => {
+                      try {
+                        if (esPostFavorito) {
+                          await eliminarFavorito('post', post.id);
+                        } else {
+                          await agregarFavorito('post', post.id, {
+                            titulo: post.contenido.substring(0, 50) + (post.contenido.length > 50 ? '...' : ''),
+                            descripcion: post.contenido,
+                            autor: post.autor.nombre,
+                            fechaPublicacion: post.fechaPublicacion,
+                            tipo: post.tipo,
+                            categoria: post.categoria || 'general'
+                          });
+                        }
+                        
+                        // Si hay callback externo, llamarlo también
+                        if (onSave) onSave(post.id);
+                      } catch (error) {
+                        console.error('Error al cambiar favorito:', error);
+                      }
+                      setMenuAbierto(false);
+                    }}
+                    className={`flex items-center px-4 py-2 text-sm hover:bg-gray-100 w-full text-left ${
+                      esPostFavorito ? 'text-red-600' : 'text-gray-700'
+                    }`}
+                  >
+                    <Bookmark size={16} className={`mr-2 ${esPostFavorito ? 'fill-current' : ''}`} />
+                    {esPostFavorito ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                  </button>
                   {onReport && (
                     <button
                       onClick={() => {
@@ -549,7 +560,7 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
                       <p className="text-sm text-gray-700 mt-1">{comentario.contenido}</p>
                     </div>
                     <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
-                      <span>{formatearFecha(comentario.fechaCreacion)}</span>
+                      <span>{formatearTiempoRelativo(comentario.fechaCreacion, 'es')}</span>
                       <button className="hover:underline">Me gusta</button>
                       <button className="hover:underline">Responder</button>
                     </div>

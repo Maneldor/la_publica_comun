@@ -12,6 +12,7 @@ import {
 import { Anuncio, CategoriaAnuncio } from '../../../tipos/anuncios';
 import { useTraduccio } from '../../contextos/TraduccioContext';
 import { useComunidad } from '../../../hooks/useComunidad';
+import { useFavoritos } from '../../contextos/FavoritosContext';
 import { useState, useEffect } from 'react';
 
 interface TarjetaAnuncioProps {
@@ -39,7 +40,11 @@ export default function TarjetaAnuncio({
 }: TarjetaAnuncioProps) {
   const router = useRouter();
   const { configuracion, idioma } = useComunidad();
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
   const tema = configuracion.tema;
+  
+  // Determinar si es favorito
+  const esAnuncioFavorito = esFavorito('post', anuncio.id);
 
   // Obtener sistema de traducción unificado
   const { t, tDynamic } = useTraduccio();
@@ -117,9 +122,28 @@ export default function TarjetaAnuncio({
     router.push(`/tauler-anuncis/${anuncio.id}`);
   };
 
-  const handleFavorito = (e: React.MouseEvent) => {
+  const handleFavorito = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onFavorito) onFavorito(anuncio.id);
+    
+    try {
+      if (esAnuncioFavorito) {
+        await eliminarFavorito('post', anuncio.id);
+      } else {
+        await agregarFavorito('post', anuncio.id, {
+          titulo: tituloTraducido.texto,
+          descripcion: descripcionTraducida.texto,
+          categoria: anuncio.categoria,
+          ubicacion: anuncio.ubicacion,
+          fechaPublicacion: anuncio.fechaPublicacion,
+          autor: anuncio.autor.nombre
+        });
+      }
+      
+      // Si hay callback externo, llamarlo también
+      if (onFavorito) onFavorito(anuncio.id);
+    } catch (error) {
+      console.error('Error al cambiar favorito del anuncio:', error);
+    }
   };
 
   const handleContactar = (e: React.MouseEvent) => {
@@ -177,9 +201,13 @@ export default function TarjetaAnuncio({
           </h3>
           <button
             onClick={handleFavorito}
-            className="text-gray-400 hover:text-red-500 ml-2 flex-shrink-0"
+            className={`ml-2 flex-shrink-0 transition-colors ${
+              esAnuncioFavorito 
+                ? 'text-red-500' 
+                : 'text-gray-400 hover:text-red-500'
+            }`}
           >
-            <Heart size={16} />
+            <Heart size={16} className={esAnuncioFavorito ? 'fill-current' : ''} />
           </button>
         </div>
         

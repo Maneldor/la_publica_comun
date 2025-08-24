@@ -10,4 +10,4 @@ export type {
   PropiedadesFormularioEvento,
   PropiedadesCalendarioEventos,
   PropiedadesDetalleEvento
-} from '../../tipos/eventos'
+} from '../../../tipos/eventos'

@@ -45,6 +45,7 @@ import {
   Archive,
   MoreHorizontal
 } from 'lucide-react';
+import { formatearNumero } from '../../../utils/formateoNumeros';
 import { useComunidad } from '../../../../hooks/useComunidad';
 import { Boton } from './ui/Boton';
 import { 
@@ -209,7 +210,7 @@ const MetricasPrincipales: React.FC<{ estadisticas: EstadisticasGenerales }> = (
   const metricas = [
     {
       titulo: 'Total Usuarios',
-      valor: estadisticas.totalUsuarios.toLocaleString(),
+      valor: formatearNumero(estadisticas.totalUsuarios),
       cambio: `+${estadisticas.nuevosUsuariosMes}`,
       tendencia: 'positiva',
       icono: <Users size={24} />,
@@ -218,7 +219,7 @@ const MetricasPrincipales: React.FC<{ estadisticas: EstadisticasGenerales }> = (
     },
     {
       titulo: 'Usuarios Activos',
-      valor: estadisticas.usuariosActivos.toLocaleString(),
+      valor: formatearNumero(estadisticas.usuariosActivos),
       cambio: `${Math.round((estadisticas.usuariosActivos / estadisticas.totalUsuarios) * 100)}%`,
       tendencia: 'positiva',
       icono: <Activity size={24} />,
@@ -227,7 +228,7 @@ const MetricasPrincipales: React.FC<{ estadisticas: EstadisticasGenerales }> = (
     },
     {
       titulo: 'Grupos Activos',
-      valor: estadisticas.gruposActivos.toLocaleString(),
+      valor: formatearNumero(estadisticas.gruposActivos),
       cambio: `${estadisticas.totalGrupos} total`,
       tendencia: 'neutral',
       icono: <Layers size={24} />,
@@ -236,7 +237,7 @@ const MetricasPrincipales: React.FC<{ estadisticas: EstadisticasGenerales }> = (
     },
     {
       titulo: 'Posts Este Mes',
-      valor: estadisticas.postsMes.toLocaleString(),
+      valor: formatearNumero(estadisticas.postsMes),
       cambio: '+15%',
       tendencia: 'positiva',
       icono: <MessageSquare size={24} />,
@@ -245,7 +246,7 @@ const MetricasPrincipales: React.FC<{ estadisticas: EstadisticasGenerales }> = (
     },
     {
       titulo: 'Eventos Este Mes',
-      valor: estadisticas.eventosMes.toLocaleString(),
+      valor: formatearNumero(estadisticas.eventosMes),
       cambio: '+8%',
       tendencia: 'positiva',
       icono: <Calendar size={24} />,
@@ -254,7 +255,7 @@ const MetricasPrincipales: React.FC<{ estadisticas: EstadisticasGenerales }> = (
     },
     {
       titulo: 'Ofertas Activas',
-      valor: estadisticas.totalOfertas.toLocaleString(),
+      valor: formatearNumero(estadisticas.totalOfertas),
       cambio: `+${estadisticas.ofertasMes}`,
       tendencia: 'positiva',
       icono: <Briefcase size={24} />,
@@ -377,7 +378,7 @@ const EstadisticasPorComunidad: React.FC<{
               <div>
                 <h4 className="font-medium text-gray-900">{comunidad.nombre}</h4>
                 <p className="text-sm text-gray-600">
-                  {comunidad.usuarios.toLocaleString()} usuarios • {comunidad.grupos} grupos
+                  {formatearNumero(comunidad.usuarios)} usuarios • {comunidad.grupos} grupos
                 </p>
               </div>
             </div>

@@ -20,6 +20,7 @@ import {
   Globe,
   Star
 } from 'lucide-react';
+import { formatearNumero } from '../../../src/utils/formateoNumeros';
 
 interface Empresa {
   id: string
@@ -249,7 +250,7 @@ export default function EmpresasColaboradorasPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-900">
-                      {empresasMock.reduce((acc, empresa) => acc + empresa.seguidores, 0).toLocaleString()}
+                      {formatearNumero(empresasMock.reduce((acc, empresa) => acc + empresa.seguidores, 0))}
                     </p>
                     <p className="text-sm text-gray-500">Seguidors</p>
                   </div>

@@ -230,7 +230,7 @@ export function EventosFiltrosProvider({ children }: { children: ReactNode }) {
 // ✅ PROVIDER PARA DATA (Cambia frecuentemente)
 export function EventosDataProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(eventosReducer, undefined, createInitialState)
-  const { addNotification } = useNotifications()
+  const { afegirNotificacio } = useNotifications()
 
   // ✅ TÉCNICA #3: Optimistic Updates con Rollback
   const crearEvento = useCallback(async (datos: FormularioEventoData): Promise<Evento> => {
@@ -269,7 +269,7 @@ export function EventosDataProvider({ children }: { children: ReactNode }) {
       // Simular API call
       await new Promise(resolve => setTimeout(resolve, 800))
 
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Esdeveniment creat',
         descripcio: `L'esdeveniment "${nuevoEvento.titulo}" s'ha creat correctament`,
@@ -282,7 +282,7 @@ export function EventosDataProvider({ children }: { children: ReactNode }) {
       // Rollback
       dispatch({ type: 'DELETE_EVENTO', eventoId: nuevoEvento.id })
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut crear l\'esdeveniment',
@@ -293,7 +293,7 @@ export function EventosDataProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', loading: false })
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const gestionarAsistencia = useCallback(async (eventoId: string, accion: AccionAsistencia): Promise<void> => {
     const usuarioId = 'user-1' // TODO: Get from auth
@@ -310,7 +310,7 @@ export function EventosDataProvider({ children }: { children: ReactNode }) {
         quizas: 'Has marcat l\'esdeveniment com a "potser"'
       }
 
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Assistència actualitzada',
         descripcio: mensajes[accion],
@@ -319,7 +319,7 @@ export function EventosDataProvider({ children }: { children: ReactNode }) {
       })
     } catch (error) {
       // TODO: Rollback en caso de error
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut actualitzar l\'assistència',
@@ -328,7 +328,7 @@ export function EventosDataProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const comentarEvento = useCallback(async (eventoId: string, contenido: string): Promise<void> => {
     const nuevoComentario: ComentarioEvento = {

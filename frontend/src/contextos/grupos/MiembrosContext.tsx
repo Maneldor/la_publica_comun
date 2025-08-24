@@ -36,7 +36,7 @@ const PERFILES_USUARIOS: Record<string, { nombre: string; nick: string; avatar: 
 export function MiembrosProvider({ children }: { children: ReactNode }) {
   const [miembros, setMiembros] = useState<MiembroGrupoAvanzado[]>([])
   const [cargandoMiembros, setCargandoMiembros] = useState(false)
-  const { addNotification } = useNotifications()
+  const { afegirNotificacio } = useNotifications()
 
   // ✅ TÉCNICA: Optimistic Updates para UX rápida
   const agregarMiembro = useCallback(async (grupoId: string, usuarioId: string, rol: RolGrupo = 'membre'): Promise<void> => {
@@ -61,7 +61,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
       // Simular API call
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Membre afegit',
         descripcio: `${nuevoMiembro.perfil.nombre} s'ha unit al grup`,
@@ -72,7 +72,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
       // Rollback optimistic update
       setMiembros(prev => prev.filter(m => m.id !== nuevoMiembro.id))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut afegir el membre',
@@ -81,7 +81,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const removerMiembro = useCallback(async (grupoId: string, usuarioId: string): Promise<void> => {
     const membroId = `${grupoId}-${usuarioId}`
@@ -93,7 +93,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
     try {
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Membre eliminat',
         descripcio: `${membroEliminado?.perfil.nombre || 'El membre'} ha sortit del grup`,
@@ -106,7 +106,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
         setMiembros(prev => [...prev, membroEliminado])
       }
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut eliminar el membre',
@@ -115,7 +115,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [miembros, addNotification])
+  }, [miembros, afegirNotificacio])
 
   const cambiarRolMiembro = useCallback(async (grupoId: string, usuarioId: string, nuevoRol: RolGrupo): Promise<void> => {
     const membroId = `${grupoId}-${usuarioId}`
@@ -129,7 +129,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
     try {
       await new Promise(resolve => setTimeout(resolve, 300))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Rol canviat',
         descripcio: `Rol actualitzat a ${nuevoRol}`,
@@ -144,7 +144,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
         ))
       }
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut canviar el rol',
@@ -153,14 +153,14 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [miembros, addNotification])
+  }, [miembros, afegirNotificacio])
 
   const invitarMiembro = useCallback(async (grupoId: string, email: string, rol: RolGrupo = 'membre'): Promise<void> => {
     setCargandoMiembros(true)
     try {
       await new Promise(resolve => setTimeout(resolve, 800))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Invitació enviada',
         descripcio: `S'ha enviat una invitació a ${email}`,
@@ -168,7 +168,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
         data: new Date()
       })
     } catch (error) {
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut enviar la invitació',
@@ -179,7 +179,7 @@ export function MiembrosProvider({ children }: { children: ReactNode }) {
     } finally {
       setCargandoMiembros(false)
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   // ✅ UTILIDADES MEMOIZADAS para evitar re-cálculos
   const esMiembroGrupo = useCallback((grupoId: string, usuarioId: string = 'user-1'): boolean => {

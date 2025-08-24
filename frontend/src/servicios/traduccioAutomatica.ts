@@ -28,7 +28,7 @@ class TraduccioAutomaticaService {
       idiomaPredeterminat: 'ca',
       fallbackIdioma: 'es',
       traduccionsCache: this.carregarTraduccionsBase(),
-      habilitatServeiExtern: false, // En desarrollo, solo usar diccionario local
+      habilitatServeiExtern: false, // DESHABILITADO: En desarrollo, solo usar diccionario local
       proveidorExtern: undefined
     }
     this.inicialitzarCache()
@@ -562,6 +562,253 @@ class TraduccioAutomaticaService {
 
 // Export singleton
 export const traduccioAutomatica = TraduccioAutomaticaService.getInstance()
+
+// ✅ NUEVO: SERVICIO DE TRADUCCIÓN AUTOMÁTICA PARA CONTENIDO
+import { 
+  IdiomaOficial, 
+  ContenidoMultiidioma, 
+  TraduccionContenido, 
+  ResultadoTraduccion 
+} from '../../tipos/i18n'
+
+export class ServicioTraduccionAutomatica {
+  private static cache = new Map<string, TraduccionContenido>()
+  
+  // ✅ TRADUCIR CONTENIDO DE USUARIO
+  static async traducirContenido(
+    contenido: ContenidoMultiidioma,
+    idiomaDestino: IdiomaOficial,
+    fuerzarRetraducir = false
+  ): Promise<string> {
+    
+    // 1. Si el idioma destino es el original, devolver original
+    if (contenido.idiomaOriginal === idiomaDestino) {
+      return contenido.textoOriginal
+    }
+    
+    // 2. Verificar si ya existe traducción válida
+    const traduccionExistente = contenido.traducciones[idiomaDestino]
+    if (traduccionExistente && !fuerzarRetraducir) {
+      return traduccionExistente.texto
+    }
+    
+    // 3. Intentar traducir
+    try {
+      const resultado = await this.traducirTexto(
+        contenido.textoOriginal,
+        contenido.idiomaOriginal,
+        idiomaDestino
+      )
+      
+      // 4. Guardar traducción en el contenido
+      if (!contenido.traducciones) {
+        contenido.traducciones = {}
+      }
+      
+      contenido.traducciones[idiomaDestino] = {
+        texto: resultado.textoTraducido,
+        fechaTraduccion: new Date(),
+        metodoTraduccion: 'automatica',
+        calidad: resultado.confianza
+      }
+      
+      return resultado.textoTraducido
+      
+    } catch (error) {
+      console.warn('Error traduciendo contenido:', error)
+      return `${contenido.textoOriginal} [Original en ${contenido.idiomaOriginal}]`
+    }
+  }
+  
+  // ✅ TRADUCIR TEXTO SIMPLE
+  static async traducirTexto(
+    texto: string,
+    desde: IdiomaOficial,
+    hacia: IdiomaOficial
+  ): Promise<ResultadoTraduccion> {
+    const startTime = performance.now()
+    
+    // 1. Verificar caché
+    const cacheKey = `${texto}_${desde}_${hacia}`
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey)!
+      return {
+        textoTraducido: cached.texto,
+        confianza: cached.calidad,
+        tiempoMs: performance.now() - startTime,
+        provider: 'cache'
+      }
+    }
+    
+    // 2. Solo usar diccionario interno (API deshabilitada en desarrollo)
+    return this.traducirInterno(texto, desde, hacia, startTime)
+  }
+  
+  // ✅ TRADUCIR CON API EXTERNA
+  private static async traducirConAPI(
+    texto: string,
+    desde: IdiomaOficial,
+    hacia: IdiomaOficial
+  ): Promise<ResultadoTraduccion> {
+    
+    // Intentar con Google Translate primero
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: texto,
+          from: desde,
+          to: hacia,
+          provider: 'google'
+        }),
+        signal: AbortSignal.timeout(5000)
+      })
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      return {
+        textoTraducido: data.translatedText,
+        idiomaDetectado: data.detectedLanguage as IdiomaOficial,
+        confianza: data.confidence || 85,
+        tiempoMs: 0,
+        provider: 'google'
+      }
+      
+    } catch (error) {
+      throw new Error(`API translation failed: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+    }
+  }
+  
+  // ✅ TRADUCIR CON DICCIONARIO INTERNO (FALLBACK)
+  private static async traducirInterno(
+    texto: string,
+    desde: IdiomaOficial,
+    hacia: IdiomaOficial,
+    startTime: number = performance.now()
+  ): Promise<ResultadoTraduccion> {
+    
+    // Diccionario básico para palabras comunes del sector público
+    const diccionarios = {
+      'es-ca': {
+        // Palabras comunes del sector público
+        'administración': 'administració',
+        'funcionario': 'funcionari',
+        'ciudadano': 'ciutadà',
+        'servicio': 'servei',
+        'público': 'públic',
+        'gobierno': 'govern',
+        'ayuntamiento': 'ajuntament',
+        'diputación': 'diputació',
+        'comunidad': 'comunitat',
+        'provincia': 'província',
+        'región': 'regió',
+        'oficina': 'oficina',
+        'trámite': 'tràmit',
+        'documento': 'document',
+        'expediente': 'expedient',
+        'solicitud': 'sol·licitud',
+        'formulario': 'formulari',
+        'certificado': 'certificat',
+        'licencia': 'llicència',
+        'permiso': 'permís',
+        'autorización': 'autorització',
+        'registro': 'registre',
+        'censo': 'cens',
+        'padrón': 'padró',
+        'impuesto': 'impost',
+        'tasa': 'taxa',
+        'multa': 'multa',
+        'sanción': 'sanció',
+        'recurso': 'recurs',
+        'alegación': 'al·legació'
+      },
+      'es-eu': {
+        'administración': 'administrazioa',
+        'funcionario': 'funtzionarioa',
+        'ciudadano': 'hiritarra',
+        'servicio': 'zerbitzua',
+        'público': 'publikoa',
+        'gobierno': 'gobernua',
+        'ayuntamiento': 'udaletxea',
+        'diputación': 'aldundia',
+        'comunidad': 'komunitatea',
+        'provincia': 'probintzia',
+        'región': 'eskualdea',
+        'oficina': 'bulegoa',
+        'trámite': 'izapidea',
+        'documento': 'dokumentua',
+        'expediente': 'espedientea',
+        'solicitud': 'eskaria',
+        'formulario': 'formularioa',
+        'certificado': 'ziurtagiria',
+        'licencia': 'lizentzia',
+        'permiso': 'baimena',
+        'autorización': 'baimena',
+        'registro': 'erregistroa',
+        'censo': 'zentsua',
+        'padrón': 'erroldea',
+        'impuesto': 'zerga',
+        'tasa': 'tasa',
+        'multa': 'isuna',
+        'sanción': 'zigorroildia',
+        'recurso': 'errekurtsoa',
+        'alegación': 'alegazioa'
+      },
+      'es-gl': {
+        'administración': 'administración',
+        'funcionario': 'funcionario',
+        'ciudadano': 'cidadán',
+        'servicio': 'servizo',
+        'público': 'público',
+        'gobierno': 'goberno',
+        'ayuntamiento': 'concello',
+        'diputación': 'deputación',
+        'comunidad': 'comunidade',
+        'provincia': 'provincia',
+        'región': 'rexión',
+        'oficina': 'oficina',
+        'trámite': 'trámite',
+        'documento': 'documento',
+        'expediente': 'expediente',
+        'solicitud': 'solicitude',
+        'formulario': 'formulario',
+        'certificado': 'certificado',
+        'licencia': 'licenza',
+        'permiso': 'permiso',
+        'autorización': 'autorización',
+        'registro': 'rexistro',
+        'censo': 'censo',
+        'padrón': 'padrón',
+        'impuesto': 'imposto',
+        'tasa': 'taxa',
+        'multa': 'multa',
+        'sanción': 'sanción',
+        'recurso': 'recurso',
+        'alegación': 'alegación'
+      }
+    }
+    
+    const diccionario = diccionarios[`${desde}-${hacia}` as keyof typeof diccionarios] || {}
+    const palabras = texto.toLowerCase().split(' ')
+    
+    const traducidas = palabras.map(palabra => {
+      const limpia = palabra.replace(/[^\w\s]/gi, '')
+      return diccionario[limpia as keyof typeof diccionario] || palabra
+    })
+    
+    return {
+      textoTraducido: traducidas.join(' '),
+      confianza: 60, // Confianza media para diccionario interno
+      tiempoMs: performance.now() - startTime,
+      provider: 'interno'
+    }
+  }
+}
 
 // Hook personalizado para usar en componentes
 export function useTraduccio(idioma?: string) {

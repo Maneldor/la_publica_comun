@@ -481,14 +481,15 @@ export default function GruposMiembros({ onSeleccionarGrupo }: GruposMiembrosPro
     return traducciones[categoria.toLowerCase()] || categoria
   }
 
-  if (cargando) {
-    return (
-      <div className="p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-2 text-gray-600">Carregant grups...</p>
-      </div>
-    )
-  }
+  // Eliminamos el loading aquí porque Next.js ya maneja el loading con loading.tsx
+  // if (cargando) {
+  //   return (
+  //     <div className="p-8 text-center">
+  //       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+  //       <p className="mt-2 text-gray-600">Carregant grups...</p>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">

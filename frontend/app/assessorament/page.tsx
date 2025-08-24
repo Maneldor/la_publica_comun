@@ -114,15 +114,14 @@ export default function AssessoramentPage() {
   const [serveis, setServeis] = useState<ServeiAsesorament[]>([]);
   const [servicesFiltrats, setServicesFiltrats] = useState<ServeiAsesorament[]>([]);
   const [estadistiques, setEstadistiques] = useState<EstadistiquesAsesorament | null>(null);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(false); // Empezar sin mostrar carga
 
   const t = (traducciones as any)[idioma] || traducciones.es;
 
   // Mock data de servicios de asesoramiento
   useEffect(() => {
     const cargarDades = async () => {
-      // Simular carga de datos
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Cargar datos directamente sin retraso artificial
 
       const mockServeis: ServeiAsesorament[] = [
         {
@@ -364,7 +363,7 @@ export default function AssessoramentPage() {
       setServeis(mockServeis);
       setServicesFiltrats(mockServeis);
       setEstadistiques(mockEstadistiques);
-      setCargando(false);
+      // Ya no necesario setCargando(false) porque empieza en false
     };
 
     cargarDades();

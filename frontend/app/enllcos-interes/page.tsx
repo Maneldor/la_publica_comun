@@ -86,14 +86,14 @@ export default function EnllaçosInteresPage() {
   const [institucions, setInstitucions] = useState<InstitucioEnllac[]>([]);
   const [institucionsFiltrades, setInstitucionsFiltrades] = useState<InstitucioEnllac[]>([]);
   const [estadistiques, setEstadistiques] = useState<EstadistiquesEnllacos | null>(null);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(false); // Empezar sin mostrar carga
 
   const t = (traducciones as any)[idioma] || traducciones.es;
 
   // Mock data de instituciones
   useEffect(() => {
     const cargarDades = async () => {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Cargar datos directamente sin retraso artificial
 
       const mockInstitucions: InstitucioEnllac[] = [
         {
@@ -329,7 +329,7 @@ export default function EnllaçosInteresPage() {
       setInstitucions(mockInstitucions);
       setInstitucionsFiltrades(mockInstitucions);
       setEstadistiques(mockEstadistiques);
-      setCargando(false);
+      // Ya no necesario setCargando(false) porque empieza en false
     };
 
     cargarDades();

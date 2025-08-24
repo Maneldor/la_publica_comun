@@ -28,7 +28,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
   const [grupos, setGrupos] = useState<GrupoAvanzado[]>([])
   const [grupoActivo, setGrupoActivo] = useState<GrupoAvanzado | null>(null)
   const [cargando, setCargando] = useState(false)
-  const { addNotification } = useNotifications()
+  const { afegirNotificacio } = useNotifications()
 
   // ✅ OPTIMIZACIÓN #3: useCallback para funciones que se pasan a componentes hijos
   const crearGrupo = useCallback(async (datos: Partial<GrupoAvanzado>): Promise<GrupoAvanzado> => {
@@ -62,7 +62,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
       
       setGrupos(prev => [nuevoGrupo, ...prev])
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Grup creat',
         descripcio: `El grup "${nuevoGrupo.nom}" s'ha creat correctament`,
@@ -72,7 +72,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
       
       return nuevoGrupo
     } catch (error) {
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut crear el grup',
@@ -83,7 +83,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
     } finally {
       setCargando(false)
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const editarGrupo = useCallback(async (id: string, datos: Partial<GrupoAvanzado>): Promise<void> => {
     try {
@@ -91,7 +91,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
         grup.id === id ? { ...grup, ...datos } : grup
       ))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Grup actualitzat',
         descripcio: 'Els canvis s\'han guardat correctament',
@@ -99,7 +99,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
         data: new Date()
       })
     } catch (error) {
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut actualitzar el grup',
@@ -108,7 +108,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const eliminarGrupo = useCallback(async (id: string): Promise<void> => {
     try {
@@ -118,7 +118,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
         setGrupoActivo(null)
       }
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Grup eliminat',
         descripcio: 'El grup s\'ha eliminat correctament',
@@ -126,7 +126,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
         data: new Date()
       })
     } catch (error) {
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut eliminar el grup',
@@ -135,7 +135,7 @@ export function GruposProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [grupoActivo, addNotification])
+  }, [grupoActivo, afegirNotificacio])
 
   const seleccionarGrupo = useCallback((id: string) => {
     const grup = grupos.find(g => g.id === id)

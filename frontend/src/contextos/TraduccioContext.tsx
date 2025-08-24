@@ -1,16 +1,8 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { traduccioAutomatica, DiccionariTraduccions } from '../servicios/traduccioAutomatica'
-// Simulación de servicio de traducción (en producción usar API real)
-type IdiomasSoportados = 'ca' | 'es' | 'eu' | 'gl';
-
-// Mock de traducción automática (en producción integrar con servicio real)
-const traducirConCache = async (texto: string, idiomaOrigen: IdiomasSoportados, idiomaDestino: IdiomasSoportados): Promise<string> => {
-  // Simulación: en producción aquí iría la llamada a la API de traducción
-  console.log(`🌐 Traduciendo "${texto}" de ${idiomaOrigen} a ${idiomaDestino}`);
-  return texto; // Por ahora devuelve el texto original
-};
+import { traduccioAutomatica, DiccionariTraduccions, ServicioTraduccionAutomatica } from '../servicios/traduccioAutomatica'
+import { IdiomaOficial, ContenidoMultiidioma } from '../../tipos/i18n'
 import { useComunidad } from '../../app/ComunidadContext'
 
 interface TraduccioContextType {
@@ -24,18 +16,48 @@ interface TraduccioContextType {
   // Función para traducir contenido dinámico (ofertas, anuncios, eventos)
   tDynamic: (content: {
     texto: string
-    idiomaOriginal?: IdiomasSoportados
+    idiomaOriginal?: IdiomaOficial
     tipo?: 'oferta' | 'anuncio' | 'evento' | 'institucional'
   }) => Promise<string>
   
+  // ✅ NUEVAS FUNCIONES PARA CONTENIDO MULTIIDIOMA
+  // Función para traducir contenido completo multiidioma
+  translateContent: (contenido: ContenidoMultiidioma) => Promise<string>
+  
+  // Función para crear contenido multiidioma desde texto plano
+  createMultilingualContent: (
+    texto: string,
+    autorId: string,
+    tipoContenido: 'post' | 'comentario' | 'evento' | 'anuncio' | 'grupo',
+    idiomaOriginal?: IdiomaOficial
+  ) => Promise<ContenidoMultiidioma>
+  
+  // Función para obtener contenido en idioma específico
+  getContentInLanguage: (contenido: ContenidoMultiidioma, idiomaDest?: IdiomaOficial) => Promise<string>
+  
   // Estado del sistema
-  idioma: string
-  idiomesDisponibles: string[]
+  idioma: IdiomaOficial
+  idiomesDisponibles: IdiomaOficial[]
   estatCarrega: 'carregant' | 'carregat' | 'error'
+  traduciendo: boolean
   
   // Configuración
-  cambiarIdioma: (nouIdioma: string) => void
+  cambiarIdioma: (nouIdioma: IdiomaOficial) => void
   afegirTraduccions: (traduccions: Record<string, string>, idioma?: string) => void
+  
+  // ✅ NUEVAS CONFIGURACIONES
+  // Configuración de preferencias de traducción del usuario
+  configuracionUsuario: {
+    traducirAutomaticamente: boolean
+    mostrarIdiomaOriginal: boolean
+    priorizarContenidoEnMiIdioma: boolean
+  }
+  
+  actualizarConfiguracionUsuario: (config: Partial<{
+    traducirAutomaticamente: boolean
+    mostrarIdiomaOriginal: boolean
+    priorizarContenidoEnMiIdioma: boolean
+  }>) => void
   
   // Utilidades
   esIdiomaSuportat: (idioma: string) => boolean
@@ -44,6 +66,13 @@ interface TraduccioContextType {
     totalClaus: number
     traduccionsPerIdioma: Record<string, number>
     clausSenseTraduccion: string[]
+    // ✅ NUEVAS ESTADÍSTICAS
+    contenidoTraducido: {
+      totalContenidos: number
+      traduccionesEnCache: number
+      traduccionesExitosas: number
+      traduccionesFallidas: number
+    }
   }
   
   // Debugging
@@ -65,14 +94,22 @@ export function TraduccioProvider({
   habilitatDebugInicial = false
 }: TraduccioProviderProps) {
   const { configuracion, idioma: idiomaComunidad } = useComunidad()
-  const [idioma, setIdioma] = useState<string>(idiomaComunidad)
+  const [idioma, setIdioma] = useState<IdiomaOficial>(idiomaComunidad as IdiomaOficial)
   const [estatCarrega, setEstatCarrega] = useState<'carregant' | 'carregat' | 'error'>('carregant')
   const [habilitatDebug, setHabilitatDebug] = useState(habilitatDebugInicial)
+  const [traduciendo, setTraduciendo] = useState(false)
+  
+  // ✅ NUEVA CONFIGURACIÓN DE USUARIO
+  const [configuracionUsuario, setConfiguracionUsuario] = useState({
+    traducirAutomaticamente: true,
+    mostrarIdiomaOriginal: false,
+    priorizarContenidoEnMiIdioma: true
+  })
 
   // Sincronizar con el idioma de la comunidad
   useEffect(() => {
     if (idiomaComunidad !== idioma) {
-      setIdioma(idiomaComunidad)
+      setIdioma(idiomaComunidad as IdiomaOficial)
       traduccioAutomatica.configurarIdiomaPredeterminat(idiomaComunidad)
     }
   }, [idiomaComunidad, idioma])
@@ -200,7 +237,7 @@ export function TraduccioProvider({
   // Función para traducir contenido dinámico con traducción automática
   const tDynamic = async (content: {
     texto: string
-    idiomaOriginal?: IdiomasSoportados
+    idiomaOriginal?: IdiomaOficial
     tipo?: 'oferta' | 'anuncio' | 'evento' | 'institucional'
   }): Promise<string> => {
     const idiomaOriginal = content.idiomaOriginal || 'es'
@@ -211,12 +248,15 @@ export function TraduccioProvider({
     }
 
     try {
-      // Usar traducción automática para contenido dinámico
-      const textoTraducido = await traducirConCache(
+      setTraduciendo(true)
+      
+      // Usar el nuevo servicio de traducción automática
+      const resultado = await ServicioTraduccionAutomatica.traducirTexto(
         content.texto,
         idiomaOriginal,
-        idioma as any
+        idioma
       )
+      const textoTraducido = typeof resultado === 'string' ? resultado : resultado.textoTraducido
       
       if (habilitatDebug) {
         console.log(`🌐 Contingut dinàmic traduït (${content.tipo || 'genèric'}): ${idiomaOriginal} → ${idioma}`)
@@ -226,11 +266,49 @@ export function TraduccioProvider({
     } catch (error) {
       console.error('❌ Error traducint contingut dinàmic:', error)
       return content.texto // Fallback al original
+    } finally {
+      setTraduciendo(false)
     }
+  }
+  
+  // ✅ NUEVA FUNCIÓN PARA TRADUCIR CONTENIDO COMPLETO MULTIIDIOMA
+  const translateContent = async (contenido: ContenidoMultiidioma): Promise<string> => {
+    return await ServicioTraduccionAutomatica.traducirContenido(contenido, idioma)
+  }
+  
+  // ✅ NUEVA FUNCIÓN PARA CREAR CONTENIDO MULTIIDIOMA
+  const createMultilingualContent = async (
+    texto: string,
+    autorId: string,
+    tipoContenido: 'post' | 'comentario' | 'evento' | 'anuncio' | 'grupo',
+    idiomaOriginal: IdiomaOficial = 'es'
+  ): Promise<ContenidoMultiidioma> => {
+    // Crear contenido manualmente ya que el método no existe en la clase
+    const contenido: ContenidoMultiidioma = {
+      id: `contenido_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      autorId,
+      fechaCreacion: new Date(),
+      idiomaOriginal,
+      textoOriginal: texto,
+      traducciones: {},
+      tipoContenido,
+      requiereTraduccion: true,
+      esOficial: false
+    }
+    return contenido
+  }
+  
+  // ✅ NUEVA FUNCIÓN PARA OBTENER CONTENIDO EN IDIOMA ESPECÍFICO
+  const getContentInLanguage = async (
+    contenido: ContenidoMultiidioma, 
+    idiomaDest?: IdiomaOficial
+  ): Promise<string> => {
+    const idiomaDestino = idiomaDest || idioma
+    return await ServicioTraduccionAutomatica.traducirContenido(contenido, idiomaDestino)
   }
 
   // Cambiar idioma
-  const cambiarIdioma = (nouIdioma: string) => {
+  const cambiarIdioma = (nouIdioma: IdiomaOficial) => {
     if (traduccioAutomatica.esIdiomaSuportat(nouIdioma)) {
       setIdioma(nouIdioma)
       traduccioAutomatica.configurarIdiomaPredeterminat(nouIdioma)
@@ -240,6 +318,19 @@ export function TraduccioProvider({
       }
     } else {
       console.warn(`⚠️ Idioma no suportat: ${nouIdioma}`)
+    }
+  }
+  
+  // ✅ NUEVA FUNCIÓN PARA ACTUALIZAR CONFIGURACIÓN DE USUARIO
+  const actualizarConfiguracionUsuario = (config: Partial<{
+    traducirAutomaticamente: boolean
+    mostrarIdiomaOriginal: boolean
+    priorizarContenidoEnMiIdioma: boolean
+  }>) => {
+    setConfiguracionUsuario(prev => ({ ...prev, ...config }))
+    
+    if (habilitatDebug) {
+      console.log(`⚙️ Configuració d'usuari actualitzada:`, config)
     }
   }
 
@@ -262,13 +353,33 @@ export function TraduccioProvider({
   const value: TraduccioContextType = {
     t,
     tDynamic,
+    translateContent,
+    createMultilingualContent,
+    getContentInLanguage,
     idioma,
-    idiomesDisponibles: configuracion.idiomas,
+    idiomesDisponibles: configuracion.idiomas as IdiomaOficial[],
     estatCarrega,
+    traduciendo,
     cambiarIdioma,
     afegirTraduccions,
+    configuracionUsuario,
+    actualizarConfiguracionUsuario,
     esIdiomaSuportat: traduccioAutomatica.esIdiomaSuportat,
-    obtenirEstadistiques: traduccioAutomatica.obtenirEstadistiques,
+    obtenirEstadistiques: () => {
+      const statsBasicas = traduccioAutomatica.obtenirEstadistiques()
+      // Estadísticas básicas por ahora, se pueden extender
+      const statsContenido = {
+        totalContenidos: 0,
+        traduccionesEnCache: 0,
+        traduccionesExitosas: 0,
+        traduccionesFallidas: 0
+      }
+      
+      return {
+        ...statsBasicas,
+        contenidoTraducido: statsContenido
+      }
+    },
     habilitatDebug,
     toggleDebug
   }
@@ -303,6 +414,67 @@ export function useTWithVars() {
     t(clau, { variables, fallback })
 }
 
+// ✅ NUEVOS HOOKS ESPECIALIZADOS PARA CONTENIDO MULTIIDIOMA
+
+// Hook para traducir contenido dinámico
+export function useTDynamic() {
+  const { tDynamic } = useTraduccio()
+  return tDynamic
+}
+
+// Hook para manejar contenido multiidioma completo
+export function useMultilingualContent() {
+  const { 
+    translateContent, 
+    createMultilingualContent, 
+    getContentInLanguage,
+    configuracionUsuario,
+    traduciendo 
+  } = useTraduccio()
+  
+  return {
+    translateContent,
+    createMultilingualContent,
+    getContentInLanguage,
+    configuracionUsuario,
+    traduciendo
+  }
+}
+
+// Hook para posts con traducción automática
+export function useTranslatedPost() {
+  const { getContentInLanguage, configuracionUsuario, idioma } = useTraduccio()
+  
+  const translatePost = async (contenido: ContenidoMultiidioma) => {
+    if (!configuracionUsuario.traducirAutomaticamente) {
+      return contenido.textoOriginal
+    }
+    
+    return await getContentInLanguage(contenido, idioma)
+  }
+  
+  return { translatePost }
+}
+
+// Hook para configuración de usuario
+export function useTranslationSettings() {
+  const { 
+    configuracionUsuario, 
+    actualizarConfiguracionUsuario,
+    idioma,
+    idiomesDisponibles,
+    cambiarIdioma
+  } = useTraduccio()
+  
+  return {
+    configuracionUsuario,
+    actualizarConfiguracionUsuario,
+    idioma,
+    idiomesDisponibles,
+    cambiarIdioma
+  }
+}
+
 // Component wrapper para traducción inline
 interface TProps {
   children: string
@@ -314,6 +486,72 @@ interface TProps {
 export function T({ children, variables, fallback, contexte }: TProps) {
   const { t } = useTraduccio()
   return <>{t(children, { variables, fallback, contexte })}</>
+}
+
+// ✅ NUEVO COMPONENTE PARA CONTENIDO MULTIIDIOMA
+interface MultilingualContentProps {
+  contenido: ContenidoMultiidioma
+  mostrarIdiomOriginal?: boolean
+  className?: string
+  onTranslationError?: (error: Error) => void
+}
+
+export function MultilingualContent({ 
+  contenido, 
+  mostrarIdiomOriginal = false,
+  className = '',
+  onTranslationError
+}: MultilingualContentProps) {
+  const { getContentInLanguage, configuracionUsuario, idioma, traduciendo } = useTraduccio()
+  const [textoMostrado, setTextoMostrado] = useState<string>(contenido.textoOriginal)
+  const [cargando, setCargando] = useState(false)
+  
+  useEffect(() => {
+    const traducirContenido = async () => {
+      if (!configuracionUsuario.traducirAutomaticamente || idioma === contenido.idiomaOriginal) {
+        setTextoMostrado(contenido.textoOriginal)
+        return
+      }
+      
+      try {
+        setCargando(true)
+        const textoTraducido = await getContentInLanguage(contenido, idioma)
+        setTextoMostrado(textoTraducido)
+      } catch (error) {
+        console.error('Error traduciendo contenido:', error)
+        setTextoMostrado(contenido.textoOriginal)
+        if (onTranslationError) {
+          onTranslationError(error as Error)
+        }
+      } finally {
+        setCargando(false)
+      }
+    }
+    
+    traducirContenido()
+  }, [contenido, idioma, configuracionUsuario.traducirAutomaticamente, getContentInLanguage, onTranslationError])
+  
+  if (cargando || traduciendo) {
+    return (
+      <div className={`animate-pulse ${className}`}>
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    )
+  }
+  
+  return (
+    <div className={className}>
+      <div className="content">
+        {textoMostrado}
+      </div>
+      {mostrarIdiomOriginal && contenido.idiomaOriginal !== idioma && (
+        <div className="text-xs text-gray-500 mt-1 border-t pt-1">
+          <span className="font-semibold">Original ({contenido.idiomaOriginal}):</span> {contenido.textoOriginal}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // HOC para componentes que necesitan traducción

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Calendar, List, Filter } from 'lucide-react'
+import { Plus, Calendar, List, Filter, Clock } from 'lucide-react'
 import { Evento, FormularioEventoData } from '../../../tipos/eventos'
 import { useEventos, useEventosFiltros, useEventosData } from '../../contextos/EventosContext'
 import { useComunidad } from '../../../hooks/useComunidad'

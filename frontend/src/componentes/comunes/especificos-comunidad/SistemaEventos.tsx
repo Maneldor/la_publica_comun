@@ -43,9 +43,11 @@ import {
   Ticket, 
   Camera,
   Mic,
-  MicOff
+  MicOff,
+  Share2
 } from 'lucide-react';
 import { useComunidad } from '../../../../hooks/useComunidad';
+import { useFavoritos } from '../../../contextos/FavoritosContext';
 import { Boton } from './ui/Boton';
 import { 
   EventoPost, 
@@ -87,7 +89,83 @@ interface ComentarioEvento {
 type CategoriaEvento = 'formacion' | 'networking' | 'conferencia' | 'taller' | 'reunion' | 'otros';
 type TipoEvento = 'presencial' | 'online' | 'hibrido';
 type ModalidadEvento = 'publico' | 'privado';
-type EstadoEvento = 'programado' | 'en-progreso' | 'finalizado' | 'cancelado';
+type EstadoEvento = 'borrador' | 'programado' | 'en-progreso' | 'finalizado' | 'cancelado';
+
+// Función para obtener imágenes diferentes según la categoría
+const getEventImage = (categoria: string): string => {
+  const imageMap: Record<string, string> = {
+    'formacion': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=200&fit=crop',
+    'networking': 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop',
+    'conferencia': 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=200&fit=crop',
+    'taller': 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=200&fit=crop',
+    'seminario': 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=200&fit=crop',
+    'reunion': 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=200&fit=crop',
+    'social': 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400&h=200&fit=crop'
+  };
+  
+  return imageMap[categoria] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop';
+};
+
+// Función para truncar texto de manera consistente
+const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  
+  // Buscar el último espacio antes del límite para no cortar palabras
+  const truncated = text.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  
+  if (lastSpace > 0) {
+    return truncated.substring(0, lastSpace) + '...';
+  }
+  
+  return truncated + '...';
+};
+
+// Funciones de permisos para eventos
+const puedeCrearEventos = (tipoUsuario: string): boolean => {
+  return ['admin-web', 'administrador-grupo'].includes(tipoUsuario);
+};
+
+const puedeEditarEvento = (tipoUsuario: string, evento: Evento, usuarioId: string): boolean => {
+  // Admin web puede editar cualquier evento
+  if (tipoUsuario === 'admin-web') return true;
+  
+  // Administrador de grupo puede editar solo sus propios eventos en borrador
+  if (tipoUsuario === 'administrador-grupo') {
+    return evento.creadorId === usuarioId && evento.estado === 'borrador';
+  }
+  
+  return false;
+};
+
+const puedeEliminarEvento = (tipoUsuario: string, evento: Evento, usuarioId: string): boolean => {
+  // Admin web puede eliminar cualquier evento
+  if (tipoUsuario === 'admin-web') return true;
+  
+  // Administrador de grupo puede eliminar solo sus propios eventos en borrador
+  if (tipoUsuario === 'administrador-grupo') {
+    return evento.creadorId === usuarioId && evento.estado === 'borrador';
+  }
+  
+  return false;
+};
+
+const puedeVerEvento = (evento: Evento, tipoUsuario: string, usuarioId: string): boolean => {
+  // Admin web ve todos los eventos
+  if (tipoUsuario === 'admin-web') return true;
+  
+  // Eventos programados son visibles para todos
+  if (evento.estado === 'programado' || evento.estado === 'en-progreso' || evento.estado === 'finalizado') {
+    return true;
+  }
+  
+  // Eventos en borrador solo los ve el creador y admin web
+  if (evento.estado === 'borrador') {
+    return evento.creadorId === usuarioId || tipoUsuario === 'admin-web';
+  }
+  
+  return false;
+};
 
 interface PropiedadesSistemaEventos {
   usuario: Usuario;
@@ -831,6 +909,48 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
 }) => {
   const [nuevoComentario, setNuevoComentario] = useState('');
   const [cargandoComentario, setCargandoComentario] = useState(false);
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
+  
+  const eventoEsFavorito = esFavorito('evento', evento.id);
+
+  const manejarToggleFavorito = async () => {
+    try {
+      if (eventoEsFavorito) {
+        await eliminarFavorito('evento', evento.id);
+      } else {
+        await agregarFavorito('evento', evento.id, {
+          eventoId: evento.id,
+          titulo: evento.titulo,
+          fecha: evento.fechaInicio,
+          ubicacion: evento.ubicacion,
+          imagen: (evento as any).banner || getEventImage(evento.categoria)
+        });
+      }
+    } catch (error) {
+      console.error('Error gestionando favorito:', error);
+    }
+  };
+
+  const manejarCompartir = async () => {
+    try {
+      const url = `${window.location.origin}/calendari?evento=${evento.id}`;
+      const texto = `¡Mira este evento! ${evento.titulo} - ${evento.fechaInicio.toLocaleDateString('es-ES')}`;
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: evento.titulo,
+          text: texto,
+          url: url
+        });
+      } else {
+        // Fallback: copiar al portapapeles
+        await navigator.clipboard.writeText(`${texto}\n${url}`);
+        alert('Enlace copiado al portapapeles');
+      }
+    } catch (error) {
+      console.error('Error compartiendo:', error);
+    }
+  };
 
   const manejarComentario = async () => {
     if (!nuevoComentario.trim()) return;
@@ -882,29 +1002,68 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="relative">
-          {(evento as any).banner && (
-            <img
-              src={(evento as any).banner}
-              alt={evento.titulo}
-              className="w-full h-48 object-cover rounded-t-xl"
-            />
-          )}
-          <div className="absolute top-4 right-4">
-            <button
-              onClick={onCerrar}
-              className="p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full"
-            >
-              <X size={20} />
-            </button>
-          </div>
-          {!(evento as any).banner && (
+          {(evento as any).banner ? (
+            <>
+              <img
+                src={(evento as any).banner}
+                alt={evento.titulo}
+                className="w-full h-48 object-cover rounded-t-xl"
+              />
+              <div className="absolute top-4 right-4 flex items-center space-x-2">
+                <button
+                  onClick={manejarCompartir}
+                  className="p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full transition-all hover:scale-105"
+                  title="Compartir evento"
+                >
+                  <Share2 size={18} className="text-gray-700" />
+                </button>
+                <button
+                  onClick={manejarToggleFavorito}
+                  className="p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full transition-all hover:scale-105"
+                  title={eventoEsFavorito ? "Quitar de favoritos" : "Añadir a favoritos"}
+                >
+                  {eventoEsFavorito ? (
+                    <BookmarkCheck size={18} className="text-blue-600" />
+                  ) : (
+                    <Bookmark size={18} className="text-gray-700" />
+                  )}
+                </button>
+                <button
+                  onClick={onCerrar}
+                  className="p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </>
+          ) : (
             <div className="h-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-xl relative">
-              <button
-                onClick={onCerrar}
-                className="absolute top-4 right-4 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full"
-              >
-                <X size={20} />
-              </button>
+              <div className="absolute top-4 right-4 flex items-center space-x-2">
+                <button
+                  onClick={manejarCompartir}
+                  className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-all hover:scale-105"
+                  title="Compartir evento"
+                >
+                  <Share2 size={18} />
+                </button>
+                <button
+                  onClick={manejarToggleFavorito}
+                  className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-all hover:scale-105"
+                  title={eventoEsFavorito ? "Quitar de favoritos" : "Añadir a favoritos"}
+                >
+                  {eventoEsFavorito ? (
+                    <BookmarkCheck size={18} className="text-white" />
+                  ) : (
+                    <Bookmark size={18} className="text-white" />
+                  )}
+                </button>
+                <button
+                  onClick={onCerrar}
+                  className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -930,15 +1089,6 @@ const DetalleEvento: React.FC<PropiedadesDetalleEvento> = ({
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-3">{evento.titulo}</h1>
               <p className="text-gray-600 mb-4">{evento.descripcion}</p>
-            </div>
-            
-            <div className="flex items-center space-x-3 ml-6">
-              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
-                <Share size={20} />
-              </button>
-              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
-                {estaAsistiendo ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
-              </button>
             </div>
           </div>
 
@@ -1203,6 +1353,11 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
 
   // Filtrar eventos
   const eventosFiltrados = eventos.filter(evento => {
+    // Primero verificar si el usuario puede ver este evento
+    if (!puedeVerEvento(evento, usuario.tipo, usuario.id)) {
+      return false;
+    }
+    
     const coincideBusqueda = evento.titulo.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
                             evento.descripcion?.toLowerCase().includes(filtros.busqueda.toLowerCase());
     
@@ -1275,58 +1430,68 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Eventos</h1>
-          <p className="text-gray-600">Descubre y participa en eventos de tu comunidad</p>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setVista('lista')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                vista === 'lista'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Lista
-            </button>
-            <button
-              onClick={() => setVista('calendario')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                vista === 'calendario'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Calendario
-            </button>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Calendari d'Esdeveniments</h1>
+            <p className="text-gray-600 mt-1">Descobreix i participa en esdeveniments de la teva comunitat</p>
           </div>
-          
-          <Boton
-            variante="primario"
-            onClick={() => setFormularioAbierto(true)}
-            icono={<Plus size={16} />}
-          >
-            Crear Evento
-          </Boton>
+        
+          <div className="flex items-center space-x-3">
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setVista('lista')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  vista === 'lista'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Filter size={16} />
+                  <span>Llista</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setVista('calendario')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  vista === 'calendario'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Calendar size={16} />
+                  <span>Calendari</span>
+                </div>
+              </button>
+            </div>
+            
+            {puedeCrearEventos(usuario.tipo) && (
+              <Boton
+                variante="primario"
+                onClick={() => setFormularioAbierto(true)}
+                icono={<Plus size={16} />}
+              >
+                Crear Esdeveniment
+              </Boton>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar eventos..."
+                placeholder="Cercar esdeveniments..."
                 value={filtros.busqueda}
                 onChange={(e) => setFiltros({ ...filtros, busqueda: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -1334,145 +1499,166 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
           <select
             value={filtros.categoria}
             onChange={(e) => setFiltros({ ...filtros, categoria: e.target.value as any })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
-            <option value="todas">Todas las categorías</option>
-            <option value="formacion">Formación</option>
+            <option value="todas">Totes les categories</option>
+            <option value="formacion">Formació</option>
             <option value="networking">Networking</option>
-            <option value="conferencia">Conferencia</option>
+            <option value="conferencia">Conferència</option>
             <option value="taller">Taller</option>
-            <option value="seminario">Seminario</option>
-            <option value="reunion">Reunión</option>
+            <option value="seminario">Seminari</option>
+            <option value="reunion">Reunió</option>
             <option value="social">Social</option>
           </select>
           
           <select
             value={filtros.tipo}
             onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value as any })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
-            <option value="todos">Todos los tipos</option>
+            <option value="todos">Tots els tipus</option>
             <option value="presencial">Presencial</option>
             <option value="virtual">Virtual</option>
-            <option value="hibrido">Híbrido</option>
+            <option value="hibrido">Híbrid</option>
           </select>
           
           <select
             value={filtros.fecha}
             onChange={(e) => setFiltros({ ...filtros, fecha: e.target.value as any })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
-            <option value="todos">Todas las fechas</option>
-            <option value="hoy">Hoy</option>
-            <option value="semana">Esta semana</option>
-            <option value="mes">Este mes</option>
+            <option value="todos">Totes les dates</option>
+            <option value="hoy">Avui</option>
+            <option value="semana">Aquesta setmana</option>
+            <option value="mes">Aquest mes</option>
           </select>
         </div>
       </div>
 
       {/* Contenido principal */}
       {vista === 'lista' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
           {eventosFiltrados.map(evento => {
             const estaAsistiendo = eventosAsistiendo.includes(evento.id);
             
             return (
-              <div key={evento.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                {(evento as any).banner && (
-                  <img
-                    src={(evento as any).banner}
-                    alt={evento.titulo}
-                    className="w-full h-48 object-cover"
-                  />
-                )}
-                
-                <div className="p-6">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {evento.categoria}
-                    </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {evento.tipo}
-                    </span>
-                    {estaAsistiendo && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <Check size={12} className="mr-1" />
-                        Asistiendo
+              <div key={evento.id} className="w-full max-w-[320px]">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 overflow-hidden group h-full flex flex-col">
+                  {/* Imagen de portada por defecto */}
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={(evento as any).banner || getEventImage(evento.categoria)}
+                      alt={evento.titulo}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-800 backdrop-blur-sm">
+                        {evento.categoria}
                       </span>
+                    </div>
+                    <div className="absolute top-4 right-4 flex flex-col gap-2">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-800 backdrop-blur-sm">
+                        {evento.tipo}
+                      </span>
+                      {evento.estado === 'borrador' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-500 text-white">
+                          BORRADOR
+                        </span>
+                      )}
+                    </div>
+                    {estaAsistiendo && (
+                      <div className="absolute bottom-4 left-4">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500 text-white">
+                          <Check size={12} className="mr-1" />
+                          Participando
+                        </span>
+                      </div>
                     )}
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {evento.titulo}
-                  </h3>
-                  
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                    {evento.descripcion}
-                  </p>
-                  
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar size={14} className="mr-2" />
-                      {evento.fechaInicio.toLocaleDateString('es-ES', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric'
-                      })} a las {evento.fechaInicio.toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors min-h-[3.5rem] flex items-start leading-tight">
+                      {truncateText(evento.titulo, 60)}
+                    </h3>
+                    
+                    <p className="text-gray-600 text-sm mb-4 min-h-[2.5rem] flex items-start leading-relaxed">
+                      {truncateText(evento.descripcion, 85)}
+                    </p>
+                    
+                    <div className="space-y-2 mb-4 flex-1">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Calendar size={14} className="mr-2 flex-shrink-0" />
+                        <span className="truncate">
+                          {evento.fechaInicio.toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short'
+                          })} - {evento.fechaInicio.toLocaleTimeString('es-ES', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      
+                      {evento.ubicacion && (
+                        <div className="flex items-center text-sm text-gray-500">
+                          <MapPin size={14} className="mr-2 flex-shrink-0" />
+                          <span className="truncate">{truncateText(evento.ubicacion, 35)}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Users size={14} className="mr-2 flex-shrink-0" />
+                        <span>{evento.asistentes} asistentes</span>
+                      </div>
+                      
+                      {evento.esGratuito && (
+                        <div className="flex items-center text-sm text-green-600">
+                          <Star size={14} className="mr-2 flex-shrink-0" />
+                          <span className="font-medium">Gratuito</span>
+                        </div>
+                      )}
                     </div>
                     
-                    {evento.ubicacion && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MapPin size={14} className="mr-2" />
-                        {evento.ubicacion}
-                      </div>
-                    )}
-                    
-                    {(evento as any).ubicacionVirtual && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Video size={14} className="mr-2" />
-                        Virtual
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Users size={14} className="mr-2" />
-                      {evento.asistentes} asistentes
-                      {evento.capacidadMaxima && ` / ${evento.capacidadMaxima}`}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                      <Boton
+                        variante="primario"
+                        tamaño="sm"
+                        onClick={() => {
+                          console.log('Abriendo detalle del evento:', evento);
+                          setEventoDetalle(evento);
+                        }}
+                        className="flex-1 mr-3 py-2.5"
+                      >
+                        Ver detalles
+                      </Boton>
+                      
+                      {(puedeEditarEvento(usuario.tipo, evento, usuario.id) || puedeEliminarEvento(usuario.tipo, evento, usuario.id)) && (
+                        <div className="flex items-center space-x-1">
+                          {puedeEditarEvento(usuario.tipo, evento, usuario.id) && (
+                            <button
+                              onClick={() => {
+                                setEventoEditando(evento);
+                                setFormularioAbierto(true);
+                              }}
+                              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Editar evento"
+                            >
+                              <Edit size={16} />
+                            </button>
+                          )}
+                          {puedeEliminarEvento(usuario.tipo, evento, usuario.id) && (
+                            <button
+                              onClick={() => onEliminarEvento(evento.id)}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Eliminar evento"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Boton
-                      variante="primario"
-                      tamaño="sm"
-                      onClick={() => setEventoDetalle(evento)}
-                      className="flex-1"
-                    >
-                      Ver detalles
-                    </Boton>
-                    
-                    {usuario.id === evento.creadorId && (
-                      <>
-                        <button
-                          onClick={() => {
-                            setEventoEditando(evento);
-                            setFormularioAbierto(true);
-                          }}
-                          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => onEliminarEvento(evento.id)}
-                          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1492,24 +1678,26 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
 
       {/* Estado vacío */}
       {eventosFiltrados.length === 0 && (
-        <div className="text-center py-12">
-          <Calendar size={64} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No hay eventos
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 text-center py-16 px-6">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Calendar size={32} className="text-gray-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No hi ha esdeveniments
           </h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-8 max-w-md mx-auto">
             {filtros.busqueda || filtros.categoria !== 'todas' || filtros.tipo !== 'todos' || filtros.fecha !== 'todos'
-              ? 'No se encontraron eventos con esos criterios'
-              : 'Aún no hay eventos programados'
+              ? 'No s\'han trobat esdeveniments amb aquests criteris de cerca'
+              : 'Encara no hi ha esdeveniments programats per a la comunitat'
             }
           </p>
-          {(!filtros.busqueda && filtros.categoria === 'todas' && filtros.tipo === 'todos' && filtros.fecha === 'todos') && (
+          {(!filtros.busqueda && filtros.categoria === 'todas' && filtros.tipo === 'todos' && filtros.fecha === 'todos') && puedeCrearEventos(usuario.tipo) && (
             <Boton
               variante="primario"
               onClick={() => setFormularioAbierto(true)}
               icono={<Plus size={16} />}
             >
-              Crear Primer Evento
+              Crear Primer Esdeveniment
             </Boton>
           )}
         </div>
@@ -1528,7 +1716,9 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
       />
 
       {eventoDetalle && (
-        <DetalleEvento
+        <>
+          {console.log('Renderizando modal de detalle para evento:', eventoDetalle)}
+          <DetalleEvento
           evento={eventoDetalle}
           abierto={!!eventoDetalle}
           onCerrar={() => setEventoDetalle(null)}
@@ -1538,6 +1728,7 @@ export const SistemaEventos: React.FC<PropiedadesSistemaEventos> = ({
           onComentarEvento={(comentario) => onComentarEvento(eventoDetalle.id, comentario)}
           comentarios={comentarios}
         />
+        </>
       )}
     </div>
   );

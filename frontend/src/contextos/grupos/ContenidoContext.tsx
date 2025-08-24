@@ -134,7 +134,7 @@ function createInitialState(): ContenidoState {
 export function ContenidoProvider({ children }: { children: ReactNode }) {
   // ✅ useReducer vs useState: Mejor para estado complejo y operaciones relacionadas
   const [state, dispatch] = useReducer(contenidoReducer, undefined, createInitialState)
-  const { addNotification } = useNotifications()
+  const { afegirNotificacio } = useNotifications()
 
   // ✅ TÉCNICA #3: Debounced Operations para actividades frecuentes
   const [activityQueue, setActivityQueue] = useState<ActividadGrupo[]>([])
@@ -192,7 +192,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
       // Add to queue instead of direct dispatch for performance
       setActivityQueue(prev => [...prev, actividad])
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Post publicat',
         descripcio: 'El teu post s\'ha publicat correctament',
@@ -205,7 +205,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
       // Rollback optimistic update
       dispatch({ type: 'DELETE_POST', postId: nuevoPost.id })
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut publicar el post',
@@ -216,7 +216,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', loading: false })
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const reaccionarPost = useCallback(async (postId: string, tipo: string): Promise<void> => {
     // ✅ TÉCNICA: Immediate UI feedback para interacciones rápidas
@@ -270,7 +270,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
       
       setActivityQueue(prev => [...prev, actividad])
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Oferta creada',
         descripcio: `L'oferta "${nuevaOferta.titol}" s'ha creat correctament`,
@@ -280,7 +280,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
       
       return nuevaOferta
     } catch (error) {
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut crear l\'oferta',
@@ -289,7 +289,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   const reclamarOferta = useCallback(async (ofertaId: string): Promise<void> => {
     dispatch({ type: 'RECLAMAR_OFERTA', ofertaId })
@@ -297,7 +297,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
     try {
       await new Promise(resolve => setTimeout(resolve, 400))
       
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Oferta reclamada',
         descripcio: 'Has reclamat l\'oferta correctament',
@@ -305,7 +305,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
         data: new Date()
       })
     } catch (error) {
-      addNotification({
+      afegirNotificacio({
         id: Date.now().toString(),
         titol: 'Error',
         descripcio: 'No s\'ha pogut reclamar l\'oferta',
@@ -314,7 +314,7 @@ export function ContenidoProvider({ children }: { children: ReactNode }) {
       })
       throw error
     }
-  }, [addNotification])
+  }, [afegirNotificacio])
 
   // ✅ TÉCNICA #5: Memoized Selectors - Solo re-calcular cuando cambian los datos relevantes
   const obtenerPostsGrupo = useCallback((grupoId: string): PostGrupo[] => {

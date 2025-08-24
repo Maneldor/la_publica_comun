@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useNotificacions } from '../../../contextos/NotificacionsContext'
 import { useMissatges } from '../../../contextos/MissatgesContext'
 import { obrirInterficieMissatges } from './MissatgesGlobal'
+import { formatearFechaRelativa } from '../../../utils/formateoFechas'
 import { 
   Crown, 
   Shield, 
@@ -99,18 +100,7 @@ export default function TarjetaMiembro({
     }
   }
 
-  const formatearFechaRelativa = (fecha: Date) => {
-    const ahora = new Date()
-    const diferencia = ahora.getTime() - fecha.getTime()
-    const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24))
-    
-    if (dias === 0) return 'Avui'
-    if (dias === 1) return 'Ahir'
-    if (dias < 7) return `Fa ${dias} dies`
-    if (dias < 30) return `Fa ${Math.floor(dias / 7)} setmanes`
-    if (dias < 365) return `Fa ${Math.floor(dias / 30)} mesos`
-    return `Fa ${Math.floor(dias / 365)} anys`
-  }
+  // ✅ USANDO FUNCIÓN CENTRALIZADA DE FORMATEO
 
   const obtenerNombreCompleto = () => {
     // Si no té nombre, mostrar només el nick
@@ -173,16 +163,17 @@ export default function TarjetaMiembro({
       console.log('Usant funció personalitzada onMissatge')
       onMissatge()
     } else if (pucEnviarMissatges(usuario.id)) {
-      // Sinó, crear conversa automàticament i obrir la interfície
-      console.log('Creant nova conversa...')
-      try {
-        const conversaId = await crearConversa(usuario.id)
-        console.log('Conversa creada:', conversaId)
-        obrirInterficieMissatges(conversaId)
-      } catch (error) {
-        console.error('Error creant conversa:', error)
-        alert('Error creant la conversa: ' + (error as Error).message)
+      // Redirigir a la pàgina principal de missatges amb el usuari seleccionat
+      console.log('Redirigint a pàgina de missatges amb usuari:', usuario.id)
+      const urlParams = new URLSearchParams()
+      urlParams.set('iniciarConversa', usuario.id)
+      urlParams.set('usuariNom', usuario.nombre)
+      if (usuario.avatar) {
+        urlParams.set('usuariAvatar', usuario.avatar)
       }
+      
+      // Usar router.push amb paràmetres
+      router.push(`/missatges?${urlParams.toString()}`)
     } else {
       console.log('No es pot enviar missatges - no connectat')
       alert('No pots enviar missatges a aquest usuari. Primer heu de connectar.')

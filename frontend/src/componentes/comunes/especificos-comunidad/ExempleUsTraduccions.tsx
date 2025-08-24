@@ -23,7 +23,7 @@ export default function ExempleUsTraduccions() {
   const tWithVars = useTWithVars()
 
   const canviarIdiomaDemostracio = (nouIdioma: string) => {
-    cambiarIdioma(nouIdioma)
+    cambiarIdioma(nouIdioma as 'ca' | 'es' | 'eu' | 'gl')
   }
 
   const afegirTraduccioPersonalitzada = () => {

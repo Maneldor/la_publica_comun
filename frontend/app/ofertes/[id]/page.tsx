@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import LayoutGeneral from '../../../src/componentes/comunes/LayoutGeneral';
 import { useIdioma } from '../../../hooks/useComunidad';
+import { useFavoritos } from '../../../src/contextos/FavoritosContext';
 import { 
   ArrowLeft,
   Heart,
@@ -320,13 +321,16 @@ export default function OfertaDetallePage() {
   const params = useParams();
   const router = useRouter();
   const { idioma } = useIdioma();
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
   const t = (traducciones as any)[idioma] || traducciones.es;
   
   const [oferta, setOferta] = useState<OfertaComercialDetallada | null>(null);
   const [loading, setLoading] = useState(true);
-  const [favorite, setFavorite] = useState(false);
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [imagenActual, setImagenActual] = useState(0);
+  
+  // Determinar si es favorito usando el contexto
+  const esFavorita = oferta ? esFavorito('oferta', oferta.id) : false;
 
   // Mock data - En producción esto vendría de la API
   // Función para obtener datos de ofertas detalladas según idioma
@@ -532,9 +536,26 @@ export default function OfertaDetallePage() {
     }
   };
 
-  const handleToggleFavorite = () => {
-    setFavorite(!favorite);
-    // Aquí iría la llamada a la API
+  const handleToggleFavorite = async () => {
+    if (!oferta) return;
+    
+    try {
+      if (esFavorita) {
+        await eliminarFavorito('oferta', oferta.id);
+      } else {
+        await agregarFavorito('oferta', oferta.id, {
+          titulo: oferta.titulo,
+          descripcion: oferta.descripcion,
+          imagen: oferta.imagen,
+          empresa: oferta.empresa.nombre,
+          categoria: oferta.categoria,
+          descuento: `${oferta.descuento.valor}%`,
+          fechaVencimiento: oferta.fechaVencimiento
+        });
+      }
+    } catch (error) {
+      console.error('Error al cambiar favorito:', error);
+    }
   };
 
   const formatearVencimiento = () => {
@@ -677,10 +698,10 @@ export default function OfertaDetallePage() {
                   <button
                     onClick={handleToggleFavorite}
                     className={`p-2 rounded-lg border transition-colors ${
-                      favorite ? 'bg-red-50 border-red-200' : 'border-gray-300 hover:bg-gray-50'
+                      esFavorita ? 'bg-red-50 border-red-200' : 'border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <Heart size={20} className={favorite ? 'text-red-500 fill-current' : 'text-gray-400'} />
+                    <Heart size={20} className={esFavorita ? 'text-red-500 fill-current' : 'text-gray-400'} />
                   </button>
                   
                   <button

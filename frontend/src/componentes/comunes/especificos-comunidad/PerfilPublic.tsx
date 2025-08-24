@@ -29,6 +29,8 @@ import {
 import { PerfilUsuari, aplicarPrivacitat } from '../../../../tipos/perfil'
 import { useUsuario } from '../../../contextos/UsuarioContext'
 import { useRouter } from 'next/navigation'
+import { useMissatges } from '../../../contextos/MissatgesContext'
+import { useNotificacions } from '../../../contextos/NotificacionsContext'
 
 // Mock data per usuaris que no tenen dades
 const PERFIL_MOCK: PerfilUsuari = {
@@ -180,6 +182,8 @@ export default function PerfilPublic({ usuariId }: PerfilPublicProps) {
   const [pestañaActiva, setPestañaActiva] = useState<'informacio' | 'activitat' | 'grups'>('informacio')
   const { usuario, cargarUsuario } = useUsuario()
   const router = useRouter()
+  const { pucEnviarMissatges } = useMissatges()
+  const { enviarSolicitudConnexio } = useNotificacions()
 
   useEffect(() => {
     const cargarPerfilUsuario = async () => {
@@ -276,13 +280,113 @@ export default function PerfilPublic({ usuariId }: PerfilPublicProps) {
 
   if (!perfil) {
     return (
-      <div className="w-full flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregant perfil...</p>
+      <div className="w-full">
+        <div className="px-4 sm:px-6 lg:px-8 py-8">
+          {/* Skeleton del header */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden animate-pulse">
+            <div className="h-48 bg-gray-300"></div>
+            <div className="px-6 pb-6">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between -mt-20 mb-6">
+                <div className="flex flex-col md:flex-row md:items-end md:space-x-4 mb-4 md:mb-0">
+                  <div className="w-32 h-32 rounded-full bg-gray-300 border-4 border-white mb-4 md:mb-0"></div>
+                  <div className="pb-2 min-w-0 flex-1">
+                    <div className="h-8 bg-gray-300 rounded-md mb-2 w-48"></div>
+                    <div className="h-6 bg-gray-200 rounded-md mb-2 w-64"></div>
+                    <div className="h-4 bg-gray-200 rounded-md w-32"></div>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <div className="w-24 h-10 bg-gray-300 rounded-lg"></div>
+                  <div className="w-24 h-10 bg-gray-300 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-gray-200">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="text-center">
+                    <div className="h-6 bg-gray-300 rounded mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Skeleton del contenido */}
+          <div className="bg-white rounded-lg border border-gray-200 animate-pulse">
+            <div className="flex border-b border-gray-200">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="px-6 py-3 border-b-2 border-transparent">
+                  <div className="h-4 bg-gray-300 rounded w-20"></div>
+                </div>
+              ))}
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-300 rounded w-40 mb-4"></div>
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-20"></div>
+                      <div className="h-4 bg-gray-300 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-300 rounded w-40 mb-4"></div>
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      <div className="flex gap-2">
+                        <div className="h-6 bg-gray-300 rounded-full w-16"></div>
+                        <div className="h-6 bg-gray-300 rounded-full w-20"></div>
+                        <div className="h-6 bg-gray-300 rounded-full w-18"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
+  }
+
+  const manejarClickConnectar = async () => {
+    console.log('Clic al botó de connectar des del perfil:', perfil.id, perfil.nom)
+    
+    try {
+      await enviarSolicitudConnexio(
+        perfil.id,
+        'professional',
+        `Hola ${perfil.nick || perfil.nom}! M'agradaria connectar amb tu a La Pública.`
+      )
+      alert(`Sol·licitud de connexió enviada a ${perfil.nom || perfil.nick}`)
+    } catch (error) {
+      console.error('Error enviant sol·licitud:', error)
+      alert('Error enviant la sol·licitud de connexió')
+    }
+  }
+
+  const manejarClickMissatge = () => {
+    console.log('Clic al botó de missatge des del perfil:', perfil.id, perfil.nom)
+    
+    if (pucEnviarMissatges(perfil.id)) {
+      // Redirigir a la pàgina principal de missatges amb el usuari seleccionat
+      console.log('Redirigint a pàgina de missatges amb usuari:', perfil.id)
+      const urlParams = new URLSearchParams()
+      urlParams.set('iniciarConversa', perfil.id)
+      urlParams.set('usuariNom', perfil.nom || perfil.nick)
+      if (perfil.avatar) {
+        urlParams.set('usuariAvatar', perfil.avatar)
+      }
+      
+      // Usar router.push amb paràmetres
+      router.push(`/missatges?${urlParams.toString()}`)
+    } else {
+      console.log('No es pot enviar missatges - no connectat')
+      alert('No pots enviar missatges a aquest usuari. Primer heu de connectar.')
+    }
   }
 
   const formatearDataRelativa = (data: Date) => {
@@ -426,11 +530,19 @@ export default function PerfilPublic({ usuariId }: PerfilPublicProps) {
               {/* Botons d'acció */}
               {!esPropiPerfil && (
                 <div className="flex space-x-3">
-                  <button className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                  <button 
+                    onClick={() => manejarClickConnectar()}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    title={`Connectar amb ${perfil.nom || perfil.nick}`}
+                  >
                     <UserPlus size={16} />
                     <span>Connectar</span>
                   </button>
-                  <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                  <button 
+                    onClick={() => manejarClickMissatge()}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    title={`Enviar missatge a ${perfil.nom || perfil.nick}`}
+                  >
                     <MessageCircle size={16} />
                     <span>Missatge</span>
                   </button>

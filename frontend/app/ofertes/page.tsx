@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral';
 import { TarjetaOferta, type OfertaComercial } from '../../src/componentes/ofertes';
 import { useIdioma } from '../../hooks/useComunidad';
+import { useFavoritos } from '../../src/contextos/FavoritosContext';
 import { 
   ShoppingBag,
   Search,
@@ -561,6 +562,7 @@ const ubicaciones = ['Barcelona', 'Madrid', 'Valencia', 'Sevilla', 'Bilbao', 'Za
 
 export default function OfertesPage() {
   const { idioma } = useIdioma();
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
   const t = (traducciones as any)[idioma] || traducciones.es; // Fallback a español si no existe el idioma
   
   // Usar datos traducidos según el idioma actual
@@ -624,8 +626,26 @@ export default function OfertesPage() {
   };
 
   const handleToggleFavorite = async (ofertaId: string) => {
-    // Lógica para añadir/quitar favoritos
-    console.log('Toggle favorito oferta comercial:', ofertaId);
+    try {
+      const oferta = ofertas.find(o => o.id === ofertaId);
+      if (!oferta) return;
+
+      if (esFavorito('oferta', ofertaId)) {
+        await eliminarFavorito('oferta', ofertaId);
+      } else {
+        await agregarFavorito('oferta', ofertaId, {
+          titulo: oferta.titulo,
+          descripcion: oferta.descripcion,
+          imagen: oferta.imagen,
+          empresa: oferta.empresa.nombre,
+          categoria: oferta.categoria,
+          descuento: `${oferta.descuento.valor}%`,
+          fechaVencimiento: oferta.fechaVencimiento
+        });
+      }
+    } catch (error) {
+      console.error('Error al cambiar favorito:', error);
+    }
   };
 
   return (

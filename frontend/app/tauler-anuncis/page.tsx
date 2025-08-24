@@ -29,6 +29,7 @@ import {
 import LayoutGeneral from '../../src/componentes/comunes/LayoutGeneral';
 import { useComunidad } from '../../hooks/useComunidad';
 import { crearContenidoMultiidioma } from '../../src/utils/contenidoMultiidioma';
+import { formatearNumero } from '../../src/utils/formateoNumeros';
 import { CategoriaAnuncio, Anuncio, FiltrosAnuncios, EstadisticasTablon } from '../../tipos/anuncios';
 import TarjetaAnuncio from '../../src/componentes/anuncios/TarjetaAnuncio';
 
@@ -830,7 +831,7 @@ export default function TaulerAnuncisPage() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">
-                  {mockEstadisticas.totalAnuncios.toLocaleString()}
+                  {formatearNumero(mockEstadisticas.totalAnuncios)}
                 </div>
                 <div className="text-sm text-gray-600">
                   {t.estadisticas.total}
@@ -846,7 +847,7 @@ export default function TaulerAnuncisPage() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">
-                  {mockEstadisticas.anunciosActivos.toLocaleString()}
+                  {formatearNumero(mockEstadisticas.anunciosActivos)}
                 </div>
                 <div className="text-sm text-gray-600">
                   {t.estadisticas.activos}

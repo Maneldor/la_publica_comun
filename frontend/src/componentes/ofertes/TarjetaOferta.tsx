@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ComunidadContext } from '../../../app/ComunidadContext';
 import { useIdioma } from '../../../hooks/useComunidad';
+import { useFavoritos } from '../../contextos/FavoritosContext';
 
 // Traducciones para TarjetaOferta
 const traduccionesTarjeta = {
@@ -135,14 +136,18 @@ export interface TarjetaOfertaProps {
 
 export function TarjetaOferta({ 
   oferta, 
-  isFavorite = false,
+  isFavorite,
   onToggleFavorite,
   onViewMore,
   onRedeem
 }: TarjetaOfertaProps) {
   const contexto = useContext(ComunidadContext);
   const { idioma } = useIdioma();
+  const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
   const t = (traduccionesTarjeta as any)[idioma] || traduccionesTarjeta.es;
+  
+  // Determinar si es favorito usando el contexto de favoritos
+  const esOfertaFavorita = isFavorite !== undefined ? isFavorite : esFavorito('oferta', oferta.id);
   
   // Si el contexto no está disponible, mostrar un placeholder
   if (!contexto) {
@@ -164,15 +169,28 @@ export function TarjetaOferta({
   const tema = contexto.configuracion.tema;
   
   const [isLoading, setIsLoading] = useState(false);
-  const [favorite, setFavorite] = useState(isFavorite);
 
   const handleToggleFavorite = async () => {
-    if (!onToggleFavorite) return;
-    
     setIsLoading(true);
     try {
-      await onToggleFavorite(oferta.id);
-      setFavorite(!favorite);
+      if (esOfertaFavorita) {
+        await eliminarFavorito('oferta', oferta.id);
+      } else {
+        await agregarFavorito('oferta', oferta.id, {
+          titulo: oferta.titulo,
+          descripcion: oferta.descripcion,
+          imagen: oferta.imagen,
+          empresa: oferta.empresa.nombre,
+          categoria: oferta.categoria,
+          descuento: formatearDescuento(),
+          fechaVencimiento: oferta.fechaVencimiento
+        });
+      }
+      
+      // Si hay un callback externo, también llamarlo
+      if (onToggleFavorite) {
+        await onToggleFavorite(oferta.id);
+      }
     } catch (error) {
       console.error('Error al cambiar favorito:', error);
     } finally {
@@ -437,12 +455,12 @@ export function TarjetaOferta({
             onClick={handleToggleFavorite}
             disabled={isLoading}
             className={`p-2 rounded-md border transition-colors ${
-              favorite ? 'bg-red-50 border-red-200' : 'border-gray-300'
+              esOfertaFavorita ? 'bg-red-50 border-red-200' : 'border-gray-300'
             } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
           >
             <Heart 
               size={16} 
-              className={favorite ? 'text-red-500 fill-current' : 'text-gray-400'} 
+              className={esOfertaFavorita ? 'text-red-500 fill-current' : 'text-gray-400'} 
             />
           </button>
           
