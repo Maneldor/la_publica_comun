@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import ModeratedInput, { ModeratedInputRef } from '../ModeratedInput'
 import { 
   ArrowLeft,
   MessageCircle,
@@ -238,15 +239,22 @@ export default function ForumTopic({ topicId }: ForumTopicProps) {
 
   const handleLike = (replyId?: string) => {
     if (replyId) {
-      setReplies(prev => prev.map(reply => 
-        reply.id === replyId 
-          ? { ...reply, likes: reply.isLiked ? reply.likes - 1 : reply.likes + 1, isLiked: !reply.isLiked }
-          : reply
-      ))
+      setReplies(prev => prev.map(reply => {
+        if (reply.id === replyId) {
+          const newLikes = reply.isLiked ? reply.likes - 1 : reply.likes + 1
+          return { ...reply, likes: newLikes, isLiked: !reply.isLiked }
+        }
+        return reply
+      }))
     } else {
-      setIsLiked(!isLiked)
+      const newIsLiked = !isLiked
+      setIsLiked(newIsLiked)
       if (topic) {
-        setTopic(prev => prev ? { ...prev, likes: isLiked ? prev.likes - 1 : prev.likes + 1 } : null)
+        setTopic(prev => {
+          if (!prev) return null
+          const newLikes = newIsLiked ? prev.likes + 1 : prev.likes - 1
+          return { ...prev, likes: newLikes }
+        })
       }
     }
   }
@@ -256,7 +264,7 @@ export default function ForumTopic({ topicId }: ForumTopicProps) {
 
     const newReplyObj: Reply = {
       id: `r-${Date.now()}`,
-      content,
+      content: content.trim(),
       author: 'Tu',
       authorAvatar: 'https://ui-avatars.com/api/?name=Tu&background=6366f1&color=fff',
       authorRole: 'Membre',
@@ -265,15 +273,19 @@ export default function ForumTopic({ topicId }: ForumTopicProps) {
     }
 
     if (parentId) {
-      setReplies(prev => prev.map(reply => 
-        reply.id === parentId 
-          ? { ...reply, replies: [...(reply.replies || []), newReplyObj] }
-          : reply
-      ))
+      setReplies(prev => prev.map(reply => {
+        if (reply.id === parentId) {
+          return { ...reply, replies: [...(reply.replies || []), newReplyObj] }
+        }
+        return reply
+      }))
     } else {
       setReplies(prev => [...prev, newReplyObj])
       if (topic) {
-        setTopic(prev => prev ? { ...prev, replies: prev.replies + 1 } : null)
+        setTopic(prev => {
+          if (!prev) return null
+          return { ...prev, replies: prev.replies + 1 }
+        })
       }
     }
 

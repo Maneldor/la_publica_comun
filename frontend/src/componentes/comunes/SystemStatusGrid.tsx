@@ -2601,7 +2601,7 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
                 
                 <div className="border-t pt-3">
                   <button
-                    onClick={() => window.location.href = '/admin/comunidades'}
+                    onClick={() => window.location.href = '/admin/comunitats'}
                     className="w-full bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition-colors flex items-center justify-center gap-2 mb-2"
                   >
                     <Globe className="w-4 h-4" />

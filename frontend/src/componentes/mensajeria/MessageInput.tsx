@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, KeyboardEvent } from 'react'
 import { PropietatsMessageInput, TipoMensaje } from '../../../tipos/mensajes'
+import ModeratedInput, { ModeratedInputRef } from '../comunes/ModeratedInput'
 import { 
   Send, Paperclip, Smile, Mic, Image, X, 
   FileText, Video, MapPin, Plus

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTema } from '../../../../hooks/useComunidad';
 import { Post, Comentario, TipoPost } from '../../../../tipos/redSocial';
 import { formatearTiempoRelativo } from '../../../utils/formateoFechas';
 import { useFavoritos } from '../../../contextos/FavoritosContext';
+import ModeratedInput, { ModeratedInputRef } from '../ModeratedInput';
 import { 
   Heart, 
   MessageCircle, 
@@ -56,9 +57,9 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
   const { colores } = useTema();
   const { agregarFavorito, eliminarFavorito, esFavorito } = useFavoritos();
   const [mostrarComentarios, setMostrarComentarios] = useState(false);
-  const [nuevoComentario, setNuevoComentario] = useState('');
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [reaccionSeleccionada, setReaccionSeleccionada] = useState<string | null>(null);
+  const comentarioInputRef = useRef<ModeratedInputRef>(null);
   
   // Determinar si el post es favorito
   const esPostFavorito = esFavorito('post', post.id);
@@ -104,10 +105,10 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
   };
 
   // Manejar comentario
-  const manejarComentario = () => {
-    if (nuevoComentario.trim() && onComment) {
-      onComment(post.id, nuevoComentario);
-      setNuevoComentario('');
+  const manejarComentario = async (comentario: string, moderationResult: any) => {
+    if (comentario.trim() && onComment) {
+      await onComment(post.id, comentario);
+      comentarioInputRef.current?.reset();
     }
   };
 
@@ -521,24 +522,18 @@ export const TarjetaPost: React.FC<PropiedadesTarjetaPost> = ({
                 U
               </div>
               <div className="flex-1">
-                <textarea
-                  value={nuevoComentario}
-                  onChange={(e) => setNuevoComentario(e.target.value)}
-                  placeholder="Escribe un comentario..."
-                  className="w-full p-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-offset-2 focus:border-transparent outline-none"
-                  style={{ '--focus-ring-color': colores.primario + '40' } as React.CSSProperties}
+                <ModeratedInput
+                  ref={comentarioInputRef}
+                  multiline={true}
                   rows={2}
+                  placeholder="Escribe un comentario..."
+                  className="w-full border border-gray-300"
+                  onSubmit={manejarComentario}
+                  submitText="Comentar"
+                  showSubmitButton={true}
+                  minLength={3}
+                  maxLength={500}
                 />
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={manejarComentario}
-                    disabled={!nuevoComentario.trim()}
-                    className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    style={{ backgroundColor: colores.primario }}
-                  >
-                    Comentar
-                  </button>
-                </div>
               </div>
             </div>
           </div>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { NovaPublicacio } from '../../../../hooks/useFeedSocial'
+import ModeratedInput, { ModeratedInputRef } from '../ModeratedInput'
 
 interface FormulariPostProps {
   onPublicar: (publicacio: NovaPublicacio) => Promise<void>
@@ -9,23 +10,31 @@ interface FormulariPostProps {
 }
 
 export default function FormulariPost({ onPublicar, carregant }: FormulariPostProps) {
-  const [contingut, setContingut] = useState('')
   const [imatge, setImatge] = useState<File | null>(null)
   const [expandit, setExpandit] = useState(false)
+  const moderatedInputRef = useRef<ModeratedInputRef>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!contingut.trim()) return
+  const handleSubmit = async (contingut: string, moderationResult: any) => {
+    if (!moderatedInputRef.current) return
 
-    await onPublicar({
-      contingut: contingut.trim(),
-      imatge: imatge || undefined
-    })
+    try {
+      await onPublicar({
+        contingut,
+        imatge: imatge || undefined,
+        moderationResult
+      })
 
-    // Reset form
-    setContingut('')
-    setImatge(null)
-    setExpandit(false)
+      // Reset form solo si la publicación fue exitosa
+      moderatedInputRef.current.reset()
+      setImatge(null)
+      setExpandit(false)
+    } catch (error) {
+      console.error('Error al publicar:', error)
+    }
+  }
+
+  const handleFocus = () => {
+    setExpandit(true)
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +49,7 @@ export default function FormulariPost({ onPublicar, carregant }: FormulariPostPr
       <div className="p-4 md:p-6">
         <h1 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">Activitat</h1>
         
-        <form onSubmit={handleSubmit}>
+        <div>
           {/* Input per crear post */}
           <div className="flex items-start space-x-3 mb-4">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-800 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-medium flex-shrink-0">
@@ -49,23 +58,28 @@ export default function FormulariPost({ onPublicar, carregant }: FormulariPostPr
             
             <div className="flex-1">
               {expandit ? (
-                <textarea
-                  value={contingut}
-                  onChange={(e) => setContingut(e.target.value)}
-                  placeholder="Què estàs pensant, Manel?"
-                  className="w-full p-3 bg-gray-100 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all resize-none"
+                <ModeratedInput
+                  ref={moderatedInputRef}
+                  multiline={true}
                   rows={4}
+                  placeholder="Què estàs pensant, Manel?"
+                  className="w-full bg-gray-100 focus:bg-white"
+                  showSubmitButton={false}
                   disabled={carregant}
+                  minLength={5}
+                  maxLength={500}
                 />
               ) : (
-                <input
-                  type="text"
-                  value={contingut}
-                  onChange={(e) => setContingut(e.target.value)}
-                  onFocus={() => setExpandit(true)}
+                <ModeratedInput
+                  ref={moderatedInputRef}
+                  multiline={false}
                   placeholder="Què estàs pensant, Manel?"
-                  className="w-full p-2.5 md:p-3 bg-gray-100 rounded-full focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all text-sm md:text-base"
+                  className="w-full bg-gray-100 rounded-full focus:bg-white"
+                  showSubmitButton={false}
                   disabled={carregant}
+                  minLength={5}
+                  maxLength={500}
+                  onChange={() => setExpandit(true)}
                 />
               )}
             </div>
@@ -126,7 +140,7 @@ export default function FormulariPost({ onPublicar, carregant }: FormulariPostPr
                     type="button"
                     onClick={() => {
                       setExpandit(false)
-                      setContingut('')
+                      moderatedInputRef.current?.reset()
                       setImatge(null)
                     }}
                     className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -136,9 +150,18 @@ export default function FormulariPost({ onPublicar, carregant }: FormulariPostPr
                   </button>
                   
                   <button
-                    type="submit"
-                    disabled={!contingut.trim() || carregant}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    type="button"
+                    onClick={() => {
+                      if (moderatedInputRef.current) {
+                        const contingut = moderatedInputRef.current.getValue()
+                        const moderationResult = moderatedInputRef.current.checkContent()
+                        if (contingut.trim() && !moderatedInputRef.current.isContentBlocked()) {
+                          handleSubmit(contingut, moderationResult)
+                        }
+                      }
+                    }}
+                    disabled={!moderatedInputRef.current?.getValue()?.trim() || carregant || moderatedInputRef.current?.isContentBlocked()}
+                    className="px-4 py-2 rounded-lg text-sm font-medium focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 text-white"
                   >
                     {carregant ? 'Publicant...' : 'Publicar'}
                   </button>
@@ -146,7 +169,7 @@ export default function FormulariPost({ onPublicar, carregant }: FormulariPostPr
               </div>
             </div>
           )}
-        </form>
+        </div>
       </div>
     </div>
   )

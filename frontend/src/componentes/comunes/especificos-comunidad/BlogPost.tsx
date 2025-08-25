@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import ModeratedInput, { ModeratedInputRef } from '../ModeratedInput'
 import { 
   ArrowLeft,
   Calendar,
@@ -576,9 +577,9 @@ export default function BlogPost({ blogId }: BlogPostProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showComments, setShowComments] = useState(false)
-  const [newComment, setNewComment] = useState('')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyContent, setReplyContent] = useState('')
+  const commentInputRef = useRef<ModeratedInputRef>(null)
+  const replyInputRef = useRef<ModeratedInputRef>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -636,15 +637,15 @@ export default function BlogPost({ blogId }: BlogPostProps) {
     }
   }
 
-  const handleCommentSubmit = () => {
-    if (!newComment.trim()) return
+  const handleCommentSubmit = async (comentario: string, moderationResult: any) => {
+    if (!comentario.trim()) return
     
     const comment: Comment = {
       id: Date.now().toString(),
       author: 'Tu',
       authorAvatar: 'https://ui-avatars.com/api/?name=Tu&background=6366f1&color=fff',
       authorRole: 'Membre de la comunitat',
-      content: newComment,
+      content: comentario,
       publishedAt: new Date(),
       likes: 0,
       isLiked: false,
@@ -652,7 +653,7 @@ export default function BlogPost({ blogId }: BlogPostProps) {
     }
     
     setComments([comment, ...comments])
-    setNewComment('')
+    commentInputRef.current?.reset()
     
     // Update comment count
     if (blog) {
@@ -663,15 +664,15 @@ export default function BlogPost({ blogId }: BlogPostProps) {
     }
   }
 
-  const handleReplySubmit = (commentId: string) => {
-    if (!replyContent.trim()) return
+  const handleReplySubmit = async (commentId: string, respuesta: string, moderationResult: any) => {
+    if (!respuesta.trim()) return
     
     const reply: Comment = {
       id: `${commentId}-${Date.now()}`,
       author: 'Tu',
       authorAvatar: 'https://ui-avatars.com/api/?name=Tu&background=6366f1&color=fff',
       authorRole: 'Membre de la comunitat',
-      content: replyContent,
+      content: respuesta,
       publishedAt: new Date(),
       likes: 0,
       isLiked: false,
@@ -684,7 +685,7 @@ export default function BlogPost({ blogId }: BlogPostProps) {
         : comment
     ))
     
-    setReplyContent('')
+    replyInputRef.current?.reset()
     setReplyingTo(null)
   }
 
@@ -906,28 +907,18 @@ export default function BlogPost({ blogId }: BlogPostProps) {
                       className="w-10 h-10 rounded-full flex-shrink-0"
                     />
                     <div className="flex-1">
-                      <textarea
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Escriu un comentari..."
+                      <ModeratedInput
+                        ref={commentInputRef}
+                        multiline={true}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        placeholder="Escriu un comentari..."
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onSubmit={handleCommentSubmit}
+                        submitText="Comentar"
+                        showSubmitButton={true}
+                        minLength={5}
+                        maxLength={1000}
                       />
-                      <div className="flex items-center justify-end mt-3 space-x-3">
-                        <button 
-                          onClick={() => setNewComment('')}
-                          className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          Cancel·lar
-                        </button>
-                        <button 
-                          onClick={handleCommentSubmit}
-                          disabled={!newComment.trim()}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                        >
-                          Comentar
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -987,31 +978,18 @@ export default function BlogPost({ blogId }: BlogPostProps) {
                                   className="w-8 h-8 rounded-full flex-shrink-0"
                                 />
                                 <div className="flex-1">
-                                  <textarea
-                                    value={replyContent}
-                                    onChange={(e) => setReplyContent(e.target.value)}
-                                    placeholder={`Respondre a ${comment.author}...`}
+                                  <ModeratedInput
+                                    ref={replyInputRef}
+                                    multiline={true}
                                     rows={2}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                                    placeholder={`Respondre a ${comment.author}...`}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                    onSubmit={(respuesta: string, moderationResult: any) => handleReplySubmit(comment.id, respuesta, moderationResult)}
+                                    submitText="Respondre"
+                                    showSubmitButton={true}
+                                    minLength={3}
+                                    maxLength={500}
                                   />
-                                  <div className="flex items-center justify-end mt-2 space-x-2">
-                                    <button 
-                                      onClick={() => {
-                                        setReplyingTo(null)
-                                        setReplyContent('')
-                                      }}
-                                      className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                                    >
-                                      Cancel·lar
-                                    </button>
-                                    <button 
-                                      onClick={() => handleReplySubmit(comment.id)}
-                                      disabled={!replyContent.trim()}
-                                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                      Respondre
-                                    </button>
-                                  </div>
                                 </div>
                               </div>
                             </div>
