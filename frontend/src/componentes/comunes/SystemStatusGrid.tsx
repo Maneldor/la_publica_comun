@@ -31,7 +31,9 @@ import {
   Play,
   Settings,
   Building2,
-  Building
+  Building,
+  CreditCard,
+  Euro
 } from 'lucide-react'
 import { useIdioma } from '../../../hooks/useComunidad'
 
@@ -42,6 +44,8 @@ interface SystemStatusGridProps {
 export default function SystemStatusGrid({ className = '' }: SystemStatusGridProps) {
   const { idioma } = useIdioma()
   const [currentTime, setCurrentTime] = useState('')
+  const [currentDate, setCurrentDate] = useState('')
+  const [currentDay, setCurrentDay] = useState('')
   const [isClient, setIsClient] = useState(false)
   const [expandedSections, setExpandedSections] = useState({
     server: false,
@@ -55,6 +59,7 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
     generalManagement: false,
     activeCommunities: false,
     companies: false,
+    billing: false,
     publicAdministrations: false
   })
   const [showToast, setShowToast] = useState(false)
@@ -66,8 +71,10 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
   // Marcar como cliente y actualizar tiempo
   useEffect(() => {
     setIsClient(true)
-    const updateTime = () => {
+    const updateDateTime = () => {
       const now = new Date()
+      
+      // Actualizar hora
       setCurrentTime(now.toLocaleTimeString('es-ES', { 
         timeZone: 'Europe/Madrid',
         hour12: false,
@@ -75,10 +82,24 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
         minute: '2-digit',
         second: '2-digit'
       }))
+      
+      // Actualizar fecha
+      setCurrentDate(now.toLocaleDateString('es-ES', { 
+        timeZone: 'Europe/Madrid',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }))
+      
+      // Actualizar día de la semana
+      setCurrentDay(now.toLocaleDateString('es-ES', { 
+        timeZone: 'Europe/Madrid',
+        weekday: 'long'
+      }))
     }
     
-    updateTime() // Actualizar inmediatamente
-    const timer = setInterval(updateTime, 1000)
+    updateDateTime() // Actualizar inmediatamente
+    const timer = setInterval(updateDateTime, 1000)
     return () => clearInterval(timer)
   }, [])
 
@@ -991,6 +1012,29 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
 
   return (
     <div className="space-y-6">
+      {/* Header con fecha y hora */}
+      {isClient && (
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Dashboard Administratiu</h2>
+              <p className="text-blue-100 text-sm">Panel de control del sistema</p>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="text-xl font-extrabold capitalize">
+                {currentDay}
+              </div>
+              <div className="text-xl font-bold">
+                {currentDate}
+              </div>
+              <div className="text-xl font-bold">
+                {currentTime}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={`grid grid-cols-1 lg:grid-cols-4 gap-4 items-start ${className}`}>
         
         {/* Estado del Servidor */}
@@ -2656,10 +2700,11 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
             </div>
           </div>
 
-          <div className={`transition-all duration-300 ease-in-out ${expandedSections.companies ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+          <div className={`transition-all duration-300 ease-in-out ${expandedSections.companies ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
             <div className="px-4 pb-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                {/* Estadísticas principales */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="bg-green-50 rounded p-3 text-center">
                     <div className="text-2xl font-bold text-green-600">1,247</div>
                     <div className="text-xs text-green-700">Empreses actives</div>
@@ -2668,53 +2713,353 @@ export default function SystemStatusGrid({ className = '' }: SystemStatusGridPro
                     <div className="text-2xl font-bold text-blue-600">3,847</div>
                     <div className="text-xs text-blue-700">Ofertes transversals</div>
                   </div>
+                  <div className="bg-purple-50 rounded p-3 text-center">
+                    <div className="text-2xl font-bold text-purple-600">89</div>
+                    <div className="text-xs text-purple-700">Nous aquest mes</div>
+                  </div>
+                  <div className="bg-orange-50 rounded p-3 text-center">
+                    <div className="text-2xl font-bold text-orange-600">94.3%</div>
+                    <div className="text-xs text-orange-700">Taxa retenció</div>
+                  </div>
                 </div>
                 
-                <div>
-                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Gestió d'ofertes</h5>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Ofertes actives</span>
-                      <span className="text-xs font-medium">234</span>
+                {/* Gestió d'ofertes i Gestors */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-xs font-semibold text-gray-700 mb-2">Gestió d'ofertes</h5>
+                    <div className="space-y-2 bg-gray-50 rounded p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Ofertes actives</span>
+                        <span className="text-xs font-medium">234</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Pendents d'aprovació</span>
+                        <span className="text-xs font-medium text-orange-600">67</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Per expirar (7 dies)</span>
+                        <span className="text-xs font-medium text-red-600">12</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Visualitzacions totals</span>
+                        <span className="text-xs font-medium">45.8k</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Taxa conversió</span>
+                        <span className="text-xs font-medium text-green-600">12.4%</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Pendents d'aprovació</span>
-                      <span className="text-xs font-medium text-orange-600">67</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Per expirar (7 dies)</span>
-                      <span className="text-xs font-medium text-red-600">12</span>
+                  </div>
+                  
+                  <div>
+                    <h5 className="text-xs font-semibold text-gray-700 mb-2">Gestors d'empreses</h5>
+                    <div className="space-y-2 bg-gray-50 rounded p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Total gestors</span>
+                        <span className="text-xs font-medium">87</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Actius avui</span>
+                        <span className="text-xs font-medium text-green-600">64</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Mitjana empreses/gestor</span>
+                        <span className="text-xs font-medium">14.3</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Sol·licituds pendents</span>
+                        <span className="text-xs font-medium text-orange-600">5</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Formació completada</span>
+                        <span className="text-xs font-medium">92%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <div>
-                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Revenue per comunitat</h5>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Catalunya</span>
-                      <span className="text-xs font-medium">€32.1k</span>
+                {/* Revenue i Categories */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-xs font-semibold text-gray-700 mb-2">Revenue per comunitat</h5>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-xs text-gray-600">Catalunya</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">€32.1k</span>
+                          <span className="text-xs text-green-600">↑12%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <span className="text-xs text-gray-600">Madrid</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">€28.4k</span>
+                          <span className="text-xs text-green-600">↑8%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-xs text-gray-600">Andalusia</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">€18.7k</span>
+                          <span className="text-xs text-green-600">↑15%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                          <span className="text-xs text-gray-600">Altres</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">€5.3k</span>
+                          <span className="text-xs text-red-600">↓2%</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Madrid</span>
-                      <span className="text-xs font-medium">€28.4k</span>
+                    <div className="mt-2 pt-2 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-gray-700">Total mensual</span>
+                        <span className="text-sm font-bold text-gray-900">€84.5k</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Altres</span>
-                      <span className="text-xs font-medium">€24.0k</span>
+                  </div>
+                  
+                  <div>
+                    <h5 className="text-xs font-semibold text-gray-700 mb-2">Categories més populars</h5>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Tecnologia</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{width: '78%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">387</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Consultoria</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{width: '65%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">324</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Formació</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-purple-500 h-2 rounded-full" style={{width: '52%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">258</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Serveis</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-orange-500 h-2 rounded-full" style={{width: '44%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">218</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="border-t pt-3">
+                {/* Top Empreses */}
+                <div>
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Top 5 Empreses per activitat</h5>
+                  <div className="bg-gray-50 rounded p-3">
+                    <div className="space-y-2">
+                      {[
+                        { name: 'TechSolutions BCN', ofertes: 67, revenue: '€12.3k', growth: '+23%', growthColor: 'text-green-600' },
+                        { name: 'ConsultPro Madrid', ofertes: 54, revenue: '€9.8k', growth: '+18%', growthColor: 'text-green-600' },
+                        { name: 'FormaciónDigital', ofertes: 48, revenue: '€8.2k', growth: '+12%', growthColor: 'text-green-600' },
+                        { name: 'Serveis Integrals CAT', ofertes: 41, revenue: '€7.4k', growth: '-3%', growthColor: 'text-red-600' },
+                        { name: 'InnovaHub Valencia', ofertes: 38, revenue: '€6.9k', growth: '+5%', growthColor: 'text-green-600' }
+                      ].map((empresa, idx) => (
+                        <div key={idx} className="flex items-center justify-between py-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-gray-700 w-4">{idx + 1}.</span>
+                            <span className="text-xs text-gray-700 font-medium">{empresa.name}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-gray-500">{empresa.ofertes} ofertes</span>
+                            <span className="text-xs font-medium">{empresa.revenue}</span>
+                            <span className={`text-xs ${empresa.growthColor}`}>{empresa.growth}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Accions */}
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                   <button
-                    onClick={() => window.location.href = '/admin/empresas'}
-                    className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                    onClick={() => window.location.href = '/admin/empreses'}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
                   >
                     <Building2 className="w-4 h-4" />
                     Gestionar Empreses
                   </button>
+                  <button
+                    onClick={() => openModal('companiesDetails')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Informe Detallat
+                  </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Facturació i Comptabilitat */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-auto min-h-fit">
+          <div 
+            className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => toggleSection('billing')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-1.5 bg-blue-100 rounded-lg flex-shrink-0">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-sm truncate">Facturació i Comptabilitat</h3>
+                  {!expandedSections.billing && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-lg font-bold text-blue-600">
+                        €84.500
+                      </span>
+                      <span className="text-xs text-gray-500">aquest mes</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-xs font-medium">
+                  3 vencides
+                </div>
+                {expandedSections.billing ? (
+                  <ChevronUp className="w-4 h-4 text-gray-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={`transition-all duration-300 ease-in-out ${expandedSections.billing ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+            <div className="px-4 pb-4">
+              <div className="space-y-4">
+                {/* Estadístiques financeres */}
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-green-50 rounded p-3">
+                    <div className="text-xl font-bold text-green-700">€84.500</div>
+                    <div className="text-xs text-green-600">Ingressos mes</div>
+                  </div>
+                  <div className="bg-red-50 rounded p-3">
+                    <div className="text-xl font-bold text-red-700">€1.247</div>
+                    <div className="text-xs text-red-600">Factures vencides</div>
+                  </div>
+                  <div className="bg-orange-50 rounded p-3">
+                    <div className="text-xl font-bold text-orange-700">€2.890</div>
+                    <div className="text-xs text-orange-600">Pendents cobrament</div>
+                  </div>
+                </div>
+                
+                {/* Resum per tipus */}
+                <div>
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Ingressos per tipus</h5>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Plans Premium</span>
+                      <span className="text-xs font-medium text-gray-900">€45.230</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Plans Professional</span>
+                      <span className="text-xs font-medium text-gray-900">€28.470</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Plans Bàsic</span>
+                      <span className="text-xs font-medium text-gray-900">€10.800</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Gastos operativos */}
+                <div>
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Despeses operatives</h5>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Hosting i infraestructura</span>
+                      <span className="text-xs font-medium text-gray-900">€2.340</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Desenvolupament</span>
+                      <span className="text-xs font-medium text-gray-900">€8.500</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Marketing</span>
+                      <span className="text-xs font-medium text-gray-900">€3.200</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Alertes financeres */}
+                <div className="bg-red-50 border border-red-200 rounded p-3">
+                  <h5 className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Alertes financeres
+                  </h5>
+                  <div className="space-y-1">
+                    <p className="text-xs text-red-600">• 3 factures vencides (€1.247)</p>
+                    <p className="text-xs text-red-600">• 2 empreses amb pagaments endarrerits</p>
+                    <p className="text-xs text-orange-600">• 5 factures vencen aquesta setmana</p>
+                  </div>
+                </div>
+                
+                {/* Benefici net */}
+                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-blue-700">Benefici net aquest mes</span>
+                    <span className="text-lg font-bold text-blue-700">€70.460</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <TrendingUp className="w-3 h-3 text-green-600" />
+                    <span className="text-xs text-green-600">+12.5% vs mes anterior</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Accions */}
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+                <button
+                  onClick={() => window.location.href = '/admin/facturacio'}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Gestionar Facturació
+                </button>
+                <button
+                  onClick={() => openModal('billingDetails')}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <Euro className="w-4 h-4" />
+                  Informe Comptable
+                </button>
               </div>
             </div>
           </div>

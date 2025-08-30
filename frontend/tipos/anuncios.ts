@@ -62,6 +62,7 @@ export interface UsuarioAnuncio {
 
 export interface AnuncioBase {
   id: string;
+  tipoOperacion: 'OFERTA' | 'DEMANDA';
   titulo: ContenidoMultiidioma;
   descripcion: ContenidoMultiidioma;
   categoria: CategoriaAnuncio;

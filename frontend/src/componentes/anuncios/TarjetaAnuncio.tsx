@@ -134,7 +134,7 @@ export default function TarjetaAnuncio({
           descripcion: descripcionTraducida.texto,
           categoria: anuncio.categoria,
           ubicacion: anuncio.ubicacion,
-          fechaPublicacion: anuncio.fechaPublicacion,
+          fechaPublicacion: anuncio.fechaCreacion,
           autor: anuncio.autor.nombre
         });
       }
@@ -173,7 +173,19 @@ export default function TarjetaAnuncio({
         )}
         
         {/* Badges */}
-        <div className="absolute top-2 left-2">
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <span 
+            className={`inline-block px-2 py-1 rounded text-xs font-bold text-white ${
+              anuncio.tipoOperacion === 'OFERTA' 
+                ? 'bg-green-600' 
+                : 'bg-blue-600'
+            }`}
+          >
+            {anuncio.tipoOperacion === 'OFERTA' 
+              ? (idioma === 'ca' ? 'OFEREIXO' : idioma === 'eu' ? 'ESKAINTZEN' : idioma === 'gl' ? 'OFREZO' : 'OFREZCO')
+              : (idioma === 'ca' ? 'BUSCO' : idioma === 'eu' ? 'BILATZEN' : idioma === 'gl' ? 'BUSCO' : 'BUSCO')
+            }
+          </span>
           <span 
             className="inline-block px-2 py-1 rounded text-xs font-medium text-white"
             style={{ backgroundColor: tema.colorPrimario }}

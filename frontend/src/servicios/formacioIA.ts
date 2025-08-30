@@ -517,4 +517,5 @@ FORMAT: Array JSON seguint l'interface OptimitzacioIA.`
 
 // Export singleton
 export const formacioIA = FormacioIAService.getInstance()
+export { FormacioIAService }
 export default formacioIA
