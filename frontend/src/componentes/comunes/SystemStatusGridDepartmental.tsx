@@ -329,11 +329,14 @@ export default function SystemStatusGridDepartmental({ className = '' }: SystemS
               {/* Accions */}
               <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                 <button
-                  onClick={() => window.location.href = '/admin/ia'}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    window.location.href = '/admin/departament-ia'
+                  }}
                   className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
                   <Brain className="w-4 h-4" />
-                  Configurar Agents
+                  Gestionar IA
                 </button>
                 <button
                   onClick={() => openModal('aiMetrics')}

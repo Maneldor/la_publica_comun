@@ -1,0 +1,3711 @@
+'use client'
+
+import { useState } from 'react'
+import { 
+  Bot, Brain, Activity, Database, GitBranch, TrendingUp, Shield, FileText,
+  Search, Settings, Package, Sparkles, AlertTriangle, CheckCircle, Clock,
+  Play, Pause, RefreshCw, Upload, Download, Copy, Eye, BarChart, Target,
+  Beaker, Microscope, Lightbulb, BookOpen, GraduationCap, Globe, Award,
+  Zap, Code, Terminal, Server, Cpu, HardDrive, Gauge, Filter, Layers,
+  GitMerge, GitCompare, History, Archive, Flag, Users, MessageSquare,
+  AlertCircle, Info, ChevronRight, Plus, X, Send, ChevronUp, ChevronDown,
+  Calendar, Euro, Star, Bell, Lock, Key, Hash, Shuffle, TestTube,
+  FlaskConical, Atom, Dna, Compass, Map, Navigation, Monitor, Building2,
+  TrendingDown
+} from 'lucide-react'
+
+type TabOption = 'dashboard' | 'models' | 'entrenament' | 'metriques' | 'compliance' | 'seguretat' | 'prompts' | 'experiments' | 'benchmarks' | 'investigacio' | 'analytics' | 'configuracio'
+
+type ModelMetric = {
+  id: string
+  nom: string
+  tipus: 'llm' | 'vision' | 'audio' | 'multimodal' | 'custom'
+  versio: string
+  rendiment: {
+    accuracy: number
+    latency: number
+    throughput: number
+    cost: number
+  }
+  estat: 'actiu' | 'entrenant' | 'avaluant' | 'pausat' | 'deprecated'
+  usRecentHores: number
+  tasquesCompletades: number
+  errorsRate: number
+}
+
+type Dataset = {
+  id: string
+  nom: string
+  tipus: 'text' | 'imatge' | 'audio' | 'video' | 'mixt'
+  tamany: string
+  samples: number
+  qualitat: number
+  estat: 'disponible' | 'processant' | 'validant' | 'arxivat'
+  dataCreacio: Date
+  ultimUs: Date
+  etiquetes: string[]
+}
+
+type Experiment = {
+  id: string
+  nom: string
+  tipus: 'ab_test' | 'fine_tuning' | 'pre_training' | 'rag' | 'prompt_engineering'
+  model: string
+  dataset: string
+  estat: 'planificat' | 'executant' | 'completat' | 'fallat' | 'pausat'
+  progres: number
+  metriques: {
+    baseline: number
+    actual: number
+    millora: number
+  }
+  dataInici: Date
+  duracioEstimada: string
+}
+
+type Prompt = {
+  id: string
+  nom: string
+  categoria: 'generacio' | 'analisi' | 'classificacio' | 'extracció' | 'traduccio'
+  versio: string
+  idioma: string
+  plantilla: string
+  variables: string[]
+  exemples: string[]
+  rendiment: {
+    precisio: number
+    velocitat: number
+    cost: number
+  }
+  usos: number
+  valoracio: number
+  tags: string[]
+}
+
+type BiasAudit = {
+  id: string
+  model: string
+  data: Date
+  tipus: 'genere' | 'edat' | 'etnia' | 'idioma' | 'socioeconomic'
+  severitat: 'baix' | 'moderat' | 'alt' | 'critic'
+  descripcio: string
+  recomanacions: string[]
+  estat: 'pendent' | 'revisat' | 'resolt' | 'acceptat'
+}
+
+type Research = {
+  id: string
+  titol: string
+  autors: string[]
+  conferencia: string
+  any: number
+  tipus: 'paper' | 'preprint' | 'blog' | 'video' | 'curs'
+  area: string[]
+  rellevancia: number
+  estat: 'nou' | 'llegint' | 'revisat' | 'aplicat'
+  resum: string
+  aplicabilitat: string
+}
+
+export default function DepartamentIA() {
+  const [activeTab, setActiveTab] = useState<TabOption>('dashboard')
+  const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null)
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
+  const [showAIAssistant, setShowAIAssistant] = useState(false)
+  const [aiMessage, setAiMessage] = useState('')
+  const [showNewModelModal, setShowNewModelModal] = useState(false)
+  const [showMetricsModal, setShowMetricsModal] = useState(false)
+  const [showVersionsModal, setShowVersionsModal] = useState(false)
+  const [showBenchmarkModal, setShowBenchmarkModal] = useState(false)
+  const [showConfigModal, setShowConfigModal] = useState(false)
+  const [showRollbackModal, setShowRollbackModal] = useState(false)
+  const [showABTestDetailModal, setShowABTestDetailModal] = useState(false)
+  const [showBiasDetailModal, setShowBiasDetailModal] = useState(false)
+  const [showScalingDetailModal, setShowScalingDetailModal] = useState(false)
+  const [selectedModelForAction, setSelectedModelForAction] = useState<string>('')
+  const [selectedUseCaseConfig, setSelectedUseCaseConfig] = useState('general')
+  
+  // Estados dinámicos para indicadores
+  const [abTestData, setAbTestData] = useState({
+    isActive: true,
+    currentVersion: '2.1.0',
+    testVersion: '2.2.0',
+    improvement: '+2.3%',
+    metric: 'precisió',
+    progress: 67,
+    daysRemaining: 5
+  })
+  
+  const [biasData, setBiasData] = useState({
+    fairnessScore: 97.2,
+    lastAuditDays: 1,
+    status: 'excellent', // excellent, good, warning, critical
+    ethnicBias: 0.8,
+    genderBias: 1.2,
+    ageBias: 0.6
+  })
+  
+  const [scalingData, setScalingData] = useState({
+    activeInstances: 3,
+    maxInstances: 5,
+    cpuAverage: 78,
+    autoScaleEnabled: true,
+    lastScaleAction: 'Scale up (+1)',
+    scaleReason: 'High traffic detected'
+  })
+
+  // Mock data
+  const models: ModelMetric[] = [
+    {
+      id: '1',
+      nom: 'CatGPT-4',
+      tipus: 'llm',
+      versio: '4.2.1',
+      rendiment: {
+        accuracy: 94.5,
+        latency: 120,
+        throughput: 1000,
+        cost: 0.02
+      },
+      estat: 'actiu',
+      usRecentHores: 24567,
+      tasquesCompletades: 145890,
+      errorsRate: 0.3
+    },
+    {
+      id: '2',
+      nom: 'VisionCat',
+      tipus: 'vision',
+      versio: '2.1.0',
+      rendiment: {
+        accuracy: 89.2,
+        latency: 250,
+        throughput: 500,
+        cost: 0.05
+      },
+      estat: 'entrenant',
+      usRecentHores: 8934,
+      tasquesCompletades: 67234,
+      errorsRate: 1.2
+    }
+  ]
+
+  const datasets: Dataset[] = [
+    {
+      id: '1',
+      nom: 'Corpus Català General',
+      tipus: 'text',
+      tamany: '45GB',
+      samples: 12000000,
+      qualitat: 95,
+      estat: 'disponible',
+      dataCreacio: new Date('2024-01-15'),
+      ultimUs: new Date(),
+      etiquetes: ['català', 'general', 'cleaned']
+    },
+    {
+      id: '2',
+      nom: 'Imatges Administració',
+      tipus: 'imatge',
+      tamany: '120GB',
+      samples: 450000,
+      qualitat: 88,
+      estat: 'processant',
+      dataCreacio: new Date('2024-03-20'),
+      ultimUs: new Date(),
+      etiquetes: ['documents', 'formularis', 'segells']
+    }
+  ]
+
+  const experiments: Experiment[] = [
+    {
+      id: '1',
+      nom: 'Fine-tuning Legal Català',
+      tipus: 'fine_tuning',
+      model: 'CatGPT-4',
+      dataset: 'Corpus Legal CAT',
+      estat: 'executant',
+      progres: 67,
+      metriques: {
+        baseline: 82.3,
+        actual: 89.7,
+        millora: 7.4
+      },
+      dataInici: new Date('2024-08-28'),
+      duracioEstimada: '48h'
+    }
+  ]
+
+  const prompts: Prompt[] = [
+    {
+      id: '1',
+      nom: 'Resum Document Administratiu',
+      categoria: 'analisi',
+      versio: '3.2',
+      idioma: 'català',
+      plantilla: 'Resumeix el següent document administratiu...',
+      variables: ['document', 'max_length', 'focus'],
+      exemples: ['Exemple 1...', 'Exemple 2...'],
+      rendiment: {
+        precisio: 91.2,
+        velocitat: 2.3,
+        cost: 0.008
+      },
+      usos: 45678,
+      valoracio: 4.7,
+      tags: ['administració', 'resum', 'documents']
+    }
+  ]
+
+  const biasAudits: BiasAudit[] = [
+    {
+      id: '1',
+      model: 'CatGPT-4',
+      data: new Date(),
+      tipus: 'idioma',
+      severitat: 'moderat',
+      descripcio: 'Biaix detectat en respostes en català vs castellà',
+      recomanacions: ['Augmentar dataset català', 'Rebalancejar pesos'],
+      estat: 'revisat'
+    }
+  ]
+
+  const research: Research[] = [
+    {
+      id: '1',
+      titol: 'Attention Is All You Need - Revisited',
+      autors: ['Vaswani et al.'],
+      conferencia: 'NeurIPS',
+      any: 2024,
+      tipus: 'paper',
+      area: ['transformers', 'attention', 'llm'],
+      rellevancia: 95,
+      estat: 'revisat',
+      resum: 'Nova arquitectura d\'atenció més eficient...',
+      aplicabilitat: 'Pot reduir latència en 30% per als nostres models'
+    }
+  ]
+
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      {/* Mètriques principals */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Brain className="w-8 h-8 text-purple-600" />
+            <span className="text-2xl font-bold">12</span>
+          </div>
+          <p className="text-sm text-gray-600">Models actius</p>
+          <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            +2 aquest mes
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Activity className="w-8 h-8 text-blue-600" />
+            <span className="text-2xl font-bold">1.2M</span>
+          </div>
+          <p className="text-sm text-gray-600">Requests diàries</p>
+          <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            +15% setmana passada
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Target className="w-8 h-8 text-green-600" />
+            <span className="text-2xl font-bold">94.5%</span>
+          </div>
+          <p className="text-sm text-gray-600">Precisió mitjana</p>
+          <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            +2.1% millora
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Euro className="w-8 h-8 text-yellow-600" />
+            <span className="text-2xl font-bold">€8.5K</span>
+          </div>
+          <p className="text-sm text-gray-600">Cost mensual</p>
+          <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+            <TrendingDown className="w-3 h-3" />
+            +5% mes passat
+          </div>
+        </div>
+      </div>
+
+      {/* Models Personalitzats */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Brain className="w-5 h-5" />
+            Models Personalitzats
+          </h3>
+          <button className="px-3 py-1 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 flex items-center gap-1">
+            <Plus className="w-4 h-4" />
+            Nou Model
+          </button>
+        </div>
+        <div className="space-y-3">
+          {models.map(model => (
+            <div key={model.id} className="border rounded-lg p-4 hover:bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${
+                    model.estat === 'actiu' ? 'bg-green-500' :
+                    model.estat === 'entrenant' ? 'bg-yellow-500' :
+                    'bg-gray-400'
+                  }`} />
+                  <div>
+                    <p className="font-medium">{model.nom}</p>
+                    <p className="text-sm text-gray-600">
+                      v{model.versio} • {model.tipus.toUpperCase()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Accuracy</p>
+                    <p className="font-medium">{model.rendiment.accuracy}%</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Latency</p>
+                    <p className="font-medium">{model.rendiment.latency}ms</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Cost</p>
+                    <p className="font-medium">€{model.rendiment.cost}/1K</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Errors</p>
+                    <p className={`font-medium ${model.errorsRate < 1 ? 'text-green-600' : 'text-red-600'}`}>
+                      {model.errorsRate}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {model.estat === 'entrenant' && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span>Progrés entrenament</span>
+                    <span>67%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '67%' }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Experiments Actius */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Beaker className="w-5 h-5" />
+            Experiments Actius
+          </h3>
+          <span className="text-sm text-gray-600">3 en execució</span>
+        </div>
+        <div className="space-y-3">
+          {experiments.map(exp => (
+            <div key={exp.id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="font-medium">{exp.nom}</p>
+                  <p className="text-sm text-gray-600">
+                    {exp.tipus.replace('_', ' ')} • Model: {exp.model}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    exp.estat === 'executant' ? 'bg-blue-100 text-blue-800' :
+                    exp.estat === 'completat' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {exp.estat}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Progrés</span>
+                  <span>{exp.progres}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${exp.progres}%` }} />
+                </div>
+                <div className="flex items-center justify-between text-sm pt-2">
+                  <span>Millora: <span className="text-green-600 font-medium">+{exp.metriques.millora}%</span></span>
+                  <span>Temps restant: {exp.duracioEstimada}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderDesenvolupament = () => (
+    <div className="space-y-6">
+      {/* Pipeline d'Entrenament */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <GitBranch className="w-5 h-5" />
+          Pipeline d'Entrenament
+        </h3>
+        <div className="grid grid-cols-5 gap-2 mb-6">
+          {['Data Prep', 'Training', 'Validation', 'Testing', 'Deploy'].map((stage, idx) => (
+            <div key={stage} className="relative">
+              <div className={`p-3 rounded-lg text-center text-sm ${
+                idx <= 2 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {stage}
+              </div>
+              {idx < 4 && (
+                <ChevronRight className="absolute -right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-medium">Model: CatGPT-4-Legal</p>
+            <div className="flex items-center gap-2">
+              <button className="p-2 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200">
+                <Pause className="w-4 h-4" />
+              </button>
+              <button className="p-2 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600">Època</p>
+              <p className="font-medium">12/50</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Loss</p>
+              <p className="font-medium">0.234</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Learning Rate</p>
+              <p className="font-medium">0.0001</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Gestió de Datasets */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            Gestió de Datasets
+          </h3>
+          <button className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 flex items-center gap-1">
+            <Upload className="w-4 h-4" />
+            Importar Dataset
+          </button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {datasets.map(dataset => (
+            <div key={dataset.id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-medium">{dataset.nom}</p>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  dataset.estat === 'disponible' ? 'bg-green-100 text-green-800' :
+                  dataset.estat === 'processant' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {dataset.estat}
+                </span>
+              </div>
+              <div className="space-y-1 text-sm text-gray-600">
+                <p>Tipus: {dataset.tipus} • Tamany: {dataset.tamany}</p>
+                <p>Samples: {dataset.samples.toLocaleString()}</p>
+                <p>Qualitat: {dataset.qualitat}%</p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {dataset.etiquetes.map(tag => (
+                    <span key={tag} className="px-2 py-1 bg-gray-100 rounded text-xs">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Fine-tuning */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings className="w-5 h-5" />
+          Fine-tuning Configuration
+        </h3>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">Model Base</label>
+            <select className="w-full p-2 border rounded-lg">
+              <option>CatGPT-4</option>
+              <option>Llama-3-CAT</option>
+              <option>Mistral-7B-CAT</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Dataset</label>
+            <select className="w-full p-2 border rounded-lg">
+              <option>Corpus Legal Català</option>
+              <option>Documents Administratius</option>
+              <option>FAQ Ciutadania</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Learning Rate</label>
+            <input type="number" className="w-full p-2 border rounded-lg" defaultValue="0.0001" step="0.00001" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Batch Size</label>
+            <input type="number" className="w-full p-2 border rounded-lg" defaultValue="32" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Epochs</label>
+            <input type="number" className="w-full p-2 border rounded-lg" defaultValue="10" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Warmup Steps</label>
+            <input type="number" className="w-full p-2 border rounded-lg" defaultValue="500" />
+          </div>
+        </div>
+        <button className="mt-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center gap-2">
+          <Play className="w-4 h-4" />
+          Iniciar Fine-tuning
+        </button>
+      </div>
+
+      {/* A/B Testing */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <GitCompare className="w-5 h-5" />
+          A/B Testing
+        </h3>
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="font-medium">Test: Resposta a Consultes Legals</p>
+              <p className="text-sm text-gray-600">Comparant CatGPT-4 vs CatGPT-4-Legal</p>
+            </div>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+              En execució
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-3 rounded">
+              <p className="text-sm font-medium mb-2">Variant A (Control)</p>
+              <div className="space-y-1 text-sm">
+                <p>Model: CatGPT-4</p>
+                <p>Mostra: 5,000 consultes</p>
+                <p>Taxa èxit: 82.3%</p>
+                <p>Temps resposta: 1.2s</p>
+              </div>
+            </div>
+            <div className="bg-green-50 p-3 rounded">
+              <p className="text-sm font-medium mb-2">Variant B (Test)</p>
+              <div className="space-y-1 text-sm">
+                <p>Model: CatGPT-4-Legal</p>
+                <p>Mostra: 5,000 consultes</p>
+                <p>Taxa èxit: 89.7%</p>
+                <p>Temps resposta: 1.1s</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-green-100 rounded">
+            <p className="text-sm font-medium text-green-800">
+              ✓ Variant B mostra millora significativa (+7.4% taxa èxit, -8% latència)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderRecerca = () => (
+    <div className="space-y-6">
+      {/* Laboratori d'Experimentació */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <FlaskConical className="w-5 h-5" />
+          Laboratori d'Experimentació
+        </h3>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <button className="p-4 border rounded-lg hover:bg-gray-50 text-left">
+            <Atom className="w-6 h-6 text-purple-500 mb-2" />
+            <p className="font-medium">Nova Arquitectura</p>
+            <p className="text-sm text-gray-600">Provar arquitectures experimentals</p>
+          </button>
+          <button className="p-4 border rounded-lg hover:bg-gray-50 text-left">
+            <Dna className="w-6 h-6 text-blue-500 mb-2" />
+            <p className="font-medium">Híbrids Multimodals</p>
+            <p className="text-sm text-gray-600">Combinar text, imatge i àudio</p>
+          </button>
+          <button className="p-4 border rounded-lg hover:bg-gray-50 text-left">
+            <Microscope className="w-6 h-6 text-green-500 mb-2" />
+            <p className="font-medium">Anàlisi de Components</p>
+            <p className="text-sm text-gray-600">Estudiar capes i atenció</p>
+          </button>
+        </div>
+        <div className="border rounded-lg p-4">
+          <p className="font-medium mb-3">Experiment Actiu: Atenció Dispersa</p>
+          <div className="grid grid-cols-4 gap-3 text-sm">
+            <div>
+              <p className="text-gray-600">Paràmetres</p>
+              <p className="font-medium">125M</p>
+            </div>
+            <div>
+              <p className="text-gray-600">FLOPs</p>
+              <p className="font-medium">-45%</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Memòria</p>
+              <p className="font-medium">-60%</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Precisió</p>
+              <p className="font-medium">92.1%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Benchmarking */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <BarChart className="w-5 h-5" />
+          Benchmarking
+        </h3>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">MMLU (Català)</p>
+              <span className="text-sm text-gray-600">Actualitzat fa 2h</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">CatGPT-4</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '94%' }} />
+                  </div>
+                  <span className="text-sm font-medium">94%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">GPT-4</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '92%' }} />
+                  </div>
+                  <span className="text-sm font-medium">92%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Claude-3</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                    <div className="bg-gray-500 h-2 rounded-full" style={{ width: '90%' }} />
+                  </div>
+                  <span className="text-sm font-medium">90%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">HumanEval (Codi)</p>
+              <span className="text-sm text-gray-600">Actualitzat fa 1d</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">CatGPT-4-Code</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '87%' }} />
+                  </div>
+                  <span className="text-sm font-medium">87%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Codex</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }} />
+                  </div>
+                  <span className="text-sm font-medium">85%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Prototipat Ràpid */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Lightbulb className="w-5 h-5" />
+          Prototipat Ràpid
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">Agent Atenció Ciutadana v2</p>
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
+                Prototip
+              </span>
+            </div>
+            <div className="space-y-2 text-sm">
+              <p className="text-gray-600">Basat en: CatGPT-4 + RAG</p>
+              <p className="text-gray-600">Datasets: FAQ + Normatives</p>
+              <p className="text-gray-600">Test A/B: 1,000 usuaris</p>
+              <div className="pt-2 flex gap-2">
+                <button className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+                  Testejar
+                </button>
+                <button className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600">
+                  Analitzar
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">Traductor Documents Oficials</p>
+              <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                Beta
+              </span>
+            </div>
+            <div className="space-y-2 text-sm">
+              <p className="text-gray-600">Basat en: M2M-100 fine-tuned</p>
+              <p className="text-gray-600">Idiomes: CAT-ES-EN-FR</p>
+              <p className="text-gray-600">Precisió: 96.3% BLEU</p>
+              <div className="pt-2 flex gap-2">
+                <button className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600">
+                  Desplegar
+                </button>
+                <button className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600">
+                  Mètriques
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderPrompts = () => (
+    <div className="space-y-6">
+      {/* Biblioteca de Prompts */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Biblioteca de Prompts
+          </h3>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar prompts..."
+                className="pl-10 pr-4 py-2 border rounded-lg text-sm w-64"
+              />
+            </div>
+            <button className="px-3 py-2 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 flex items-center gap-1">
+              <Plus className="w-4 h-4" />
+              Nou Prompt
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {prompts.map(prompt => (
+            <div key={prompt.id} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                 onClick={() => setSelectedPrompt(prompt)}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-medium">{prompt.nom}</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">v{prompt.versio}</span>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    <span className="text-sm">{prompt.valoracio}</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">{prompt.categoria} • {prompt.idioma}</p>
+              <div className="flex items-center justify-between text-sm">
+                <span>{prompt.usos.toLocaleString()} usos</span>
+                <span className="text-green-600">{prompt.rendiment.precisio}% precisió</span>
+              </div>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {prompt.tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="px-2 py-1 bg-gray-100 rounded text-xs">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Versionat de Prompts */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <GitBranch className="w-5 h-5" />
+          Versionat i Historial
+        </h3>
+        <div className="space-y-3">
+          <div className="border rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <History className="w-4 h-4 text-gray-500" />
+                <div>
+                  <p className="font-medium">Resum Document Administratiu v3.2</p>
+                  <p className="text-sm text-gray-600">Actualitzat fa 2 dies per @maria</p>
+                </div>
+              </div>
+              <button className="px-3 py-1 border rounded text-sm hover:bg-gray-50">
+                Restaurar
+              </button>
+            </div>
+          </div>
+          <div className="border rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <History className="w-4 h-4 text-gray-500" />
+                <div>
+                  <p className="font-medium">Resum Document Administratiu v3.1</p>
+                  <p className="text-sm text-gray-600">Actualitzat fa 1 setmana per @joan</p>
+                </div>
+              </div>
+              <button className="px-3 py-1 border rounded text-sm hover:bg-gray-50">
+                Comparar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Optimització Automàtica */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Zap className="w-5 h-5" />
+          Optimització Automàtica
+        </h3>
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="font-medium">Optimitzador de Prompts Actiu</p>
+              <p className="text-sm text-gray-600">Utilitzant GPT-4 per millorar prompts automàticament</p>
+            </div>
+            <button className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+              Actiu
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="bg-gray-50 p-3 rounded">
+              <p className="text-gray-600 mb-1">Prompts Optimitzats</p>
+              <p className="text-xl font-bold">234</p>
+              <p className="text-green-600">+15% millora mitjana</p>
+            </div>
+            <div className="bg-gray-50 p-3 rounded">
+              <p className="text-gray-600 mb-1">Temps Estalviat</p>
+              <p className="text-xl font-bold">45h</p>
+              <p className="text-blue-600">Aquest mes</p>
+            </div>
+            <div className="bg-gray-50 p-3 rounded">
+              <p className="text-gray-600 mb-1">Cost Reduït</p>
+              <p className="text-xl font-bold">€1,250</p>
+              <p className="text-green-600">-22% tokens</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderEtica = () => (
+    <div className="space-y-6">
+      {/* Auditoria de Sesgos */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            Auditoria de Sesgos
+          </h3>
+          <button className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 flex items-center gap-1">
+            <AlertTriangle className="w-4 h-4" />
+            Nova Auditoria
+          </button>
+        </div>
+        <div className="space-y-3">
+          {biasAudits.map(audit => (
+            <div key={audit.id} className={`border rounded-lg p-4 ${
+              audit.severitat === 'critic' ? 'border-red-300 bg-red-50' :
+              audit.severitat === 'alt' ? 'border-orange-300 bg-orange-50' :
+              audit.severitat === 'moderat' ? 'border-yellow-300 bg-yellow-50' :
+              'border-gray-200'
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className={`w-5 h-5 ${
+                    audit.severitat === 'critic' ? 'text-red-600' :
+                    audit.severitat === 'alt' ? 'text-orange-600' :
+                    audit.severitat === 'moderat' ? 'text-yellow-600' :
+                    'text-gray-600'
+                  }`} />
+                  <div>
+                    <p className="font-medium">Biaix de {audit.tipus}</p>
+                    <p className="text-sm text-gray-600">Model: {audit.model}</p>
+                  </div>
+                </div>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  audit.estat === 'resolt' ? 'bg-green-100 text-green-800' :
+                  audit.estat === 'revisat' ? 'bg-blue-100 text-blue-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {audit.estat}
+                </span>
+              </div>
+              <p className="text-sm mb-2">{audit.descripcio}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Recomanacions:</p>
+                {audit.recomanacions.map((rec, idx) => (
+                  <p key={idx} className="text-sm text-gray-600 pl-4">• {rec}</p>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Monitorització de Contingut */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Eye className="w-5 h-5" />
+          Monitorització de Contingut Problemàtic
+        </h3>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="bg-red-50 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <AlertCircle className="w-6 h-6 text-red-500" />
+              <span className="text-2xl font-bold">3</span>
+            </div>
+            <p className="text-sm">Contingut Ofensiu</p>
+            <p className="text-xs text-red-600">Últimes 24h</p>
+          </div>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <Info className="w-6 h-6 text-yellow-500" />
+              <span className="text-2xl font-bold">12</span>
+            </div>
+            <p className="text-sm">Informació Incorrecta</p>
+            <p className="text-xs text-yellow-600">Últimes 24h</p>
+          </div>
+          <div className="bg-orange-50 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <Lock className="w-6 h-6 text-orange-500" />
+              <span className="text-2xl font-bold">0</span>
+            </div>
+            <p className="text-sm">Dades Sensibles</p>
+            <p className="text-xs text-green-600">Cap incident</p>
+          </div>
+        </div>
+        <div className="border rounded-lg p-4">
+          <p className="font-medium mb-3">Filtres Actius</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Llenguatge ofensiu</span>
+              <button className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                Actiu
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Informació personal (GDPR)</span>
+              <button className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                Actiu
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Contingut polític sensible</span>
+              <button className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                Actiu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Compliance Dashboard */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <CheckCircle className="w-5 h-5" />
+          Compliance Dashboard
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border rounded-lg p-4">
+            <p className="font-medium mb-3">GDPR Compliance</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Anonimització de dades</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Dret a l'oblit</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Consentiment explícit</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Portabilitat de dades</span>
+                <AlertCircle className="w-4 h-4 text-yellow-500" />
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <p className="font-medium mb-3">AI Act EU</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Transparència algorítmica</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Supervisió humana</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Avaluació de riscos</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Documentació tècnica</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderAnalytics = () => (
+    <div className="space-y-6">
+      {/* Anàlisi Predictiu */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5" />
+          Anàlisi Predictiu d'Ús
+        </h3>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="border rounded-lg p-4">
+            <p className="text-sm text-gray-600 mb-2">Predicció Setmana Vinent</p>
+            <p className="text-2xl font-bold">1.45M</p>
+            <p className="text-sm text-green-600">+21% vs actual</p>
+            <div className="mt-2 text-xs text-gray-500">
+              Confiança: 89%
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <p className="text-sm text-gray-600 mb-2">Pics d'Ús Previstos</p>
+            <p className="text-lg font-bold">Dimarts 10-12h</p>
+            <p className="text-sm text-blue-600">45K req/min</p>
+            <div className="mt-2 text-xs text-gray-500">
+              Basat en patrons històrics
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <p className="text-sm text-gray-600 mb-2">Capacitat Necessària</p>
+            <p className="text-2xl font-bold">+3</p>
+            <p className="text-sm">Nodes GPU addicionals</p>
+            <div className="mt-2 text-xs text-gray-500">
+              Per mantenir SLA 99.9%
+            </div>
+          </div>
+        </div>
+        <div className="border rounded-lg p-4">
+          <p className="font-medium mb-3">Tendències Identificades</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Consultes legals</span>
+              <span className="text-sm text-green-600">↑ 34% creixement</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Generació documents</span>
+              <span className="text-sm text-green-600">↑ 28% creixement</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Traduccions</span>
+              <span className="text-sm text-red-600">↓ 12% decreixement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Identificació de Patrons */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Compass className="w-5 h-5" />
+          Patrons d'Ús Detectats
+        </h3>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4 bg-blue-50">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-5 h-5 text-blue-600" />
+              <p className="font-medium">Patró: Consultes en Cascada</p>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              Els usuaris fan 3-4 consultes relacionades en menys de 5 minuts
+            </p>
+            <div className="flex items-center justify-between text-sm">
+              <span>Freqüència: 234 cops/dia</span>
+              <button className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+                Optimitzar
+              </button>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4 bg-yellow-50">
+            <div className="flex items-center gap-2 mb-2">
+              <Shuffle className="w-5 h-5 text-yellow-600" />
+              <p className="font-medium">Patró: Reformulació Repetitiva</p>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              30% d'usuaris reformulen la mateixa pregunta 2+ vegades
+            </p>
+            <div className="flex items-center justify-between text-sm">
+              <span>Impact: -15% satisfacció</span>
+              <button className="px-3 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600">
+                Millorar Prompts
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ROI d'Inversions */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Euro className="w-5 h-5" />
+          ROI d'Inversions en IA
+        </h3>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">CatGPT-4 Development</p>
+              <span className="text-green-600 font-medium">ROI: 285%</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div>
+                <p className="text-gray-600">Inversió</p>
+                <p className="font-medium">€125,000</p>
+              </div>
+              <div>
+                <p className="text-gray-600">Estalvis/any</p>
+                <p className="font-medium">€356,250</p>
+              </div>
+              <div>
+                <p className="text-gray-600">Payback</p>
+                <p className="font-medium">4.2 mesos</p>
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">Automatització Atenció Ciutadana</p>
+              <span className="text-green-600 font-medium">ROI: 420%</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div>
+                <p className="text-gray-600">Inversió</p>
+                <p className="font-medium">€45,000</p>
+              </div>
+              <div>
+                <p className="text-gray-600">Estalvis/any</p>
+                <p className="font-medium">€189,000</p>
+              </div>
+              <div>
+                <p className="text-gray-600">Payback</p>
+                <p className="font-medium">2.9 mesos</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 p-4 bg-green-50 rounded-lg">
+          <p className="text-sm font-medium text-green-800">
+            Total ROI Portfolio IA: 342% • Estalvis anuals: €1.2M
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderModels = () => (
+    <div className="space-y-6">
+      {/* Models Overview Dashboard */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Activity className="w-8 h-8 text-blue-600" />
+            <span className="text-2xl font-bold">12</span>
+          </div>
+          <p className="text-sm text-gray-600">Models actius</p>
+          <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            +2 aquest mes
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Gauge className="w-8 h-8 text-green-600" />
+            <span className="text-2xl font-bold">94.2%</span>
+          </div>
+          <p className="text-sm text-gray-600">Precisió mitjana</p>
+          <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            +1.3% millora
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Clock className="w-8 h-8 text-yellow-600" />
+            <span className="text-2xl font-bold">145ms</span>
+          </div>
+          <p className="text-sm text-gray-600">Latència mitjana</p>
+          <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            +12ms vs ahir
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <Server className="w-8 h-8 text-purple-600" />
+            <span className="text-2xl font-bold">85%</span>
+          </div>
+          <p className="text-sm text-gray-600">Utilització recursos</p>
+          <div className="mt-2 text-xs text-yellow-600 flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" />
+            Prop del límit
+          </div>
+        </div>
+      </div>
+
+      {/* Models Personalitzats amb Dashboard Detallat */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Brain className="w-5 h-5" />
+              Models Personalitzats
+            </h3>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 flex items-center gap-1">
+                <RefreshCw className="w-4 h-4" />
+                Actualitzar
+              </button>
+              <button 
+                onClick={() => setShowNewModelModal(true)}
+                className="px-3 py-1 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 flex items-center gap-1">
+                <Plus className="w-4 h-4" />
+                Nou Model
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="divide-y divide-gray-200">
+          {models.map(model => (
+            <div key={model.id} className="p-6 hover:bg-gray-50">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                      model.estat === 'actiu' ? 'bg-green-100' :
+                      model.estat === 'entrenant' ? 'bg-yellow-100' :
+                      'bg-gray-100'
+                    }`}>
+                      <Brain className={`w-6 h-6 ${
+                        model.estat === 'actiu' ? 'text-green-600' :
+                        model.estat === 'entrenant' ? 'text-yellow-600' :
+                        'text-gray-600'
+                      }`} />
+                    </div>
+                    <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                      model.estat === 'actiu' ? 'bg-green-500' :
+                      model.estat === 'entrenant' ? 'bg-yellow-500' :
+                      'bg-gray-400'
+                    }`} />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{model.nom}</h4>
+                    <p className="text-sm text-gray-600 mb-1">
+                      v{model.versio} • {model.tipus.toUpperCase()} • {model.estat}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>Actualitzat fa 2h</span>
+                      <span>•</span>
+                      <span>{model.tasquesCompletades.toLocaleString()} tasques</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      model.estat === 'actiu' ? 'bg-green-100 text-green-800' :
+                      model.estat === 'entrenant' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {model.estat}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {model.usRecentHores.toLocaleString()} requests/24h
+                  </div>
+                </div>
+              </div>
+
+              {/* Mètriques de Rendiment en Temps Real */}
+              <div className="grid grid-cols-5 gap-4 mb-4">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-lg font-bold text-green-600">{model.rendiment.accuracy}%</div>
+                  <div className="text-xs text-gray-500">Precisió</div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <div className="w-full bg-gray-200 rounded-full h-1">
+                      <div className="bg-green-500 h-1 rounded-full" style={{ width: `${model.rendiment.accuracy}%` }} />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-lg font-bold text-blue-600">{model.rendiment.latency}ms</div>
+                  <div className="text-xs text-gray-500">Latència</div>
+                  <div className="text-xs text-gray-400 mt-1">P95: 180ms</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-lg font-bold text-purple-600">{model.rendiment.throughput}/s</div>
+                  <div className="text-xs text-gray-500">Throughput</div>
+                  <div className="text-xs text-gray-400 mt-1">Max: 1.2K/s</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-lg font-bold text-yellow-600">€{model.rendiment.cost}</div>
+                  <div className="text-xs text-gray-500">Cost/1K tok</div>
+                  <div className="text-xs text-gray-400 mt-1">€{(model.rendiment.cost * 24).toFixed(2)}/dia</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-lg font-bold text-red-600">{model.errorsRate}%</div>
+                  <div className="text-xs text-gray-500">Taxa errors</div>
+                  <div className="text-xs text-gray-400 mt-1">SLA: &lt;1%</div>
+                </div>
+              </div>
+
+              {/* A/B Testing i Bias Analysis */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div 
+                  onClick={() => setShowABTestDetailModal(true)}
+                  className="bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer hover:bg-blue-100 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-blue-800">
+                      {abTestData.isActive ? 'A/B Test Actiu' : 'A/B Test Inactiu'}
+                    </span>
+                    <TestTube className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div className="text-xs text-blue-600">
+                    v{abTestData.currentVersion} vs v{abTestData.testVersion}
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    Millora: {abTestData.improvement} {abTestData.metric}
+                  </div>
+                  {abTestData.isActive && (
+                    <div className="w-full bg-blue-200 rounded-full h-1 mt-2">
+                      <div 
+                        className="bg-blue-600 h-1 rounded-full transition-all duration-300" 
+                        style={{ width: `${abTestData.progress}%` }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+                
+                <div 
+                  onClick={() => setShowBiasDetailModal(true)}
+                  className="bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer hover:bg-green-100 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-green-800">Bias Score</span>
+                    <Shield className={`w-4 h-4 ${
+                      biasData.status === 'excellent' ? 'text-green-600' :
+                      biasData.status === 'good' ? 'text-yellow-600' :
+                      biasData.status === 'warning' ? 'text-orange-600' : 'text-red-600'
+                    }`} />
+                  </div>
+                  <div className="text-xs text-green-600">
+                    Fairness: {biasData.fairnessScore}%
+                  </div>
+                  <div className="text-xs text-green-600 mt-1">
+                    Últim audit: fa {biasData.lastAuditDays}d
+                  </div>
+                  <div className="w-full bg-green-200 rounded-full h-1 mt-2">
+                    <div 
+                      className="bg-green-600 h-1 rounded-full transition-all duration-300" 
+                      style={{ width: `${biasData.fairnessScore}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div 
+                  onClick={() => setShowScalingDetailModal(true)}
+                  className="bg-purple-50 border border-purple-200 rounded-lg p-3 cursor-pointer hover:bg-purple-100 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-purple-800">Auto Scaling</span>
+                    <Zap className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div className="text-xs text-purple-600">
+                    {scalingData.activeInstances}/{scalingData.maxInstances} instàncies actives
+                  </div>
+                  <div className="text-xs text-purple-600 mt-1">
+                    CPU: {scalingData.cpuAverage}% mitjana
+                  </div>
+                  <div className="w-full bg-purple-200 rounded-full h-1 mt-2">
+                    <div 
+                      className="bg-purple-600 h-1 rounded-full transition-all duration-300" 
+                      style={{ width: `${(scalingData.activeInstances / scalingData.maxInstances) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Accions del Model */}
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      setSelectedModelForAction('CatGPT-4')
+                      setShowMetricsModal(true)
+                    }}
+                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 flex items-center gap-1"
+                  >
+                    <BarChart className="w-3 h-3" />
+                    Mètriques
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedModelForAction('CatGPT-4')
+                      setShowVersionsModal(true)
+                    }}
+                    className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 flex items-center gap-1"
+                  >
+                    <History className="w-3 h-3" />
+                    Versions
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedModelForAction('CatGPT-4')
+                      setShowABTestDetailModal(true)
+                    }}
+                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200 flex items-center gap-1"
+                  >
+                    <TestTube className="w-3 h-3" />
+                    A/B Test
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedModelForAction('CatGPT-4')
+                      setShowBenchmarkModal(true)
+                    }}
+                    className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200 flex items-center gap-1"
+                  >
+                    <Target className="w-3 h-3" />
+                    Benchmark
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      setSelectedModelForAction('CatGPT-4')
+                      setShowConfigModal(true)
+                    }}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 flex items-center gap-1"
+                  >
+                    <Settings className="w-3 h-3" />
+                    Configurar
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedModelForAction('CatGPT-4')
+                      setShowRollbackModal(true)
+                    }}
+                    className="px-3 py-1 bg-orange-100 text-orange-700 rounded text-xs hover:bg-orange-200 flex items-center gap-1"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Rollback
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* System Status i Balanceig de Càrrega */}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Server className="w-5 h-5" />
+            Balanceig de Càrrega
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <div>
+                <p className="font-medium">Load Balancer 1</p>
+                <p className="text-sm text-gray-600">eu-west-1a</p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">1,247 req/min</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }} />
+                  </div>
+                  <span className="text-xs text-gray-600">65%</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <div>
+                <p className="font-medium">Load Balancer 2</p>
+                <p className="text-sm text-gray-600">eu-west-1b</p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">892 req/min</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '45%' }} />
+                  </div>
+                  <span className="text-xs text-gray-600">45%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Rollback Automàtic
+          </h3>
+          <div className="space-y-3">
+            <div className="p-3 bg-green-50 border border-green-200 rounded">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-green-800">CatGPT-4 v4.2.1</p>
+                  <p className="text-sm text-green-600">Desplegament exitós</p>
+                </div>
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              </div>
+            </div>
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-yellow-800">VisionCat v2.1.0</p>
+                  <p className="text-sm text-yellow-600">Monitoritzant errors</p>
+                </div>
+                <Clock className="w-5 h-5 text-yellow-500" />
+              </div>
+              <div className="mt-2 text-xs text-yellow-600">
+                Taxa errors: 0.8% (límit: 1%)
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-gray-50 rounded">
+            <p className="text-sm font-medium mb-2">Configuració Rollback</p>
+            <div className="space-y-1 text-xs text-gray-600">
+              <p>• Rollback automàtic si errors &gt; 1%</p>
+              <p>• Rollback si latència &gt; 500ms</p>
+              <p>• Rollback si precisió &lt; 90%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderEntrenament = () => (
+    <div className="space-y-6">
+      {/* Pipeline d'Entrenament */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <GitBranch className="w-5 h-5" />
+          Pipeline d'Entrenament
+        </h3>
+        <div className="grid grid-cols-5 gap-2 mb-6">
+          {['Data Prep', 'Training', 'Validation', 'Testing', 'Deploy'].map((stage, idx) => (
+            <div key={stage} className="relative">
+              <div className={`p-3 rounded-lg text-center text-sm ${
+                idx <= 2 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {stage}
+              </div>
+              {idx < 4 && (
+                <ChevronRight className="absolute -right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderMetriques = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <BarChart className="w-5 h-5" />
+          Mètriques de Rendiment
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gray-50 p-4 rounded">
+            <p className="text-sm text-gray-600">Precisió Mitjana</p>
+            <p className="text-2xl font-bold">94.5%</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <p className="text-sm text-gray-600">Latència Mitjana</p>
+            <p className="text-2xl font-bold">120ms</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <p className="text-sm text-gray-600">Requests/dia</p>
+            <p className="text-2xl font-bold">1.2M</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderCompliance = () => (
+    <div className="space-y-6">
+      {/* Compliance Dashboard */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Shield className="w-5 h-5" />
+          Compliance Dashboard
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border rounded-lg p-4">
+            <p className="font-medium mb-3">GDPR Compliance</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Anonimització de dades</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Dret a l'oblit</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <p className="font-medium mb-3">AI Act EU</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Transparència algorítmica</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Supervisió humana</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderSeguretat = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Lock className="w-5 h-5" />
+          Seguretat dels Models
+        </h3>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Encriptació de Models</p>
+                <p className="text-sm text-gray-600">Models encriptats en repòs i en trànsit</p>
+              </div>
+              <CheckCircle className="w-5 h-5 text-green-500" />
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Control d'Accés</p>
+                <p className="text-sm text-gray-600">Autenticació i autorització robustes</p>
+              </div>
+              <CheckCircle className="w-5 h-5 text-green-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderExperiments = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <TestTube className="w-5 h-5" />
+          Experiments Actius
+        </h3>
+        <div className="space-y-3">
+          {experiments.map(exp => (
+            <div key={exp.id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="font-medium">{exp.nom}</p>
+                  <p className="text-sm text-gray-600">
+                    {exp.tipus.replace('_', ' ')} • Model: {exp.model}
+                  </p>
+                </div>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  exp.estat === 'executant' ? 'bg-blue-100 text-blue-800' :
+                  exp.estat === 'completat' ? 'bg-green-100 text-green-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {exp.estat}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${exp.progres}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderBenchmarks = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Target className="w-5 h-5" />
+          Benchmarking
+        </h3>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-medium">MMLU (Català)</p>
+              <span className="text-sm text-gray-600">Actualitzat fa 2h</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">CatGPT-4</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '94%' }} />
+                  </div>
+                  <span className="text-sm font-medium">94%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderConfiguracio = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings className="w-5 h-5" />
+          Configuració General
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Model per defecte</label>
+            <select className="w-full p-2 border rounded-lg">
+              <option>CatGPT-4</option>
+              <option>Llama-3-CAT</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Límit de requests/dia</label>
+            <input type="number" className="w-full p-2 border rounded-lg" defaultValue="100000" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderInvestigacio = () => (
+    <div className="space-y-6">
+      {/* Papers Acadèmics */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <BookOpen className="w-5 h-5" />
+            Papers Acadèmics Recents
+          </h3>
+          <button className="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 flex items-center gap-1">
+            <Plus className="w-4 h-4" />
+            Afegir Paper
+          </button>
+        </div>
+        <div className="space-y-3">
+          {research.map(paper => (
+            <div key={paper.id} className="border rounded-lg p-4 hover:bg-gray-50">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="font-medium">{paper.titol}</p>
+                  <p className="text-sm text-gray-600">
+                    {paper.autors.join(', ')} • {paper.conferencia} {paper.any}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    paper.estat === 'aplicat' ? 'bg-green-100 text-green-800' :
+                    paper.estat === 'revisat' ? 'bg-blue-100 text-blue-800' :
+                    paper.estat === 'llegint' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {paper.estat}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm">{paper.rellevancia}%</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">{paper.resum}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-1">
+                  {paper.area.map(tag => (
+                    <span key={tag} className="px-2 py-1 bg-gray-100 rounded text-xs">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button className="text-sm text-blue-600 hover:underline">
+                  Veure detalls →
+                </button>
+              </div>
+              {paper.aplicabilitat && (
+                <div className="mt-2 p-2 bg-green-50 rounded">
+                  <p className="text-sm text-green-800">
+                    <strong>Aplicabilitat:</strong> {paper.aplicabilitat}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tendències del Sector */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Globe className="w-5 h-5" />
+          Tendències del Sector
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-5 h-5 text-green-500" />
+              <p className="font-medium">Emergents</p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span>Multimodal Models</span>
+                <span className="text-green-600">+145%</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span>Chain-of-Thought</span>
+                <span className="text-green-600">+89%</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span>Constitutional AI</span>
+                <span className="text-green-600">+67%</span>
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-5 h-5 text-purple-500" />
+              <p className="font-medium">Líders</p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span>OpenAI</span>
+                <span className="text-gray-600">35% share</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span>Anthropic</span>
+                <span className="text-gray-600">22% share</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span>Google</span>
+                <span className="text-gray-600">18% share</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Roadmap de Recerca */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Map className="w-5 h-5" />
+          Roadmap de Recerca
+        </h3>
+        <div className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-blue-600">Q3</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-medium mb-1">Agents Autònoms</p>
+              <p className="text-sm text-gray-600">
+                Desenvolupament d'agents capaços de tasques complexes multi-pas
+              </p>
+              <div className="mt-2 flex gap-2">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                  En progrés
+                </span>
+                <span className="text-xs text-gray-500">60% completat</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-purple-600">Q4</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-medium mb-1">RAG Avançat</p>
+              <p className="text-sm text-gray-600">
+                Sistema de recuperació amb comprensió contextual profunda
+              </p>
+              <div className="mt-2 flex gap-2">
+                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                  Planificat
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-green-600">Q1</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-medium mb-1">Model Sobirà Català</p>
+              <p className="text-sm text-gray-600">
+                LLM entrenat des de zero amb corpus 100% català
+              </p>
+              <div className="mt-2 flex gap-2">
+                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                  Concepte
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header amb gradient */}
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+        <div className="px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-4 mb-2">
+                <button
+                  onClick={() => window.location.href = '/admin/dashboard'}
+                  className="flex items-center gap-2 bg-white/20 backdrop-blur rounded-lg px-3 py-2 hover:bg-white/30 transition-colors text-sm font-medium"
+                >
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                  Dashboard Admin
+                </button>
+              </div>
+              <h1 className="text-2xl font-bold flex items-center gap-3">
+                <Brain className="w-8 h-8" />
+                Departament d'Intel·ligència Artificial
+              </h1>
+              <p className="text-purple-100 mt-1">
+                Centre d'Excel·lència en IA per l'Administració Pública
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  <span className="font-semibold">12 Models Actius</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAIAssistant(!showAIAssistant)}
+                className="bg-white/20 backdrop-blur rounded-lg p-2 hover:bg-white/30 transition-colors"
+              >
+                <Bot className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navegación por pestañas - Dos filas */}
+      <div className="bg-white border-b px-6">
+        {/* Primera fila */}
+        <div className="flex gap-3">
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: Monitor },
+            { id: 'models', label: 'Models', icon: Brain },
+            { id: 'entrenament', label: 'Entrenament', icon: Zap },
+            { id: 'metriques', label: 'Mètriques', icon: BarChart },
+            { id: 'compliance', label: 'Compliance', icon: Shield },
+            { id: 'seguretat', label: 'Seguretat', icon: Lock }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabOption)}
+              className={`flex items-center justify-center gap-2 py-3 px-3 border-b-2 transition-colors w-48 ${
+                activeTab === tab.id
+                  ? 'border-purple-600 text-purple-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        
+        {/* Segunda fila */}
+        <div className="flex gap-3 border-t border-gray-100">
+          {[
+            { id: 'prompts', label: 'Prompts', icon: FileText },
+            { id: 'experiments', label: 'Experiments', icon: TestTube },
+            { id: 'benchmarks', label: 'Benchmarks', icon: Target },
+            { id: 'investigacio', label: 'Investigació', icon: GraduationCap },
+            { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+            { id: 'configuracio', label: 'Configuració', icon: Settings }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabOption)}
+              className={`flex items-center justify-center gap-2 py-3 px-3 border-b-2 transition-colors w-48 ${
+                activeTab === tab.id
+                  ? 'border-purple-600 text-purple-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenido */}
+      <div className="p-6">
+        {activeTab === 'dashboard' && renderDashboard()}
+        {activeTab === 'models' && renderModels()}
+        {activeTab === 'entrenament' && renderEntrenament()}
+        {activeTab === 'metriques' && renderMetriques()}
+        {activeTab === 'compliance' && renderCompliance()}
+        {activeTab === 'seguretat' && renderSeguretat()}
+        {activeTab === 'prompts' && renderPrompts()}
+        {activeTab === 'experiments' && renderExperiments()}
+        {activeTab === 'benchmarks' && renderBenchmarks()}
+        {activeTab === 'investigacio' && renderInvestigacio()}
+        {activeTab === 'analytics' && renderAnalytics()}
+        {activeTab === 'configuracio' && renderConfiguracio()}
+      </div>
+
+      {/* Model Detail Modal Professional */}
+      {selectedModel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full mx-4 max-h-[95vh] overflow-hidden">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    selectedModel.estat === 'actiu' ? 'bg-green-100' : 'bg-gray-100'
+                  }`}>
+                    <Brain className={`w-5 h-5 ${
+                      selectedModel.estat === 'actiu' ? 'text-green-600' : 'text-gray-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold">{selectedModel.nom}</h3>
+                    <p className="text-sm text-gray-600">
+                      v{selectedModel.versio} • {selectedModel.tipus.toUpperCase()}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedModel(null)} className="p-2 hover:bg-gray-100 rounded">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(95vh-200px)]">
+              <div className="grid grid-cols-12 gap-6 p-6">
+                {/* Mètriques en Temps Real */}
+                <div className="col-span-8 space-y-6">
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <BarChart className="w-4 h-4" />
+                      Mètriques en Temps Real
+                    </h4>
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-green-600">{selectedModel.rendiment.accuracy}%</div>
+                        <div className="text-sm text-green-700">Precisió</div>
+                        <div className="text-xs text-gray-500 mt-1">Target: 95%</div>
+                        <div className="w-full bg-green-200 rounded-full h-2 mt-2">
+                          <div className="bg-green-500 h-2 rounded-full" style={{ width: `${selectedModel.rendiment.accuracy}%` }} />
+                        </div>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-blue-600">{selectedModel.rendiment.latency}ms</div>
+                        <div className="text-sm text-blue-700">Latència P50</div>
+                        <div className="text-xs text-gray-500 mt-1">P95: 180ms | P99: 250ms</div>
+                        <div className="text-xs text-blue-600 mt-1">SLA: &lt;200ms</div>
+                      </div>
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-purple-600">{selectedModel.rendiment.throughput}</div>
+                        <div className="text-sm text-purple-700">Throughput/s</div>
+                        <div className="text-xs text-gray-500 mt-1">Max: 1.2K/s</div>
+                        <div className="text-xs text-purple-600 mt-1">CPU: 78%</div>
+                      </div>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-yellow-600">€{selectedModel.rendiment.cost}</div>
+                        <div className="text-sm text-yellow-700">Cost/1K tokens</div>
+                        <div className="text-xs text-gray-500 mt-1">€{(selectedModel.rendiment.cost * 1000).toFixed(0)}/M</div>
+                        <div className="text-xs text-yellow-600 mt-1">Pressupost: €500/dia</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Historial de Versions */}
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      Historial de Versions
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-4 bg-green-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                              {selectedModel.versio}
+                            </div>
+                            <div>
+                              <p className="font-medium">v{selectedModel.versio} (Actual)</p>
+                              <p className="text-sm text-gray-600">Desplegat fa 2 dies</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">Estable</span>
+                          </div>
+                        </div>
+                        <div className="mt-3 text-sm">
+                          <p className="font-medium">Changelog:</p>
+                          <ul className="mt-1 space-y-1 text-gray-600 text-xs">
+                            <li>• Millora 2.3% precisió en tasques de classificació</li>
+                            <li>• Reducció 15ms latència mitjana</li>
+                            <li>• Correcció bias en preguntes sobre gènere</li>
+                            <li>• Optimització memòria GPU (-12%)</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-gray-400 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                              {(parseFloat(selectedModel.versio) - 0.1).toFixed(1)}
+                            </div>
+                            <div>
+                              <p className="font-medium">v{(parseFloat(selectedModel.versio) - 0.1).toFixed(1)}</p>
+                              <p className="text-sm text-gray-600">Desplegat fa 1 setmana</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs hover:bg-orange-200">
+                              Rollback
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Testing Automatitzat */}
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <TestTube className="w-4 h-4" />
+                      Testing Automatitzat
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="font-medium">Tests Funcionals</p>
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Tests de regressió</span>
+                            <span className="text-green-600">✓ 156/156</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Tests de rendiment</span>
+                            <span className="text-green-600">✓ 24/24</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Tests de bias</span>
+                            <span className="text-green-600">✓ 12/12</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="font-medium">Benchmarks Sector Públic</p>
+                          <Target className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>MMLU Administració</span>
+                            <span className="font-medium">94.2%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Legal Benchmark</span>
+                            <span className="font-medium">91.8%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Traducció Oficial</span>
+                            <span className="font-medium">96.1%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configuració Avançada per Cas d'Ús */}
+                <div className="col-span-4 space-y-6">
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Configuració per Cas d'Ús
+                    </h4>
+                    
+                    {/* Selector de Cas d'Ús */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium mb-2">Tipus de Consulta</label>
+                      <select className="w-full p-2 border rounded text-sm bg-white">
+                        <option value="general">Consultes Generals</option>
+                        <option value="legal">Normativa Legal</option>
+                        <option value="administrative">Procediments Administratius</option>
+                        <option value="ciudadania">Atenció Ciutadania</option>
+                        <option value="contratacion">Contractació Pública</option>
+                      </select>
+                    </div>
+
+                    {/* Paràmetres Configurables per Cas d'Ús */}
+                    <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
+                      <h5 className="text-sm font-medium text-gray-800">Paràmetres per "Consultes Generals"</h5>
+                      
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-medium">Temperatura</label>
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Optimitzat</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="range" min="0" max="2" step="0.1" defaultValue="0.7" className="flex-1" />
+                          <span className="text-sm font-medium w-8">0.7</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Creativitat moderada per respostes equilibrades</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Max Tokens</label>
+                        <input type="number" defaultValue="1024" className="w-full p-2 border rounded text-sm" />
+                        <p className="text-xs text-gray-500 mt-1">Respostes concises per consultes generals</p>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-medium">Top P</label>
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Òptim</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="range" min="0" max="1" step="0.05" defaultValue="0.85" className="flex-1" />
+                          <span className="text-sm font-medium w-8">0.85</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Nucleus sampling equilibrat</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Frequency Penalty</label>
+                        <div className="flex items-center gap-2">
+                          <input type="range" min="0" max="2" step="0.1" defaultValue="0.3" className="flex-1" />
+                          <span className="text-sm font-medium w-8">0.3</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Evita repeticions lleus</p>
+                      </div>
+                    </div>
+
+                    {/* Presets Optimitzats */}
+                    <div>
+                      <h5 className="text-sm font-medium mb-3">Presets Sector Públic</h5>
+                      <div className="space-y-2">
+                        <button className="w-full p-3 border-2 border-green-200 bg-green-50 rounded-lg text-left hover:bg-green-100">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-green-800">Atenció Ciutadania</p>
+                              <p className="text-xs text-green-600">Temp: 0.5, Tokens: 512, TopP: 0.8</p>
+                            </div>
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          </div>
+                        </button>
+                        <button className="w-full p-3 border rounded-lg text-left hover:bg-gray-50">
+                          <div>
+                            <p className="font-medium">Assessoria Legal</p>
+                            <p className="text-xs text-gray-600">Temp: 0.2, Tokens: 2048, TopP: 0.9</p>
+                          </div>
+                        </button>
+                        <button className="w-full p-3 border rounded-lg text-left hover:bg-gray-50">
+                          <div>
+                            <p className="font-medium">Procediments Admin</p>
+                            <p className="text-xs text-gray-600">Temp: 0.3, Tokens: 1536, TopP: 0.85</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Context Window per Comunitat */}
+                    <div>
+                      <h5 className="text-sm font-medium mb-3">Context per Comunitat Autònoma</h5>
+                      <div className="space-y-3">
+                        <div className="border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Catalunya</span>
+                            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Actiu</span>
+                          </div>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <p>• Context: Normativa catalana, idioma català preferent</p>
+                            <p>• Window: 8K tokens</p>
+                            <p>• Personalització: Terminologia jurídica CAT</p>
+                          </div>
+                        </div>
+                        <div className="border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Madrid</span>
+                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Configurat</span>
+                          </div>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <p>• Context: Normativa estatal, castellà</p>
+                            <p>• Window: 6K tokens</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Límits per Tipus d'Usuari */}
+                    <div>
+                      <h5 className="text-sm font-medium mb-3">Límits per Tipus d'Usuari</h5>
+                      <div className="space-y-3">
+                        <div className="border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Empleats Públics</span>
+                            <Users className="w-4 h-4 text-blue-500" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-600">Req/hora:</span>
+                              <span className="font-medium ml-1">100</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Max tokens:</span>
+                              <span className="font-medium ml-1">2048</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Prioritat:</span>
+                              <span className="font-medium ml-1 text-green-600">Alta</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Context:</span>
+                              <span className="font-medium ml-1">8K</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Empreses</span>
+                            <Building2 className="w-4 h-4 text-orange-500" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-600">Req/hora:</span>
+                              <span className="font-medium ml-1">50</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Max tokens:</span>
+                              <span className="font-medium ml-1">1024</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Prioritat:</span>
+                              <span className="font-medium ml-1 text-yellow-600">Mitjana</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Context:</span>
+                              <span className="font-medium ml-1">4K</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Administracions</span>
+                            <Shield className="w-4 h-4 text-green-500" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-600">Req/hora:</span>
+                              <span className="font-medium ml-1">200</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Max tokens:</span>
+                              <span className="font-medium ml-1">4096</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Prioritat:</span>
+                              <span className="font-medium ml-1 text-green-600">Crítica</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Context:</span>
+                              <span className="font-medium ml-1">16K</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Templates de Prompts Específics */}
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Templates de Prompts
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Consulta Legal</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Actiu</span>
+                            <TestTube className="w-3 h-3 text-blue-500" />
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-600 mb-2">
+                          "Com a assistent especialitzat en normativa [COMUNITAT_AUTÒNOMA], analitza la següent consulta legal tenint en compte la legislació vigent..."
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div>
+                            <span className="text-gray-500">A/B Test:</span>
+                            <span className="ml-1 text-green-600">95.2% èxit</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Usos:</span>
+                            <span className="ml-1">1,247</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Latència:</span>
+                            <span className="ml-1">1.2s</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Procediment Administratiu</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Testing</span>
+                            <RefreshCw className="w-3 h-3 text-yellow-500 animate-spin" />
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-600 mb-2">
+                          "Explica pas a pas el procediment [TIPUS_PROCEDIMENT] segons la normativa de [COMUNITAT_AUTÒNOMA], incloent documentació necessària..."
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div>
+                            <span className="text-gray-500">A/B Test:</span>
+                            <span className="ml-1 text-yellow-600">En curs</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Usos:</span>
+                            <span className="ml-1">456</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Latència:</span>
+                            <span className="ml-1">0.9s</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button className="w-full p-2 border border-dashed border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Afegir Template
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* A/B Testing Automàtic */}
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <GitCompare className="w-4 h-4" />
+                      A/B Testing Automàtic
+                    </h4>
+                    
+                    {/* Test Actiu */}
+                    <div className="border rounded-lg p-4 mb-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium">Test: Prompt Atenció Ciutadania</span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">En execució</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {/* Variants */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-blue-800">Variant A (Control)</span>
+                              <span className="text-xs text-blue-600">50% tràfic</span>
+                            </div>
+                            <div className="text-xs text-blue-700 space-y-1">
+                              <p>Precisió: 92.1%</p>
+                              <p>Satisfacció: 4.2/5</p>
+                              <p>Temps resposta: 1.3s</p>
+                            </div>
+                          </div>
+                          <div className="bg-green-50 border border-green-200 rounded p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-green-800">Variant B (Test)</span>
+                              <span className="text-xs text-green-600">50% tràfic</span>
+                            </div>
+                            <div className="text-xs text-green-700 space-y-1">
+                              <p>Precisió: 94.3%</p>
+                              <p>Satisfacció: 4.6/5</p>
+                              <p>Temps resposta: 1.1s</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Mètriques del Test */}
+                        <div className="pt-2 border-t space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Confiança estadística</span>
+                            <span className="font-medium">94%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Mostra</span>
+                            <span>2,456 consultes</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Millora observada</span>
+                            <span className="font-medium text-green-600">+2.2% precisió</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Significança</span>
+                            <span className="font-medium text-green-600">p &lt; 0.05</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <button className="flex-1 px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+                            Aplicar Variant B
+                          </button>
+                          <button className="px-3 py-2 border rounded text-sm hover:bg-gray-50">
+                            Aturar Test
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Configuració A/B Testing */}
+                    <div className="border rounded-lg p-3">
+                      <p className="text-sm font-medium mb-3">Configuració Testing Automàtic</p>
+                      <div className="space-y-2 text-xs text-gray-600">
+                        <div className="flex justify-between">
+                          <span>• Tests automàtics per rendiment &lt; 90%</span>
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Optimització cada 1.000 consultes</span>
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Rollback automàtic si degradació</span>
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Notificacions equip IA</span>
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Anàlisi Bias i Fairness */}
+                  <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Anàlisi Bias
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Bias de gènere</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: '96%' }} />
+                            </div>
+                            <span className="text-xs font-medium">96%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Bias ètnic</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: '98%' }} />
+                            </div>
+                            <span className="text-xs font-medium">98%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Bias idiomàtic</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '94%' }} />
+                            </div>
+                            <span className="text-xs font-medium">94%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 p-3 bg-blue-50 rounded text-xs">
+                      <p className="font-medium text-blue-800">Recomanació:</p>
+                      <p className="text-blue-600 mt-1">Augmentar diversitat en dataset d'entrenament per millorar bias idiomàtic</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t bg-gray-50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4" />
+                  Pausar Model
+                </button>
+                <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 flex items-center gap-1">
+                  <RefreshCw className="w-4 h-4" />
+                  Reiniciar
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                  Cancel·lar
+                </button>
+                <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                  Desar Canvis
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panel de Asistente IA */}
+      {showAIAssistant && (
+        <div className="fixed right-0 top-0 w-96 h-full bg-white border-l border-gray-200 shadow-xl z-40">
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Assistent IA</h3>
+                  <p className="text-xs text-purple-100">Expert en Intel·ligència Artificial</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAIAssistant(false)}
+                className="text-white/80 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 h-[calc(100vh-180px)]">
+            {/* Mensajes del chat */}
+            <div className="space-y-4">
+              <div className="flex gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg h-fit">
+                  <Bot className="w-4 h-4 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="bg-gray-100 rounded-lg p-3">
+                    <p className="text-sm">
+                      Hola! Sóc el teu assistent especialitzat en IA. Puc ajudar-te amb:
+                    </p>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        Optimitzar models d'IA
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        Analitzar mètriques i rendiment
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        Detectar sesgos i problemes
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        Suggerir millores
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg h-fit">
+                  <Bot className="w-4 h-4 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="bg-gray-100 rounded-lg p-3">
+                    <p className="text-sm">
+                      He detectat que el model CatGPT-4 té una latència lleugerament alta. Vols que analitzi les causes possibles?
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={aiMessage}
+                onChange={(e) => setAiMessage(e.target.value)}
+                placeholder="Pregunta'm sobre els models d'IA..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+              />
+              <button
+                onClick={() => setAiMessage('')}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALS */}
+      
+      {/* New Model Modal */}
+      {showNewModelModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Crear Nou Model</h3>
+              <button onClick={() => setShowNewModelModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Nom del Model</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: CatGPT-5" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Tipus</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>Generació de text</option>
+                  <option>Anàlisi de documents</option>
+                  <option>Traducció</option>
+                  <option>Classificació</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Model Base</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>GPT-4</option>
+                  <option>Claude-3</option>
+                  <option>Llama-2</option>
+                  <option>PaLM</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Descripció</label>
+                <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20" placeholder="Descripció del model i el seu propòsit..."></textarea>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Max Tokens</label>
+                  <input type="number" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="4096" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Temperatura</label>
+                  <input type="number" step="0.1" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.7" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowNewModelModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                Cancel·lar
+              </button>
+              <button 
+                onClick={() => {
+                  // Simular creació de model
+                  alert('Model creat correctament! Nou model CatGPT-5 afegit al sistema.')
+                  setShowNewModelModal(false)
+                }}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Crear Model
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Metrics Modal */}
+      {showMetricsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Mètriques Detallades - {selectedModelForAction || 'Model'}</h3>
+              <button onClick={() => setShowMetricsModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Time Range Selector */}
+            <div className="flex gap-2 mb-6">
+              {['24h', '7d', '30d', '90d'].map((range) => (
+                <button key={range} className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                  {range}
+                </button>
+              ))}
+            </div>
+            
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-blue-600">Requests/hora</span>
+                  <TrendingUp className="w-4 h-4 text-blue-500" />
+                </div>
+                <div className="text-2xl font-bold text-blue-700 mt-1">2,847</div>
+                <div className="text-xs text-blue-600 mt-1">+12% respecte ahir</div>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-green-600">Latència mitjana</span>
+                  <Clock className="w-4 h-4 text-green-500" />
+                </div>
+                <div className="text-2xl font-bold text-green-700 mt-1">847ms</div>
+                <div className="text-xs text-green-600 mt-1">-3% respecte ahir</div>
+              </div>
+              
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-purple-600">Precisió</span>
+                  <Target className="w-4 h-4 text-purple-500" />
+                </div>
+                <div className="text-2xl font-bold text-purple-700 mt-1">94.2%</div>
+                <div className="text-xs text-purple-600 mt-1">Estable</div>
+              </div>
+              
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-yellow-600">Cost/1K tokens</span>
+                  <Euro className="w-4 h-4 text-yellow-500" />
+                </div>
+                <div className="text-2xl font-bold text-yellow-700 mt-1">€0.021</div>
+                <div className="text-xs text-yellow-600 mt-1">Optimitzat</div>
+              </div>
+            </div>
+            
+            {/* Charts Placeholder */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <h4 className="font-medium mb-4">Ús per Hora</h4>
+                <div className="h-40 flex items-center justify-center text-gray-500">
+                  [Gràfic de barres del usage per hora]
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <h4 className="font-medium mb-4">Distribució de Latència</h4>
+                <div className="h-40 flex items-center justify-center text-gray-500">
+                  [Histograma de latència]
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Versions Modal */}
+      {showVersionsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Historial de Versions - {selectedModelForAction || 'Model'}</h3>
+              <button onClick={() => setShowVersionsModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Current Version */}
+              <div className="border-l-4 border-green-500 bg-green-50 p-4 rounded-r-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">v2.1.0 (Actual)</span>
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Producció</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">Millores en precisió i reducció de latència</p>
+                <div className="text-xs text-gray-500">
+                  <div>Desplegat: 15 maig 2024</div>
+                  <div>Autor: Maria García</div>
+                  <div>Commit: a7f2b91</div>
+                </div>
+              </div>
+              
+              {/* Previous Versions */}
+              <div className="border-l-4 border-gray-300 bg-gray-50 p-4 rounded-r-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">v2.0.5</span>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        alert('Comparació entre v2.1.0 i v2.0.5:\n\n• Millores en precisió: +2.7%\n• Reducció latència: -45ms\n• Nous datasets: 3 afegits\n• Correccions bugs: 12 fixes')
+                      }}
+                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200"
+                    >
+                      Comparar
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (confirm('Confirmes que vols revertir a la versió v2.0.5? Aquesta acció és immediata.')) {
+                          alert('Versió v2.0.5 desplegada correctament. Temps de desplegament: 45 segons.')
+                          setShowVersionsModal(false)
+                        }
+                      }}
+                      className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded hover:bg-yellow-200"
+                    >
+                      Revertir
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">Optimització de prompts per sector públic</p>
+                <div className="text-xs text-gray-500">
+                  <div>Desplegat: 8 maig 2024</div>
+                  <div>Autor: Joan Martínez</div>
+                  <div>Commit: c4e1d82</div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-gray-300 bg-gray-50 p-4 rounded-r-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">v2.0.4</span>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        alert('Comparació entre v2.1.0 i v2.0.4:\n\n• Millores en precisió: +3.2%\n• Reducció latència: -67ms\n• Correccions bugs: 18 fixes\n• Noves característiques: 5 afegides')
+                      }}
+                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200"
+                    >
+                      Comparar
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (confirm('Confirmes que vols revertir a la versió v2.0.4? Aquesta acció és immediata.')) {
+                          alert('Versió v2.0.4 desplegada correctament. Temps de desplegament: 45 segons.')
+                          setShowVersionsModal(false)
+                        }
+                      }}
+                      className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded hover:bg-yellow-200"
+                    >
+                      Revertir
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">Correcció de bugs en classificació de documents</p>
+                <div className="text-xs text-gray-500">
+                  <div>Desplegat: 1 maig 2024</div>
+                  <div>Autor: Anna López</div>
+                  <div>Commit: f9a3b47</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Benchmark Modal */}
+      {showBenchmarkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Benchmarks - {selectedModelForAction || 'Model'}</h3>
+              <button onClick={() => setShowBenchmarkModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Benchmark Results */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-4 h-4 text-blue-500" />
+                    <span className="font-medium">Precisió General</span>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-700">94.2%</div>
+                  <div className="text-xs text-blue-600">Sector Públic Dataset</div>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-green-500" />
+                    <span className="font-medium">Velocitat</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-700">847ms</div>
+                  <div className="text-xs text-green-600">Temps resposta mitjà</div>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="w-4 h-4 text-purple-500" />
+                    <span className="font-medium">Seguretat</span>
+                  </div>
+                  <div className="text-2xl font-bold text-purple-700">99.1%</div>
+                  <div className="text-xs text-purple-600">Detecció contingut inapropiat</div>
+                </div>
+              </div>
+              
+              {/* Detailed Results */}
+              <div>
+                <h4 className="font-medium mb-3">Resultats Detallats</h4>
+                <div className="space-y-3">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Classificació de Documents</span>
+                      <span className="text-green-600 font-semibold">96.8%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{width: '96.8%'}}></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Dataset: 10,000 documents administratius</div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Anàlisi de Normativa</span>
+                      <span className="text-blue-600 font-semibold">91.5%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '91.5%'}}></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Dataset: Corpus jurídic de Catalunya</div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Traducció Automàtica</span>
+                      <span className="text-purple-600 font-semibold">94.2%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-500 h-2 rounded-full" style={{width: '94.2%'}}></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Dataset: Documents oficials CA-ES</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Run New Benchmark */}
+              <div className="border-t pt-6">
+                <h4 className="font-medium mb-3">Executar Nou Benchmark</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Dataset</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>Sector Públic General</option>
+                      <option>Normativa Legal</option>
+                      <option>Documents Administratius</option>
+                      <option>Traducció Multiidioma</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Tipus de Test</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>Precisió</option>
+                      <option>Velocitat</option>
+                      <option>Bias Detection</option>
+                      <option>Seguretat</option>
+                    </select>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    alert('Benchmark iniciat correctament. Els resultats estaran disponibles en 15-30 minuts.')
+                  }}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Executar Benchmark
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Configuration Modal */}
+      {showConfigModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Configuració Avançada - {selectedModelForAction || 'Model'}</h3>
+              <button onClick={() => setShowConfigModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Basic Parameters */}
+              <div>
+                <h4 className="font-medium mb-4">Paràmetres Bàsics</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Temperatura</label>
+                    <input type="range" min="0" max="2" step="0.1" className="w-full" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>0 (Determinístic)</span>
+                      <span>2 (Creatiu)</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Max Tokens</label>
+                    <input type="number" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value="4096" />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Top-P</label>
+                    <input type="range" min="0" max="1" step="0.05" className="w-full" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>0</span>
+                      <span>1</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Frequency Penalty</label>
+                    <input type="range" min="-2" max="2" step="0.1" className="w-full" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>-2</span>
+                      <span>2</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Use Case Specific */}
+              <div>
+                <h4 className="font-medium mb-4">Configuració per Cas d'Ús</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Tipus de Consulta</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option>General</option>
+                      <option>Normativa Legal</option>
+                      <option>Procediments Administratius</option>
+                      <option>Traducció</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Comunitat Autònoma</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option>Catalunya</option>
+                      <option>Madrid</option>
+                      <option>Andalucía</option>
+                      <option>País Basc</option>
+                      <option>Galícia</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Context Window</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option>8K (Estàndard)</option>
+                      <option>16K (Ampliada)</option>
+                      <option>32K (Màxima)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Límits per Tipus d'Usuari</label>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Empleats públics:</span>
+                        <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" value="1000" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Empreses:</span>
+                        <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" value="500" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Administracions:</span>
+                        <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" value="2000" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Save Configuration */}
+            <div className="flex gap-3 mt-6 pt-6 border-t">
+              <button onClick={() => setShowConfigModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                Cancel·lar
+              </button>
+              <button 
+                onClick={() => {
+                  alert('Configuració guardada correctament. Els canvis s\'aplicaran en els propers 2-3 minuts.')
+                  setShowConfigModal(false)
+                }}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Guardar Configuració
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rollback Modal */}
+      {showRollbackModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Confirmar Rollback</h3>
+              <button onClick={() => setShowRollbackModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                  <span className="font-medium text-yellow-800">Atenció: Acció Irreversible</span>
+                </div>
+                <p className="text-sm text-yellow-700">
+                  Estàs a punt de fer rollback del model <strong>{selectedModelForAction || 'Model'}</strong> a una versió anterior. 
+                  Aquesta acció afectarà immediatament tots els usuaris.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Versió Actual</label>
+                  <input type="text" className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg" value="v2.1.0" readOnly />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Revertir a</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <option>v2.0.5 (8 maig 2024)</option>
+                    <option>v2.0.4 (1 maig 2024)</option>
+                    <option>v2.0.3 (24 abril 2024)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Motiu del Rollback</label>
+                  <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 h-20" placeholder="Descriu el motiu del rollback..."></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button onClick={() => setShowRollbackModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                Cancel·lar
+              </button>
+              <button 
+                onClick={() => {
+                  alert('Rollback completat correctament. Model revertit a versió anterior. Temps de desplegament: 30 segons.')
+                  setShowRollbackModal(false)
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Confirmar Rollback
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* A/B Test Detail Modal */}
+      {showABTestDetailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">A/B Test Detalls</h3>
+              <button onClick={() => setShowABTestDetailModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Test Status */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium">Test de Temperatura Òptima</span>
+                  <span className={`px-2 py-1 text-xs rounded ${
+                    abTestData.isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {abTestData.isActive ? 'Actiu' : 'Finalitzat'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="text-center p-3 bg-white rounded border">
+                    <div className="font-semibold text-blue-700">Variant A (Control)</div>
+                    <div className="text-sm text-gray-600">v{abTestData.currentVersion}</div>
+                    <div className="text-lg font-bold text-blue-600 mt-1">92.1%</div>
+                    <div className="text-xs text-gray-500">Precisió mitjana</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded border">
+                    <div className="font-semibold text-green-700">Variant B (Test)</div>
+                    <div className="text-sm text-gray-600">v{abTestData.testVersion}</div>
+                    <div className="text-lg font-bold text-green-600 mt-1">94.4%</div>
+                    <div className="text-xs text-gray-500">Precisió mitjana</div>
+                  </div>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Progrés del test</span>
+                    <span>{abTestData.progress}%</span>
+                  </div>
+                  <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${abTestData.progress}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {abTestData.daysRemaining} dies restants
+                  </div>
+                </div>
+              </div>
+              
+              {/* Test Actions */}
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => {
+                    setAbTestData(prev => ({ ...prev, isActive: false, progress: 100 }))
+                    alert('Test A/B finalitzat. Variant B seleccionada com a guanyadora!')
+                    setShowABTestDetailModal(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Finalitzar Test
+                </button>
+                <button 
+                  onClick={() => {
+                    setAbTestData(prev => ({ ...prev, isActive: false }))
+                    alert('Test A/B cancel·lat. Variant A mantinguda.')
+                    setShowABTestDetailModal(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Cancel·lar Test
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bias Detail Modal */}
+      {showBiasDetailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Anàlisi de Biaixos</h3>
+              <button onClick={() => setShowBiasDetailModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Overall Score */}
+              <div className={`border rounded-lg p-4 ${
+                biasData.status === 'excellent' ? 'bg-green-50 border-green-200' :
+                biasData.status === 'good' ? 'bg-yellow-50 border-yellow-200' :
+                biasData.status === 'warning' ? 'bg-orange-50 border-orange-200' : 
+                'bg-red-50 border-red-200'
+              }`}>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium">Puntuació General de Fairness</span>
+                  <span className={`px-3 py-1 text-sm rounded-full ${
+                    biasData.status === 'excellent' ? 'bg-green-100 text-green-700' :
+                    biasData.status === 'good' ? 'bg-yellow-100 text-yellow-700' :
+                    biasData.status === 'warning' ? 'bg-orange-100 text-orange-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {biasData.status.charAt(0).toUpperCase() + biasData.status.slice(1)}
+                  </span>
+                </div>
+                <div className="text-3xl font-bold mb-2">{biasData.fairnessScore}%</div>
+                <div className="text-sm text-gray-600">Últim audit: fa {biasData.lastAuditDays} dies</div>
+              </div>
+              
+              {/* Detailed Bias Metrics */}
+              <div>
+                <h4 className="font-medium mb-3">Mètriques Detallades</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <span>Biaix Ètnic</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{biasData.ethnicBias}%</span>
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${biasData.ethnicBias < 2 ? 'bg-green-500' : biasData.ethnicBias < 5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min(biasData.ethnicBias * 10, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <span>Biaix de Gènere</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{biasData.genderBias}%</span>
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${biasData.genderBias < 2 ? 'bg-green-500' : biasData.genderBias < 5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min(biasData.genderBias * 10, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <span>Biaix d'Edat</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{biasData.ageBias}%</span>
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${biasData.ageBias < 2 ? 'bg-green-500' : biasData.ageBias < 5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min(biasData.ageBias * 10, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => {
+                    setBiasData(prev => ({ ...prev, lastAuditDays: 0 }))
+                    alert('Nou audit de biaixos iniciat. Resultats disponibles en 30-45 minuts.')
+                    setShowBiasDetailModal(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Executar Nou Audit
+                </button>
+                <button 
+                  onClick={() => setShowBiasDetailModal(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Tancar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auto Scaling Detail Modal */}
+      {showScalingDetailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Auto Scaling Status</h3>
+              <button onClick={() => setShowScalingDetailModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Current Status */}
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium">Estat Actual</span>
+                  <span className={`px-2 py-1 text-xs rounded ${
+                    scalingData.autoScaleEnabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {scalingData.autoScaleEnabled ? 'Actiu' : 'Desactivat'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">{scalingData.activeInstances}</div>
+                    <div className="text-sm text-gray-600">Instàncies actives</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">{scalingData.maxInstances}</div>
+                    <div className="text-sm text-gray-600">Límit màxim</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">{scalingData.cpuAverage}%</div>
+                    <div className="text-sm text-gray-600">CPU mitjà</div>
+                  </div>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Utilització de capacitat</span>
+                    <span>{((scalingData.activeInstances / scalingData.maxInstances) * 100).toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-purple-200 rounded-full h-3">
+                    <div 
+                      className="bg-purple-600 h-3 rounded-full transition-all duration-300" 
+                      style={{ width: `${(scalingData.activeInstances / scalingData.maxInstances) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="text-sm">
+                  <div className="flex justify-between items-center">
+                    <span>Darrera acció:</span>
+                    <span className="font-medium text-purple-700">{scalingData.lastScaleAction}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span>Motiu:</span>
+                    <span className="text-gray-600">{scalingData.scaleReason}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Scaling Controls */}
+              <div>
+                <h4 className="font-medium mb-3">Controls de Scaling</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => {
+                      setScalingData(prev => ({ 
+                        ...prev, 
+                        activeInstances: Math.min(prev.activeInstances + 1, prev.maxInstances),
+                        lastScaleAction: 'Manual Scale Up (+1)',
+                        scaleReason: 'Manual intervention'
+                      }))
+                      alert('Instància afegida manualment. Temps d\'activació: ~2 minuts.')
+                    }}
+                    disabled={scalingData.activeInstances >= scalingData.maxInstances}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    Scale Up (+1)
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setScalingData(prev => ({ 
+                        ...prev, 
+                        activeInstances: Math.max(prev.activeInstances - 1, 1),
+                        lastScaleAction: 'Manual Scale Down (-1)',
+                        scaleReason: 'Manual intervention'
+                      }))
+                      alert('Instància eliminada manualment.')
+                    }}
+                    disabled={scalingData.activeInstances <= 1}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    Scale Down (-1)
+                  </button>
+                </div>
+              </div>
+              
+              {/* Toggle Auto Scaling */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span className="font-medium">Auto Scaling</span>
+                <button 
+                  onClick={() => {
+                    setScalingData(prev => ({ ...prev, autoScaleEnabled: !prev.autoScaleEnabled }))
+                    alert(scalingData.autoScaleEnabled ? 'Auto Scaling desactivat' : 'Auto Scaling activat')
+                  }}
+                  className={`px-4 py-2 rounded-lg ${
+                    scalingData.autoScaleEnabled 
+                      ? 'bg-red-600 text-white hover:bg-red-700' 
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                >
+                  {scalingData.autoScaleEnabled ? 'Desactivar' : 'Activar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  )
+}
