@@ -14,6 +14,14 @@ import {
   TrendingDown, Scale, Heart, Bug, Radar
 } from 'lucide-react'
 
+// Import modular components
+import Dashboard from './components/Dashboard'
+import Models from './components/Models'
+import Experiments from './components/Experiments'
+import Prompts from './components/Prompts'
+import Analytics from './components/Analytics'
+import Research from './components/Research'
+
 type TabOption = 'dashboard' | 'models' | 'entrenament' | 'metriques' | 'compliance' | 'seguretat' | 'prompts' | 'experiments' | 'benchmarks' | 'investigacio' | 'analytics' | 'configuracio'
 
 type ModelMetric = {
@@ -109,7 +117,7 @@ type Research = {
 
 export default function DepartamentIA() {
   const [activeTab, setActiveTab] = useState<TabOption>('dashboard')
-  const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null)
+  // const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null) // Moved below
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
   const [aiMessage, setAiMessage] = useState('')
@@ -1223,6 +1231,252 @@ export default function DepartamentIA() {
   const [pausedCampaigns, setPausedCampaigns] = useState<string[]>([])
   const [newScanRunning, setNewScanRunning] = useState(false)
 
+  // Estados para gestión empresarial avanzada de prompts
+  const [promptCategories, setPromptCategories] = useState([
+    {
+      id: 'cat_admin',
+      name: 'Administración Pública',
+      community: 'General',
+      prompts: 156,
+      avgEffectiveness: 92.4,
+      useCases: ['Resoluciones', 'Comunicados', 'Informes'],
+      color: 'blue'
+    },
+    {
+      id: 'cat_legal',
+      name: 'Asesoramiento Legal',
+      community: 'Catalunya',
+      prompts: 89,
+      avgEffectiveness: 89.7,
+      useCases: ['Contratos', 'Consultas', 'Dictámenes'],
+      color: 'green'
+    },
+    {
+      id: 'cat_citizen',
+      name: 'Atención Ciudadana',
+      community: 'Madrid',
+      prompts: 203,
+      avgEffectiveness: 94.1,
+      useCases: ['FAQ', 'Trámites', 'Soporte'],
+      color: 'purple'
+    }
+  ])
+
+  const [promptVariants, setPromptVariants] = useState([
+    {
+      id: 'var_001',
+      promptId: 'prom_admin_res',
+      name: 'Resolución Administrativa v2.3',
+      version: 'A',
+      effectiveness: 94.2,
+      usage: 1450,
+      conversionRate: 87.3,
+      avgResponseTime: 2.3,
+      userSatisfaction: 4.6,
+      isActive: true,
+      testingStatus: 'production',
+      languages: ['es', 'ca'],
+      community: 'Catalunya',
+      lastUpdate: new Date('2024-08-30')
+    },
+    {
+      id: 'var_002', 
+      promptId: 'prom_admin_res',
+      name: 'Resolución Administrativa v2.3',
+      version: 'B',
+      effectiveness: 91.8,
+      usage: 1350,
+      conversionRate: 84.1,
+      avgResponseTime: 2.7,
+      userSatisfaction: 4.3,
+      isActive: true,
+      testingStatus: 'testing',
+      languages: ['es', 'ca'],
+      community: 'Catalunya',
+      lastUpdate: new Date('2024-08-28')
+    }
+  ])
+
+  const [abTests, setAbTests] = useState([
+    {
+      id: 'test_001',
+      name: 'Mejora de Claridad Jurídica',
+      promptId: 'prom_admin_res',
+      variantA: 'var_001',
+      variantB: 'var_002',
+      status: 'running',
+      startDate: new Date('2024-08-25'),
+      endDate: new Date('2024-09-08'),
+      sampleSize: 2800,
+      confidenceLevel: 95,
+      results: {
+        variantA: { effectiveness: 94.2, conversionRate: 87.3, satisfaction: 4.6 },
+        variantB: { effectiveness: 91.8, conversionRate: 84.1, satisfaction: 4.3 },
+        statisticalSignificance: 89.4,
+        winner: 'A'
+      },
+      community: 'Catalunya'
+    },
+    {
+      id: 'test_002',
+      name: 'Optimización Multiidioma',
+      promptId: 'prom_citizen_faq',
+      variantA: 'var_003',
+      variantB: 'var_004',
+      status: 'completed',
+      startDate: new Date('2024-08-15'),
+      endDate: new Date('2024-08-29'),
+      sampleSize: 3200,
+      confidenceLevel: 99,
+      results: {
+        variantA: { effectiveness: 88.5, conversionRate: 82.1, satisfaction: 4.2 },
+        variantB: { effectiveness: 92.3, conversionRate: 89.7, satisfaction: 4.7 },
+        statisticalSignificance: 97.8,
+        winner: 'B'
+      },
+      community: 'Madrid'
+    }
+  ])
+
+  const [userProfiles, setUserProfiles] = useState([
+    {
+      id: 'profile_admin',
+      name: 'Administrador Senior',
+      experience: 'high',
+      department: 'Administración General',
+      community: 'Catalunya',
+      promptPreferences: {
+        verbosity: 'detailed',
+        technicalLevel: 'advanced',
+        language: 'ca',
+        format: 'formal'
+      },
+      adaptivePrompts: [
+        { promptId: 'prom_admin_res', adaptations: ['increased_detail', 'legal_references'] },
+        { promptId: 'prom_legal_contract', adaptations: ['catalan_law_focus', 'precedent_citations'] }
+      ]
+    },
+    {
+      id: 'profile_citizen_support',
+      name: 'Agente Atención Ciudadana',
+      experience: 'medium',
+      department: 'Atención al Público',
+      community: 'Madrid',
+      promptPreferences: {
+        verbosity: 'concise',
+        technicalLevel: 'basic',
+        language: 'es',
+        format: 'friendly'
+      },
+      adaptivePrompts: [
+        { promptId: 'prom_citizen_faq', adaptations: ['simplified_language', 'empathetic_tone'] },
+        { promptId: 'prom_procedure_guide', adaptations: ['step_by_step', 'madrid_specific'] }
+      ]
+    }
+  ])
+
+  const [promptAnalytics, setPromptAnalytics] = useState({
+    usagePatterns: [
+      {
+        promptId: 'prom_admin_res',
+        hourlyUsage: [45, 52, 38, 41, 67, 89, 134, 167, 156, 178, 145, 134, 123, 167, 189, 201, 167, 134, 89, 67, 56, 48, 42, 38],
+        peakHours: ['09:00', '14:00', '16:00'],
+        communityDistribution: { Catalunya: 45, Madrid: 25, Andalucía: 15, Euskadi: 10, Other: 5 },
+        averageSessionLength: 4.2,
+        bounceRate: 12.3
+      }
+    ],
+    lowPerformance: [
+      {
+        promptId: 'prom_tax_calc',
+        name: 'Calculadora Tributaria',
+        issues: ['high_error_rate', 'low_user_satisfaction', 'slow_response'],
+        effectiveness: 67.8,
+        satisfaction: 3.2,
+        errorRate: 23.4,
+        recommendations: [
+          'Simplificar lógica de cálculo',
+          'Mejorar validación de inputs',
+          'Añadir ejemplos específicos'
+        ]
+      }
+    ],
+    multilingual: {
+      languages: ['es', 'ca', 'eu', 'gl'],
+      translationQuality: {
+        'es-ca': 96.8,
+        'es-eu': 89.4,
+        'es-gl': 93.2,
+        'ca-es': 97.1
+      },
+      autoTranslationJobs: [
+        {
+          id: 'trans_001',
+          promptId: 'prom_admin_res',
+          source: 'es',
+          target: 'ca',
+          status: 'completed',
+          quality: 96.8,
+          humanReview: true
+        }
+      ]
+    }
+  })
+
+  // Estados de modales para prompts avançados
+  const [showPromptCategoriesModal, setShowPromptCategoriesModal] = useState(false)
+  const [showAbTestingModal, setShowAbTestingModal] = useState(false)
+  const [showPromptAnalyticsModal, setShowPromptAnalyticsModal] = useState(false)
+  const [showAdaptivePromptsModal, setShowAdaptivePromptsModal] = useState(false)
+  const [showVariantGeneratorModal, setShowVariantGeneratorModal] = useState(false)
+  const [showRobustnessTestModal, setShowRobustnessTestModal] = useState(false)
+  const [showUsagePatternsModal, setShowUsagePatternsModal] = useState(false)
+  const [showLowPerformanceModal, setShowLowPerformanceModal] = useState(false)
+  const [showMultilingualModal, setShowMultilingualModal] = useState(false)
+  const [showCollaborativeModal, setShowCollaborativeModal] = useState(false)
+  const [selectedPromptCategory, setSelectedPromptCategory] = useState<any>(null)
+  const [selectedAbTest, setSelectedAbTest] = useState<any>(null)
+  const [generatingVariants, setGeneratingVariants] = useState(false)
+  const [runningRobustnessTest, setRunningRobustnessTest] = useState<string[]>([])
+  
+  // Estados para filtros y configuraciones
+  const [timeFilter, setTimeFilter] = useState('today')
+  const [autoStartTests, setAutoStartTests] = useState(true)
+  const [autoImplementation, setAutoImplementation] = useState(false)
+  const [emailAlerts, setEmailAlerts] = useState(true)
+  const [testDuration, setTestDuration] = useState(14)
+  const [confidenceLevel, setConfidenceLevel] = useState(95)
+  const [minSampleSize, setMinSampleSize] = useState(1000)
+  const [effectivenessThreshold, setEffectivenessThreshold] = useState(85)
+  const [conversionThreshold, setConversionThreshold] = useState(75)
+  const [satisfactionThreshold, setSatisfactionThreshold] = useState(4.0)
+  
+  // Estados para el Laboratorio R&D de Experimentos
+  const [showExperimentWizardModal, setShowExperimentWizardModal] = useState(false)
+  const [showExperimentDetailsModal, setShowExperimentDetailsModal] = useState(false)
+  const [showStatisticalAnalysisModal, setShowStatisticalAnalysisModal] = useState(false)
+  const [showComparisonModal, setShowComparisonModal] = useState(false)
+  const [showCollaborationModal, setShowCollaborationModal] = useState(false)
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false)
+  const [showDocumentationModal, setShowDocumentationModal] = useState(false)
+  const [showReportsModal, setShowReportsModal] = useState(false)
+  const [selectedExperiment, setSelectedExperiment] = useState<any>(null)
+  const [selectedExperimentTemplate, setSelectedExperimentTemplate] = useState<any>(null)
+  const [experimentFilter, setExperimentFilter] = useState('all')
+  const [experimentTypeFilter, setExperimentTypeFilter] = useState('all')
+  const [collaborators, setCollaborators] = useState<any[]>([])
+  const [experimentVersions, setExperimentVersions] = useState<any[]>([])
+
+  // Functions for AI Assistant
+  const toggleAIAssistant = () => setShowAIAssistant(!showAIAssistant)
+
+  const sendAIMessage = () => {
+    if (aiMessage.trim()) {
+      console.log('Mensaje enviado a IA:', aiMessage)
+      setAiMessage('')
+    }
+  }
+
   // Mock data
   const models: ModelMetric[] = [
     {
@@ -1326,6 +1580,75 @@ export default function DepartamentIA() {
     }
   ]
 
+  // Datos expandidos para el Laboratorio R&D de Experimentos
+  const experimentTemplates = [
+    {
+      id: 'template_ab_conversion',
+      name: 'Test A/B Conversión Ciudadanos',
+      category: 'public_service',
+      description: 'Template optimizado para medir conversión en servicios públicos digitales',
+      hypothesis: 'El cambio en la interfaz incrementará la tasa de completado de formularios',
+      metrics: ['conversion_rate', 'completion_time', 'user_satisfaction', 'error_rate'],
+      duration: 14,
+      sampleSize: 1000,
+      variants: ['A', 'B'],
+      methodology: 'Diseño experimental aleatorizado con control'
+    },
+    {
+      id: 'template_abc_ui',
+      name: 'Test A/B/C Interfaz Administrativa',
+      category: 'administration',
+      description: 'Comparación de tres variantes de interfaz para administración pública',
+      hypothesis: 'Las nuevas interfaces reducirán el tiempo de procesamiento administrativo',
+      metrics: ['processing_time', 'error_reduction', 'user_efficiency', 'task_completion'],
+      duration: 21,
+      sampleSize: 1500,
+      variants: ['A', 'B', 'C'],
+      methodology: 'Diseño factorial con análisis ANOVA'
+    }
+  ]
+
+  const advancedExperiments = [
+    {
+      id: 'exp_advanced_001',
+      name: 'Optimización IA Atención Ciudadana',
+      type: 'multivariate',
+      status: 'running',
+      progress: 73,
+      hypothesis: 'La implementación de IA conversacional mejorará la satisfacción ciudadana en un 25%',
+      startDate: new Date('2024-08-15'),
+      endDate: new Date('2024-09-30'),
+      participants: 2500,
+      variants: {
+        control: { name: 'Sistema Actual', percentage: 33.3 },
+        variantA: { name: 'IA Básica', percentage: 33.3 },
+        variantB: { name: 'IA Avanzada', percentage: 33.4 }
+      },
+      metrics: {
+        primary: { name: 'satisfaction_score', current: 7.8, target: 8.5 },
+        secondary: [
+          { name: 'resolution_time', current: '4.2 min', baseline: '6.1 min' },
+          { name: 'first_contact_resolution', current: '89%', baseline: '72%' },
+          { name: 'escalation_rate', current: '8%', baseline: '15%' }
+        ]
+      },
+      statisticalSignificance: 0.87,
+      confidenceLevel: 95,
+      collaborators: ['Maria García', 'Joan Puig', 'Anna Martín'],
+      versions: [
+        { version: 'v1.0', date: new Date('2024-08-15'), author: 'Maria García', changes: 'Configuración inicial' },
+        { version: 'v1.1', date: new Date('2024-08-22'), author: 'Joan Puig', changes: 'Ajuste parámetros IA' },
+        { version: 'v1.2', date: new Date('2024-08-28'), author: 'Anna Martín', changes: 'Optimización métricas' }
+      ],
+      documentation: {
+        methodology: 'Experimental randomizado controlado con análisis estadístico bayesiano',
+        tools: ['R Studio', 'Python', 'TensorFlow', 'Google Analytics'],
+        dataCollection: 'Automatizada cada 4 horas via API',
+        qualityControls: ['Validación datos', 'Detección anomalías', 'Balance grupos'],
+        ethicalConsiderations: 'Consentimiento informado, anonimización datos, cumplimiento GDPR'
+      }
+    }
+  ]
 
   const research: Research[] = [
     {
@@ -1868,129 +2191,309 @@ export default function DepartamentIA() {
 
   const renderPrompts = () => (
     <div className="space-y-6">
-      {/* Biblioteca de Prompts */}
-      <div className="bg-white rounded-lg p-6 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Biblioteca de Prompts
-          </h3>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar prompts..."
-                className="pl-10 pr-4 py-2 border rounded-lg text-sm w-64"
-              />
+      {/* Header del Sistema de Prompts Empresarial */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Gestión Empresarial de Prompts</h2>
+            <p className="text-purple-100">Sistema avanzado de optimización y gestión de prompts para el sector público</p>
+          </div>
+          <FileText className="w-12 h-12 text-purple-200" />
+        </div>
+      </div>
+
+      {/* Métricas principales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100">Total Prompts</p>
+              <p className="text-2xl font-bold">{promptCategories.reduce((sum, cat) => sum + cat.prompts, 0)}</p>
+              <p className="text-xs text-blue-200">
+                Efectividad: {(promptCategories.reduce((sum, cat) => sum + cat.avgEffectiveness, 0) / promptCategories.length).toFixed(1)}%
+              </p>
             </div>
-            <button className="px-3 py-2 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 flex items-center gap-1">
-              <Plus className="w-4 h-4" />
-              Nou Prompt
-            </button>
+            <Archive className="w-8 h-8 text-blue-200" />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {prompts.map(prompt => (
-            <div key={prompt.id} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-                 onClick={() => setSelectedPrompt(prompt)}>
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-medium">{prompt.nom}</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">v{prompt.versio}</span>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span className="text-sm">{prompt.valoracio}</span>
-                  </div>
+        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100">Tests A/B Activos</p>
+              <p className="text-2xl font-bold">{abTests.filter(test => test.status === 'running').length}</p>
+              <p className="text-xs text-green-200">
+                {abTests.filter(test => test.status === 'completed').length} completados
+              </p>
+            </div>
+            <Target className="w-8 h-8 text-green-200" />
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100">Variantes Generadas</p>
+              <p className="text-2xl font-bold">{promptVariants.length}</p>
+              <p className="text-xs text-orange-200">
+                {promptVariants.filter(v => v.testingStatus === 'production').length} en producción
+              </p>
+            </div>
+            <GitBranch className="w-8 h-8 text-orange-200" />
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-indigo-100">Idiomas Soportados</p>
+              <p className="text-2xl font-bold">{promptAnalytics.multilingual.languages.length}</p>
+              <p className="text-xs text-indigo-200">
+                Calidad promedio: {(Object.values(promptAnalytics.multilingual.translationQuality).reduce((a, b) => a + b, 0) / Object.keys(promptAnalytics.multilingual.translationQuality).length).toFixed(1)}%
+              </p>
+            </div>
+            <Globe className="w-8 h-8 text-indigo-200" />
+          </div>
+        </div>
+      </div>
+
+      {/* Categorización por Casos de Uso y Comunidades */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Package className="w-5 h-5 text-blue-500" />
+            Categorización por Casos de Uso y Comunidades Autónomas
+          </h3>
+          <button 
+            onClick={() => setShowPromptCategoriesModal(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+          >
+            <Settings className="w-4 h-4" />
+            Gestionar Categorías
+          </button>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {promptCategories.map(category => (
+            <div key={category.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                 onClick={() => {
+                   setSelectedPromptCategory(category);
+                   setShowPromptCategoriesModal(true);
+                 }}>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium">{category.name}</h4>
+                <div className={`w-3 h-3 rounded-full bg-${category.color}-500`}></div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Comunidad:</span>
+                  <span className="font-medium">{category.community}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Prompts:</span>
+                  <span className="font-medium">{category.prompts}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Efectividad:</span>
+                  <span className="text-green-600 font-medium">{category.avgEffectiveness}%</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-2">{prompt.categoria} • {prompt.idioma}</p>
-              <div className="flex items-center justify-between text-sm">
-                <span>{prompt.usos.toLocaleString()} usos</span>
-                <span className="text-green-600">{prompt.rendiment.precisio}% precisió</span>
-              </div>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {prompt.tags.slice(0, 3).map(tag => (
-                  <span key={tag} className="px-2 py-1 bg-gray-100 rounded text-xs">
-                    {tag}
-                  </span>
-                ))}
+              <div className="mt-3">
+                <p className="text-xs text-gray-600 mb-1">Casos de uso:</p>
+                <div className="flex flex-wrap gap-1">
+                  {category.useCases.slice(0, 2).map(useCase => (
+                    <span key={useCase} className="px-2 py-1 bg-gray-100 text-xs rounded">
+                      {useCase}
+                    </span>
+                  ))}
+                  {category.useCases.length > 2 && (
+                    <span className="px-2 py-1 bg-gray-100 text-xs rounded">
+                      +{category.useCases.length - 2}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Versionat de Prompts */}
+      {/* A/B Testing Automático */}
       <div className="bg-white rounded-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <GitBranch className="w-5 h-5" />
-          Versionat i Historial
-        </h3>
-        <div className="space-y-3">
-          <div className="border rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <History className="w-4 h-4 text-gray-500" />
-                <div>
-                  <p className="font-medium">Resum Document Administratiu v3.2</p>
-                  <p className="text-sm text-gray-600">Actualitzat fa 2 dies per @maria</p>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Target className="w-5 h-5 text-green-500" />
+            A/B Testing Automático entre Variantes
+          </h3>
+          <button 
+            onClick={() => setShowAbTestingModal(true)}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo Test A/B
+          </button>
+        </div>
+        <div className="space-y-4">
+          {abTests.slice(0, 2).map(test => (
+            <div key={test.id} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                 onClick={() => {
+                   setSelectedAbTest(test);
+                   setShowAbTestingModal(true);
+                 }}>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium">{test.name}</h4>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  test.status === 'running' ? 'bg-blue-100 text-blue-800' :
+                  test.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {test.status.toUpperCase()}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-3">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Tamaño Muestra</p>
+                  <p className="font-medium">{test.sampleSize.toLocaleString()}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Confianza</p>
+                  <p className="font-medium">{test.confidenceLevel}%</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Comunidad</p>
+                  <p className="font-medium">{test.community}</p>
                 </div>
               </div>
-              <button className="px-3 py-1 border rounded text-sm hover:bg-gray-50">
-                Restaurar
-              </button>
-            </div>
-          </div>
-          <div className="border rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <History className="w-4 h-4 text-gray-500" />
-                <div>
-                  <p className="font-medium">Resum Document Administratiu v3.1</p>
-                  <p className="text-sm text-gray-600">Actualitzat fa 1 setmana per @joan</p>
+              {test.status === 'completed' && (
+                <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded">
+                  <div className="text-center">
+                    <p className="text-xs text-gray-600">Variante A</p>
+                    <p className="font-medium">{test.results.variantA.effectiveness}%</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-600">Variante B</p>
+                    <p className="font-medium">{test.results.variantB.effectiveness}%</p>
+                  </div>
+                  <div className="col-span-2 text-center">
+                    <p className="text-sm font-medium text-green-600">
+                      Ganador: Variante {test.results.winner} 
+                      ({test.results.statisticalSignificance}% significancia)
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <button className="px-3 py-1 border rounded text-sm hover:bg-gray-50">
-                Comparar
-              </button>
+              )}
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* Optimització Automàtica */}
-      <div className="bg-white rounded-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          Optimització Automàtica
-        </h3>
-        <div className="border rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="font-medium">Optimitzador de Prompts Actiu</p>
-              <p className="text-sm text-gray-600">Utilitzant GPT-4 per millorar prompts automàticament</p>
-            </div>
-            <button className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
-              Actiu
-            </button>
+      {/* Grid de funcionalidades avanzadas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Métricas de Efectividad */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowPromptAnalyticsModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <BarChart className="w-8 h-8 text-blue-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
           </div>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="bg-gray-50 p-3 rounded">
-              <p className="text-gray-600 mb-1">Prompts Optimitzats</p>
-              <p className="text-xl font-bold">234</p>
-              <p className="text-green-600">+15% millora mitjana</p>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <p className="text-gray-600 mb-1">Temps Estalviat</p>
-              <p className="text-xl font-bold">45h</p>
-              <p className="text-blue-600">Aquest mes</p>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <p className="text-gray-600 mb-1">Cost Reduït</p>
-              <p className="text-xl font-bold">€1,250</p>
-              <p className="text-green-600">-22% tokens</p>
-            </div>
+          <h4 className="font-medium mb-2">Métricas por Contexto</h4>
+          <p className="text-sm text-gray-600 mb-3">Análisis de efectividad por contexto de uso</p>
+          <div className="text-xs text-blue-600">
+            {promptAnalytics.usagePatterns.length} patrones identificados
+          </div>
+        </div>
+
+        {/* Prompts Adaptativos */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowAdaptivePromptsModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <Users className="w-8 h-8 text-purple-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Prompts Adaptativos</h4>
+          <p className="text-sm text-gray-600 mb-3">Adaptación según perfil de usuario</p>
+          <div className="text-xs text-purple-600">
+            {userProfiles.length} perfiles configurados
+          </div>
+        </div>
+
+        {/* Generador de Variantes */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowVariantGeneratorModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <Zap className="w-8 h-8 text-yellow-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Generador de Variantes</h4>
+          <p className="text-sm text-gray-600 mb-3">Generación automática de variantes</p>
+          <div className="text-xs text-yellow-600">
+            IA optimizada para sector público
+          </div>
+        </div>
+
+        {/* Testing de Robustez */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowRobustnessTestModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <Shield className="w-8 h-8 text-red-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Testing Robustez</h4>
+          <p className="text-sm text-gray-600 mb-3">Pruebas contra edge cases</p>
+          <div className="text-xs text-red-600">
+            Protección automática habilitada
+          </div>
+        </div>
+
+        {/* Analytics de Patrones */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowUsagePatternsModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <Activity className="w-8 h-8 text-green-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Patrones de Uso</h4>
+          <p className="text-sm text-gray-600 mb-3">Analytics avanzados de uso</p>
+          <div className="text-xs text-green-600">
+            Monitoreo en tiempo real
+          </div>
+        </div>
+
+        {/* Identificación Bajo Rendimiento */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowLowPerformanceModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <AlertTriangle className="w-8 h-8 text-orange-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Bajo Rendimiento</h4>
+          <p className="text-sm text-gray-600 mb-3">Identificación automática de problemas</p>
+          <div className="text-xs text-orange-600">
+            {promptAnalytics.lowPerformance.length} prompts requieren atención
+          </div>
+        </div>
+
+        {/* Multiidioma */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowMultilingualModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <Globe className="w-8 h-8 text-indigo-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Sistema Multiidioma</h4>
+          <p className="text-sm text-gray-600 mb-3">Traducción automática avanzada</p>
+          <div className="text-xs text-indigo-600">
+            {promptAnalytics.multilingual.languages.length} idiomas activos
+          </div>
+        </div>
+
+        {/* Sistema Colaborativo */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+             onClick={() => setShowCollaborativeModal(true)}>
+          <div className="flex items-center justify-between mb-3">
+            <Users className="w-8 h-8 text-teal-500" />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+          <h4 className="font-medium mb-2">Sistema Colaborativo</h4>
+          <p className="text-sm text-gray-600 mb-3">Aprobación para prompts críticos</p>
+          <div className="text-xs text-teal-600">
+            Flujo de trabajo regulado
           </div>
         </div>
       </div>
@@ -4527,35 +5030,298 @@ export default function DepartamentIA() {
 
   const renderExperiments = () => (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <TestTube className="w-5 h-5" />
-          Experiments Actius
-        </h3>
-        <div className="space-y-3">
-          {experiments.map(exp => (
-            <div key={exp.id} className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="font-medium">{exp.nom}</p>
-                  <p className="text-sm text-gray-600">
-                    {exp.tipus.replace('_', ' ')} • Model: {exp.model}
-                  </p>
-                </div>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  exp.estat === 'executant' ? 'bg-blue-100 text-blue-800' :
-                  exp.estat === 'completat' ? 'bg-green-100 text-green-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {exp.estat}
-                </span>
+      {/* Header del Laboratorio R&D */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold flex items-center gap-3">
+              <TestTube className="w-7 h-7" />
+              Laboratori Complet de R&D
+            </h3>
+            <p className="text-blue-100 mt-1">
+              Gestió avançada d'experiments amb control en temps real i anàlisi estadístic
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                <span className="font-semibold">{advancedExperiments.filter(e => e.status === 'running').length} Actius</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${exp.progres}%` }} />
+            </div>
+            <button
+              onClick={() => setShowExperimentWizardModal(true)}
+              className="bg-white/20 backdrop-blur rounded-lg px-4 py-2 hover:bg-white/30 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Nou Experiment
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard de Métricas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <Target className="w-8 h-8 text-blue-500" />
+            <span className="text-2xl font-bold text-blue-600">
+              {advancedExperiments.length}
+            </span>
+          </div>
+          <p className="font-medium">Experiments Totals</p>
+          <p className="text-sm text-gray-600">+2 aquest mes</p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <TrendingUp className="w-8 h-8 text-green-500" />
+            <span className="text-2xl font-bold text-green-600">87%</span>
+          </div>
+          <p className="font-medium">Significància Mitjana</p>
+          <p className="text-sm text-gray-600">Confiança estadística</p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <Users className="w-8 h-8 text-purple-500" />
+            <span className="text-2xl font-bold text-purple-600">12</span>
+          </div>
+          <p className="font-medium">Col·laboradors</p>
+          <p className="text-sm text-gray-600">Equip multidisciplinar</p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <BookOpen className="w-8 h-8 text-orange-500" />
+            <span className="text-2xl font-bold text-orange-600">156</span>
+          </div>
+          <p className="font-medium">Templates</p>
+          <p className="text-sm text-gray-600">Sector públic</p>
+        </div>
+      </div>
+
+      {/* Filtros y Acciones Principales */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estat</label>
+              <select 
+                className="p-2 border border-gray-300 rounded-lg"
+                value={experimentFilter}
+                onChange={(e) => setExperimentFilter(e.target.value)}
+              >
+                <option value="all">Tots els experiments</option>
+                <option value="running">En execució</option>
+                <option value="completed">Completats</option>
+                <option value="paused">Pausats</option>
+                <option value="draft">Esborradors</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipus</label>
+              <select 
+                className="p-2 border border-gray-300 rounded-lg"
+                value={experimentTypeFilter}
+                onChange={(e) => setExperimentTypeFilter(e.target.value)}
+              >
+                <option value="all">Tots els tipus</option>
+                <option value="ab">A/B Testing</option>
+                <option value="multivariate">Multivariat</option>
+                <option value="factorial">Factorial</option>
+                <option value="sequential">Seqüencial</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowTemplatesModal(true)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <BookOpen className="w-4 h-4" />
+              Templates
+            </button>
+            <button
+              onClick={() => setShowComparisonModal(true)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <BarChart className="w-4 h-4" />
+              Comparar
+            </button>
+            <button
+              onClick={() => setShowCollaborationModal(true)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              Equip
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Experimentos Avanzados */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <TestTube className="w-5 h-5" />
+            Experiments Actius
+          </h3>
+        </div>
+        
+        <div className="divide-y divide-gray-200">
+          {advancedExperiments.map(experiment => (
+            <div key={experiment.id} className="p-6 hover:bg-gray-50 transition-colors">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h4 className="font-semibold text-lg">{experiment.name}</h4>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      experiment.status === 'running' ? 'bg-blue-100 text-blue-800' :
+                      experiment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      experiment.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {experiment.status.charAt(0).toUpperCase() + experiment.status.slice(1)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      Confiança: {experiment.confidenceLevel}%
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 mb-3">{experiment.hypothesis}</p>
+                  
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Participants</p>
+                      <p className="font-semibold">{experiment.participants.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Progrés</p>
+                      <p className="font-semibold">{experiment.progress}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Significància</p>
+                      <p className="font-semibold">{(experiment.statisticalSignificance * 100).toFixed(1)}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Mètrica Primària</p>
+                      <p className="font-semibold">{experiment.metrics.primary.current}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Barra de progreso */}
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                    <div 
+                      className="bg-blue-500 h-3 rounded-full transition-all duration-300" 
+                      style={{ width: `${experiment.progress}%` }}
+                    />
+                  </div>
+                  
+                  {/* Variantes */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="text-sm text-gray-600">Variantes:</span>
+                    {Object.entries(experiment.variants).map(([key, variant]: [string, any]) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span className="text-sm font-medium">{variant.name}</span>
+                        <span className="text-xs text-gray-500">({variant.percentage}%)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-2 ml-6">
+                  <button 
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                    onClick={() => {
+                      setSelectedExperiment(experiment);
+                      setShowExperimentDetailsModal(true);
+                    }}
+                  >
+                    Detalls
+                  </button>
+                  <button 
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                    onClick={() => {
+                      setSelectedExperiment(experiment);
+                      setShowStatisticalAnalysisModal(true);
+                    }}
+                  >
+                    Anàlisi
+                  </button>
+                  <button 
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                    onClick={() => {
+                      setSelectedExperiment(experiment);
+                      setShowDocumentationModal(true);
+                    }}
+                  >
+                    Docs
+                  </button>
+                </div>
+              </div>
+              
+              {/* Métricas secundarias */}
+              <div className="grid grid-cols-3 gap-4">
+                {experiment.metrics.secondary.map((metric: any, idx: number) => (
+                  <div key={idx} className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-600 capitalize">
+                        {metric.name.replace('_', ' ')}
+                      </p>
+                      <TrendingUp className="w-4 h-4 text-green-500" />
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="font-semibold">{metric.current}</span>
+                      <span className="text-xs text-gray-500">vs {metric.baseline}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Acciones Rápidas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <button
+          onClick={() => setShowExperimentWizardModal(true)}
+          className="bg-white border-2 border-dashed border-blue-300 rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+        >
+          <Plus className="w-8 h-8 text-blue-400 group-hover:text-blue-500 mx-auto mb-2" />
+          <p className="font-medium text-blue-600">Crear Experiment</p>
+          <p className="text-sm text-gray-500 mt-1">Wizard guiat A/B/C</p>
+        </button>
+        
+        <button
+          onClick={() => setShowTemplatesModal(true)}
+          className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+        >
+          <BookOpen className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+          <p className="font-medium">Templates</p>
+          <p className="text-sm text-gray-500 mt-1">Sector públic</p>
+        </button>
+        
+        <button
+          onClick={() => setShowStatisticalAnalysisModal(true)}
+          className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+        >
+          <BarChart className="w-8 h-8 text-green-500 mx-auto mb-2" />
+          <p className="font-medium">Anàlisi Estadístic</p>
+          <p className="text-sm text-gray-500 mt-1">Visualització avançada</p>
+        </button>
+        
+        <button
+          onClick={() => setShowReportsModal(true)}
+          className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+        >
+          <FileText className="w-8 h-8 text-orange-500 mx-auto mb-2" />
+          <p className="font-medium">Reportes</p>
+          <p className="text-sm text-gray-500 mt-1">Recomanacions IA</p>
+        </button>
       </div>
     </div>
   )
@@ -8134,8 +8900,2331 @@ export default function DepartamentIA() {
     );
   };
 
+  // Modales del Sistema de Gestión Empresarial de Prompts
+
+  // Modal de Categorías de Prompts
+  const PromptCategoriesModal = () => {
+    if (!showPromptCategoriesModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Package className="w-6 h-6 text-blue-500" />
+              Gestión de Categorías por Casos de Uso y Comunidades
+            </h2>
+            <button 
+              onClick={() => {
+                setShowPromptCategoriesModal(false);
+                setSelectedPromptCategory(null);
+              }}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Lista de categorías */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Categorías Configuradas</h3>
+                <button 
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                  onClick={() => {
+                    const newCategory = {
+                      id: `cat_${Date.now()}`,
+                      name: 'Nueva Categoría',
+                      community: 'General',
+                      prompts: 0,
+                      avgEffectiveness: 85.0,
+                      useCases: ['Nuevo caso de uso'],
+                      color: 'indigo'
+                    };
+                    setPromptCategories(prev => [...prev, newCategory]);
+                    console.log('Nueva categoría creada:', newCategory);
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Nueva Categoría
+                </button>
+              </div>
+              
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {promptCategories.map(category => (
+                  <div key={category.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full bg-${category.color}-500`}></div>
+                        <h4 className="font-medium">{category.name}</h4>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          category.avgEffectiveness >= 90 ? 'bg-green-100 text-green-800' :
+                          category.avgEffectiveness >= 80 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {category.avgEffectiveness}% efectividad
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <p className="text-sm text-gray-600">Comunidad</p>
+                        <p className="font-medium">{category.community}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Total Prompts</p>
+                        <p className="font-medium">{category.prompts}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-600 mb-2">Casos de Uso</p>
+                      <div className="flex flex-wrap gap-1">
+                        {category.useCases.map(useCase => (
+                          <span key={useCase} className="px-2 py-1 bg-gray-100 text-xs rounded">
+                            {useCase}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-500">
+                        ID: {category.id}
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                          onClick={() => {
+                            setPromptCategories(prev => prev.map(c => 
+                              c.id === category.id ? { ...c, prompts: c.prompts + 1 } : c
+                            ));
+                          }}
+                        >
+                          Añadir Prompt
+                        </button>
+                        <button 
+                          className="px-3 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+                          onClick={() => {
+                            const categoryName = prompt('Nuevo nombre para la categoría:', category.name);
+                            if (categoryName && categoryName !== category.name) {
+                              setPromptCategories(prev => prev.map(c => 
+                                c.id === category.id ? { ...c, name: categoryName } : c
+                              ));
+                              console.log(`Categoría ${category.id} renombrada a: ${categoryName}`);
+                            }
+                          }}
+                        >
+                          Editar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Panel de estadísticas */}
+            <div>
+              <h3 className="font-semibold mb-4">Estadísticas Generales</h3>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-blue-800">Distribución por Comunidad</h4>
+                  <div className="space-y-2">
+                    {Object.entries(
+                      promptCategories.reduce((acc, cat) => {
+                        acc[cat.community] = (acc[cat.community] || 0) + cat.prompts;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([community, count]) => (
+                      <div key={community} className="flex justify-between items-center">
+                        <span className="text-sm">{community}</span>
+                        <span className="font-medium text-blue-600">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-green-800">Rendimiento por Categoría</h4>
+                  <div className="space-y-2">
+                    {promptCategories.sort((a, b) => b.avgEffectiveness - a.avgEffectiveness).map(cat => (
+                      <div key={cat.id} className="flex justify-between items-center">
+                        <span className="text-sm truncate">{cat.name}</span>
+                        <span className="font-medium text-green-600">{cat.avgEffectiveness}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-purple-800">Casos de Uso Más Comunes</h4>
+                  <div className="space-y-2">
+                    {Object.entries(
+                      promptCategories.flatMap(cat => cat.useCases)
+                        .reduce((acc, useCase) => {
+                          acc[useCase] = (acc[useCase] || 0) + 1;
+                          return acc;
+                        }, {} as Record<string, number>)
+                    ).sort(([,a], [,b]) => b - a).slice(0, 5).map(([useCase, count]) => (
+                      <div key={useCase} className="flex justify-between items-center">
+                        <span className="text-sm">{useCase}</span>
+                        <span className="font-medium text-purple-600">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de A/B Testing
+  const AbTestingModal = () => {
+    if (!showAbTestingModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Target className="w-6 h-6 text-green-500" />
+              A/B Testing Automático de Prompts
+            </h2>
+            <button 
+              onClick={() => {
+                setShowAbTestingModal(false);
+                setSelectedAbTest(null);
+              }}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {/* Métricas dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="p-4 bg-blue-50 rounded-lg text-center">
+              <p className="text-2xl font-bold text-blue-600">{abTests.length}</p>
+              <p className="text-sm text-blue-600">Tests Totales</p>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg text-center">
+              <p className="text-2xl font-bold text-green-600">{abTests.filter(t => t.status === 'running').length}</p>
+              <p className="text-sm text-green-600">En Ejecución</p>
+            </div>
+            <div className="p-4 bg-purple-50 rounded-lg text-center">
+              <p className="text-2xl font-bold text-purple-600">{abTests.filter(t => t.status === 'completed').length}</p>
+              <p className="text-sm text-purple-600">Completados</p>
+            </div>
+            <div className="p-4 bg-orange-50 rounded-lg text-center">
+              <p className="text-2xl font-bold text-orange-600">
+                {abTests.filter(t => t.status === 'completed').length > 0 ? 
+                  (abTests.filter(t => t.status === 'completed').reduce((sum, t) => 
+                    sum + t.results.statisticalSignificance, 0) / 
+                  abTests.filter(t => t.status === 'completed').length).toFixed(1) : 0}%
+              </p>
+              <p className="text-sm text-orange-600">Sig. Promedio</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Lista de tests */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Tests A/B Configurados</h3>
+                <button 
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
+                  onClick={() => {
+                    const newTest = {
+                      id: `test_${Date.now()}`,
+                      name: 'Nuevo Test A/B',
+                      promptId: 'new_prompt',
+                      variantA: 'var_new_a',
+                      variantB: 'var_new_b',
+                      status: 'draft' as const,
+                      startDate: new Date(),
+                      endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                      sampleSize: 1000,
+                      confidenceLevel: 95,
+                      results: {
+                        variantA: { effectiveness: 0, conversionRate: 0, satisfaction: 0 },
+                        variantB: { effectiveness: 0, conversionRate: 0, satisfaction: 0 },
+                        statisticalSignificance: 0,
+                        winner: 'A' as const
+                      },
+                      community: 'General'
+                    };
+                    setAbTests(prev => [...prev, newTest]);
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Nuevo Test
+                </button>
+              </div>
+              
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {abTests.map(test => (
+                  <div key={test.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium">{test.name}</h4>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        test.status === 'running' ? 'bg-blue-100 text-blue-800' :
+                        test.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {test.status.toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 mb-3">
+                      <div>
+                        <p className="text-sm text-gray-600">Muestra</p>
+                        <p className="font-medium">{test.sampleSize.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Confianza</p>
+                        <p className="font-medium">{test.confidenceLevel}%</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Comunidad</p>
+                        <p className="font-medium">{test.community}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <p className="text-sm text-gray-600">Período</p>
+                        <p className="text-sm font-medium">
+                          {test.startDate.toLocaleDateString()} - {test.endDate.toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Progreso</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-500 h-2 rounded-full" 
+                              style={{ width: `${test.status === 'completed' ? 100 : test.status === 'running' ? 65 : 0}%` }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium">
+                            {test.status === 'completed' ? 100 : test.status === 'running' ? 65 : 0}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {test.status === 'completed' && (
+                      <div className="p-3 bg-gray-50 rounded mb-3">
+                        <h5 className="font-medium mb-2">Resultados</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Variante A</p>
+                            <p className="font-bold text-lg">{test.results.variantA.effectiveness}%</p>
+                            <p className="text-xs text-gray-600">
+                              Conv: {test.results.variantA.conversionRate}% | 
+                              Sat: {test.results.variantA.satisfaction}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Variante B</p>
+                            <p className="font-bold text-lg">{test.results.variantB.effectiveness}%</p>
+                            <p className="text-xs text-gray-600">
+                              Conv: {test.results.variantB.conversionRate}% | 
+                              Sat: {test.results.variantB.satisfaction}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-center">
+                          <p className="text-sm font-medium text-green-600">
+                            🏆 Ganador: Variante {test.results.winner} 
+                            ({test.results.statisticalSignificance}% significancia)
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">ID: {test.id}</span>
+                      <div className="flex gap-2">
+                        {test.status === 'running' && (
+                          <button 
+                            className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600"
+                            onClick={() => {
+                              setAbTests(prev => prev.map(t => 
+                                t.id === test.id ? { ...t, status: 'completed' as const } : t
+                              ));
+                            }}
+                          >
+                            Finalizar
+                          </button>
+                        )}
+                        {test.status === 'completed' && (
+                          <button className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600">
+                            Implementar Ganador
+                          </button>
+                        )}
+                        <button 
+                          className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                          onClick={() => {
+                            const details = {
+                              test: test.name,
+                              estado: test.status,
+                              muestra: test.sampleSize,
+                              confianza: test.confidenceLevel,
+                              inicio: test.startDate.toLocaleDateString(),
+                              fin: test.endDate.toLocaleDateString(),
+                              resultados: test.status === 'completed' ? test.results : 'En progreso'
+                            };
+                            console.log('Detalles del test:', details);
+                            alert(`Detalles del Test: ${test.name}\\n\\nEstado: ${test.status.toUpperCase()}\\nMuestra: ${test.sampleSize.toLocaleString()}\\nNivel de confianza: ${test.confidenceLevel}%\\nPeríodo: ${test.startDate.toLocaleDateString()} - ${test.endDate.toLocaleDateString()}\\n\\n${test.status === 'completed' ? `Ganador: Variante ${test.results.winner} (${test.results.statisticalSignificance}% significancia)` : 'Test en progreso...'}`);
+                          }}
+                        >
+                          Ver Detalles
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Panel de configuración */}
+            <div>
+              <h3 className="font-semibold mb-4">Configuración de Tests</h3>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-blue-800">Configuración Automática</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Auto-iniciar tests</span>
+                      <button 
+                        className={`w-10 h-6 rounded-full relative transition-colors ${autoStartTests ? 'bg-green-500' : 'bg-gray-300'}`}
+                        onClick={() => setAutoStartTests(!autoStartTests)}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${autoStartTests ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Implementación automática</span>
+                      <button 
+                        className={`w-10 h-6 rounded-full relative transition-colors ${autoImplementation ? 'bg-green-500' : 'bg-gray-300'}`}
+                        onClick={() => setAutoImplementation(!autoImplementation)}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${autoImplementation ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Alertas por email</span>
+                      <button 
+                        className={`w-10 h-6 rounded-full relative transition-colors ${emailAlerts ? 'bg-green-500' : 'bg-gray-300'}`}
+                        onClick={() => setEmailAlerts(!emailAlerts)}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${emailAlerts ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-green-800">Parámetros por Defecto</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm text-gray-600">Duración (días)</label>
+                      <input 
+                        type="range" 
+                        min="7" 
+                        max="30" 
+                        value={testDuration}
+                        onChange={(e) => setTestDuration(Number(e.target.value))}
+                        className="w-full mt-1"
+                      />
+                      <div className="text-center text-xs text-blue-600 mt-1">{testDuration} días</div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>7</span>
+                        <span>30</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-600">Nivel de confianza</label>
+                      <select 
+                        className="w-full mt-1 p-2 border rounded text-sm"
+                        value={confidenceLevel}
+                        onChange={(e) => setConfidenceLevel(Number(e.target.value))}
+                      >
+                        <option value="90">90%</option>
+                        <option value="95">95%</option>
+                        <option value="99">99%</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-600">Tamaño mínimo</label>
+                      <input 
+                        type="number" 
+                        value={minSampleSize}
+                        onChange={(e) => setMinSampleSize(Number(e.target.value))}
+                        min="100" 
+                        className="w-full mt-1 p-2 border rounded text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-purple-800">Métricas de Éxito</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Efectividad</span>
+                      <input 
+                        type="number" 
+                        value={effectivenessThreshold}
+                        onChange={(e) => setEffectivenessThreshold(Number(e.target.value))}
+                        min="0" 
+                        max="100" 
+                        className="w-16 text-xs p-1 border rounded text-center" 
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Conversión</span>
+                      <input 
+                        type="number" 
+                        value={conversionThreshold}
+                        onChange={(e) => setConversionThreshold(Number(e.target.value))}
+                        min="0" 
+                        max="100" 
+                        className="w-16 text-xs p-1 border rounded text-center" 
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Satisfacción</span>
+                      <input 
+                        type="number" 
+                        value={satisfactionThreshold}
+                        onChange={(e) => setSatisfactionThreshold(Number(e.target.value))}
+                        min="1" 
+                        max="5" 
+                        step="0.1" 
+                        className="w-16 text-xs p-1 border rounded text-center" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Analytics de Prompts
+  const PromptAnalyticsModal = () => {
+    if (!showPromptAnalyticsModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <BarChart className="w-6 h-6 text-blue-500" />
+              Métricas de Efectividad por Contexto
+            </h2>
+            <button 
+              onClick={() => setShowPromptAnalyticsModal(false)}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Gráfico de uso por horas */}
+            <div className="lg:col-span-2">
+              <h3 className="font-semibold mb-4">Patrones de Uso por Horas</h3>
+              
+              <div className="border rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium">Uso por Horas (24h)</h4>
+                  <select 
+                    className="p-2 border rounded text-sm"
+                    value={timeFilter}
+                    onChange={(e) => {
+                      setTimeFilter(e.target.value);
+                      // Simular actualización de datos basado en filtro
+                      console.log(`Filtrando datos por: ${e.target.value}`);
+                    }}
+                  >
+                    <option value="today">Hoy</option>
+                    <option value="yesterday">Ayer</option>
+                    <option value="last_week">Última semana</option>
+                  </select>
+                </div>
+                
+                {/* Gráfico simulado con barras */}
+                <div className="grid grid-cols-24 gap-1 h-32 items-end">
+                  {promptAnalytics.usagePatterns[0].hourlyUsage.map((usage, hour) => (
+                    <div key={hour} className="relative group">
+                      <div 
+                        className={`bg-blue-500 rounded-t ${
+                          promptAnalytics.usagePatterns[0].peakHours.includes(`${hour.toString().padStart(2, '0')}:00`) 
+                            ? 'bg-red-500' : 'bg-blue-500'
+                        }`}
+                        style={{ height: `${(usage / Math.max(...promptAnalytics.usagePatterns[0].hourlyUsage)) * 100}%` }}
+                      />
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                        <span className="text-xs text-gray-600">{hour}</span>
+                      </div>
+                      <div className="hidden group-hover:block absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-black text-white p-1 rounded text-xs">
+                        {usage} req
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-8 grid grid-cols-3 gap-4 text-sm">
+                  <div className="text-center">
+                    <p className="text-gray-600">Horas Pico</p>
+                    <p className="font-medium">{promptAnalytics.usagePatterns[0].peakHours.join(', ')}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-600">Sesión Media</p>
+                    <p className="font-medium">{promptAnalytics.usagePatterns[0].averageSessionLength} min</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-600">Tasa de Rebote</p>
+                    <p className="font-medium">{promptAnalytics.usagePatterns[0].bounceRate}%</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Distribución por comunidades */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium mb-4">Distribución por Comunidades Autónomas</h4>
+                <div className="space-y-3">
+                  {Object.entries(promptAnalytics.usagePatterns[0].communityDistribution)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([community, percentage]) => (
+                    <div key={community} className="flex items-center justify-between">
+                      <span className="text-sm">{community}</span>
+                      <div className="flex items-center gap-2 flex-1 mx-4">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full" 
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium w-10 text-right">{percentage}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Panel de métricas */}
+            <div>
+              <h3 className="font-semibold mb-4">Métricas Clave</h3>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-blue-800">Rendimiento General</h4>
+                  <div className="space-y-3">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-600">
+                        {(promptCategories.reduce((sum, cat) => sum + cat.avgEffectiveness, 0) / promptCategories.length).toFixed(1)}%
+                      </p>
+                      <p className="text-sm text-blue-600">Efectividad Promedio</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-center">
+                      <div>
+                        <p className="text-lg font-bold text-green-600">
+                          {promptCategories.reduce((sum, cat) => sum + cat.prompts, 0)}
+                        </p>
+                        <p className="text-xs text-gray-600">Prompts Activos</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-purple-600">
+                          {promptCategories.length}
+                        </p>
+                        <p className="text-xs text-gray-600">Categorías</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-green-800">Mejores Performers</h4>
+                  <div className="space-y-2">
+                    {promptCategories
+                      .sort((a, b) => b.avgEffectiveness - a.avgEffectiveness)
+                      .slice(0, 3)
+                      .map((cat, idx) => (
+                      <div key={cat.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-4 h-4 text-xs flex items-center justify-center rounded-full ${
+                            idx === 0 ? 'bg-yellow-400 text-white' :
+                            idx === 1 ? 'bg-gray-400 text-white' :
+                            'bg-orange-400 text-white'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <span className="text-sm truncate">{cat.name}</span>
+                        </div>
+                        <span className="text-sm font-medium text-green-600">{cat.avgEffectiveness}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-orange-50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-orange-800">Alertas y Recomendaciones</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Pico de uso detectado</p>
+                        <p className="text-xs text-gray-600">14:00-16:00 requiere escalado</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <TrendingUp className="w-4 h-4 text-blue-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Crecimiento sostenido</p>
+                        <p className="text-xs text-gray-600">+15% uso vs mes anterior</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Target className="w-4 h-4 text-green-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Oportunidad optimización</p>
+                        <p className="text-xs text-gray-600">3 prompts candidatos para A/B</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium mb-3">Acciones Rápidas</h4>
+                  <div className="space-y-2">
+                    <button 
+                      className="w-full px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                      onClick={() => {
+                        const reportData = {
+                          fecha: new Date().toLocaleDateString(),
+                          totalPrompts: promptCategories.reduce((sum, cat) => sum + cat.prompts, 0),
+                          efectividadPromedio: (promptCategories.reduce((sum, cat) => sum + cat.avgEffectiveness, 0) / promptCategories.length).toFixed(1),
+                          categorias: promptCategories.length,
+                          testsActivos: abTests.filter(t => t.status === 'running').length
+                        };
+                        console.log('Generando reporte:', reportData);
+                        alert(`Reporte generado:\n\nFecha: ${reportData.fecha}\nTotal Prompts: ${reportData.totalPrompts}\nEfectividad: ${reportData.efectividadPromedio}%\nCategorías: ${reportData.categorias}\nTests A/B activos: ${reportData.testsActivos}`);
+                      }}
+                    >
+                      Generar Reporte Completo
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                      onClick={() => {
+                        const csvData = promptCategories.map(cat => 
+                          `${cat.name},${cat.community},${cat.prompts},${cat.avgEffectiveness}%`
+                        ).join('\n');
+                        const csvContent = 'Categoría,Comunidad,Prompts,Efectividad\n' + csvData;
+                        console.log('Exportando métricas CSV:', csvContent);
+                        alert('Métricas exportadas a CSV\n\nDatos incluidos:\n' + promptCategories.length + ' categorías con métricas de efectividad');
+                      }}
+                    >
+                      Exportar Métricas
+                    </button>
+                    <button 
+                      className="w-full px-3 py-2 bg-purple-500 text-white rounded text-sm hover:bg-purple-600"
+                      onClick={() => {
+                        const alertConfig = {
+                          emailAlerts,
+                          efectividadMinima: effectivenessThreshold,
+                          conversionMinima: conversionThreshold,
+                          satisfaccionMinima: satisfactionThreshold
+                        };
+                        console.log('Configuración de alertas:', alertConfig);
+                        alert(`Alertas configuradas:\n\nEmail: ${emailAlerts ? 'Activado' : 'Desactivado'}\nEfectividad mínima: ${effectivenessThreshold}%\nConversión mínima: ${conversionThreshold}%\nSatisfacción mínima: ${satisfactionThreshold}`);
+                      }}
+                    >
+                      Configurar Alertas
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modales simplificados para funcionalidad básica
+  const AdaptivePromptsModal = () => showAdaptivePromptsModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Prompts Adaptativos según Perfil de Usuario</h2>
+          <button onClick={() => setShowAdaptivePromptsModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {userProfiles.map(profile => (
+            <div key={profile.id} className="border rounded-lg p-4">
+              <h3 className="font-medium">{profile.name}</h3>
+              <p className="text-sm text-gray-600">Experiencia: {profile.experience} | Departamento: {profile.department}</p>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {profile.adaptivePrompts.map((adapt, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                    {adapt.adaptations.join(', ')}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const VariantGeneratorModal = () => showVariantGeneratorModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Generación Automática de Variantes</h2>
+          <button onClick={() => setShowVariantGeneratorModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="text-center py-8">
+          <Zap className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <button 
+            className={`px-6 py-3 rounded-lg text-white ${generatingVariants ? 'bg-gray-500' : 'bg-yellow-500 hover:bg-yellow-600'}`}
+            disabled={generatingVariants}
+            onClick={() => {
+              setGeneratingVariants(true);
+              setTimeout(() => {
+                setPromptVariants(prev => [...prev, {
+                  id: `var_${Date.now()}`,
+                  promptId: 'new_prompt',
+                  name: 'Variante Generada Automáticamente',
+                  version: 'AUTO',
+                  effectiveness: 88 + Math.random() * 10,
+                  usage: Math.floor(Math.random() * 1000),
+                  conversionRate: 75 + Math.random() * 15,
+                  avgResponseTime: 2 + Math.random() * 2,
+                  userSatisfaction: 4 + Math.random(),
+                  isActive: false,
+                  testingStatus: 'draft' as const,
+                  languages: ['es', 'ca'],
+                  community: 'General',
+                  lastUpdate: new Date()
+                }]);
+                setGeneratingVariants(false);
+              }, 3000);
+            }}
+          >
+            {generatingVariants ? 'Generando...' : 'Generar Nueva Variante'}
+          </button>
+          <p className="text-sm text-gray-600 mt-4">IA optimizada para el sector público español</p>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const RobustnessTestModal = () => showRobustnessTestModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Testing de Robustez contra Edge Cases</h2>
+          <button onClick={() => setShowRobustnessTestModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {promptVariants.slice(0,2).map(variant => (
+            <div key={variant.id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium">{variant.name}</h3>
+                <button 
+                  className={`px-3 py-1 text-white text-xs rounded ${
+                    runningRobustnessTest.includes(variant.id) ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'
+                  }`}
+                  disabled={runningRobustnessTest.includes(variant.id)}
+                  onClick={() => {
+                    setRunningRobustnessTest(prev => [...prev, variant.id]);
+                    setTimeout(() => {
+                      setRunningRobustnessTest(prev => prev.filter(id => id !== variant.id));
+                    }, 2000);
+                  }}
+                >
+                  {runningRobustnessTest.includes(variant.id) ? 'Testeando...' : 'Ejecutar Test'}
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Efectividad</p>
+                  <p className="font-medium">{variant.effectiveness.toFixed(1)}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Uso</p>
+                  <p className="font-medium">{variant.usage}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Satisfacción</p>
+                  <p className="font-medium">{variant.userSatisfaction.toFixed(1)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const UsagePatternsModal = () => showUsagePatternsModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Analytics de Patrones de Uso</h2>
+          <button onClick={() => setShowUsagePatternsModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="p-4 bg-green-50 rounded-lg">
+            <h3 className="font-medium mb-3 text-green-800">Sesiones Promedio</h3>
+            <p className="text-2xl font-bold text-green-600">{promptAnalytics.usagePatterns[0].averageSessionLength} min</p>
+          </div>
+          <div className="p-4 bg-orange-50 rounded-lg">
+            <h3 className="font-medium mb-3 text-orange-800">Tasa de Rebote</h3>
+            <p className="text-2xl font-bold text-orange-600">{promptAnalytics.usagePatterns[0].bounceRate}%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const LowPerformanceModal = () => showLowPerformanceModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Identificación de Prompts con Bajo Rendimiento</h2>
+          <button onClick={() => setShowLowPerformanceModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {promptAnalytics.lowPerformance.map(prompt => (
+            <div key={prompt.promptId} className="border rounded-lg p-4 bg-red-50">
+              <h3 className="font-medium text-red-800">{prompt.name}</h3>
+              <div className="grid grid-cols-3 gap-4 mt-2">
+                <div>
+                  <p className="text-sm text-gray-600">Efectividad</p>
+                  <p className="font-medium text-red-600">{prompt.effectiveness}%</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Satisfacción</p>
+                  <p className="font-medium text-red-600">{prompt.satisfaction}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Tasa Error</p>
+                  <p className="font-medium text-red-600">{prompt.errorRate}%</p>
+                </div>
+              </div>
+              <div className="mt-3">
+                <p className="text-sm text-gray-600 mb-2">Recomendaciones:</p>
+                <div className="space-y-1">
+                  {prompt.recommendations.map((rec, idx) => (
+                    <p key={idx} className="text-sm text-blue-600">• {rec}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const MultilingualModal = () => showMultilingualModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Sistema Multiidioma con Traducción Automática</h2>
+          <button onClick={() => setShowMultilingualModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-medium mb-3">Idiomas Soportados</h3>
+            <div className="space-y-2">
+              {promptAnalytics.multilingual.languages.map(lang => (
+                <div key={lang} className="flex items-center justify-between p-2 border rounded">
+                  <span className="font-medium">{lang.toUpperCase()}</span>
+                  <span className="text-green-600">Activo</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="font-medium mb-3">Calidad de Traducción</h3>
+            <div className="space-y-2">
+              {Object.entries(promptAnalytics.multilingual.translationQuality).map(([pair, quality]) => (
+                <div key={pair} className="flex items-center justify-between">
+                  <span className="text-sm">{pair}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{ width: `${quality}%` }} />
+                    </div>
+                    <span className="text-sm font-medium">{quality}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  // Modales del Laboratorio R&D de Experimentos
+
+  // Modal del Wizard de Experimentos A/B/C
+  const ExperimentWizardModal = () => {
+    if (!showExperimentWizardModal) return null;
+    
+    const [wizardStep, setWizardStep] = useState(1);
+    const [experimentData, setExperimentData] = useState({
+      name: '',
+      hypothesis: '',
+      type: 'ab',
+      template: '',
+      metrics: [],
+      duration: 14,
+      participants: 1000,
+      confidenceLevel: 95
+    });
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Wizard de Disseny Experimental A/B/C</h2>
+              <button onClick={() => setShowExperimentWizardModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Progress Steps */}
+            <div className="flex items-center mt-6">
+              {[1, 2, 3, 4, 5].map(step => (
+                <div key={step} className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    step <= wizardStep ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {step}
+                  </div>
+                  {step < 5 && <div className={`w-12 h-1 ${step < wizardStep ? 'bg-blue-500' : 'bg-gray-200'}`} />}
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-600">
+              Pas {wizardStep} de 5: {
+                wizardStep === 1 ? 'Informació Bàsica' :
+                wizardStep === 2 ? 'Hipòtesis i Objetius' :
+                wizardStep === 3 ? 'Configuració de Variants' :
+                wizardStep === 4 ? 'Mètriques i Duració' :
+                'Revisió Final'
+              }
+            </div>
+          </div>
+          
+          <div className="p-6">
+            {wizardStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Nom de l'Experiment</label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border rounded-lg"
+                    placeholder="Ex: Optimització interfície ciutadana"
+                    value={experimentData.name}
+                    onChange={(e) => setExperimentData({...experimentData, name: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tipus d'Experiment</label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { id: 'ab', name: 'A/B Test', desc: 'Comparació de 2 variants' },
+                      { id: 'abc', name: 'A/B/C Test', desc: 'Comparació de 3 variants' },
+                      { id: 'multivariate', name: 'Multivariat', desc: 'Múltiples variables' }
+                    ].map(type => (
+                      <div
+                        key={type.id}
+                        className={`p-4 border-2 rounded-lg cursor-pointer ${
+                          experimentData.type === type.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => setExperimentData({...experimentData, type: type.id})}
+                      >
+                        <h4 className="font-medium">{type.name}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{type.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Template (Opcional)</label>
+                  <select 
+                    className="w-full p-3 border rounded-lg"
+                    value={experimentData.template}
+                    onChange={(e) => setExperimentData({...experimentData, template: e.target.value})}
+                  >
+                    <option value="">Seleccionar template...</option>
+                    {experimentTemplates.map(template => (
+                      <option key={template.id} value={template.id}>
+                        {template.name} - {template.category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+            
+            {wizardStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Hipòtesis Principal</label>
+                  <textarea
+                    className="w-full p-3 border rounded-lg h-24"
+                    placeholder="Ex: La nova interfície millorarà la satisfacció dels usuaris en un 20%"
+                    value={experimentData.hypothesis}
+                    onChange={(e) => setExperimentData({...experimentData, hypothesis: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <h4 className="font-medium mb-3">Objectius Esperats</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h5 className="font-medium text-green-800 mb-2">Objectius Primaris</h5>
+                      <ul className="text-sm text-green-700 space-y-1">
+                        <li>• Millorar satisfacció usuari</li>
+                        <li>• Augmentar taxa de conversió</li>
+                        <li>• Reduir temps de tasca</li>
+                      </ul>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h5 className="font-medium text-blue-800 mb-2">Objectius Secundaris</h5>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• Reduir taxa d'error</li>
+                        <li>• Millorar accessibilitat</li>
+                        <li>• Optimitzar rendiment</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {wizardStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-medium mb-3">Configuració de Variants</h4>
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4">
+                      <h5 className="font-medium mb-2">Variant A (Control)</h5>
+                      <p className="text-sm text-gray-600">Versió actual del sistema</p>
+                      <div className="mt-2 p-2 bg-gray-100 rounded text-sm">33.3% del tràfic</div>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <h5 className="font-medium mb-2">Variant B (Test)</h5>
+                      <input 
+                        type="text" 
+                        className="w-full p-2 border rounded mb-2" 
+                        placeholder="Descripció de la variant B"
+                      />
+                      <div className="mt-2 p-2 bg-gray-100 rounded text-sm">33.3% del tràfic</div>
+                    </div>
+                    {experimentData.type === 'abc' && (
+                      <div className="border rounded-lg p-4">
+                        <h5 className="font-medium mb-2">Variant C (Test 2)</h5>
+                        <input 
+                          type="text" 
+                          className="w-full p-2 border rounded mb-2" 
+                          placeholder="Descripció de la variant C"
+                        />
+                        <div className="mt-2 p-2 bg-gray-100 rounded text-sm">33.4% del tràfic</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {wizardStep === 4 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Duració (dies)</label>
+                    <input
+                      type="range"
+                      min="7"
+                      max="60"
+                      value={experimentData.duration}
+                      onChange={(e) => setExperimentData({...experimentData, duration: Number(e.target.value)})}
+                      className="w-full"
+                    />
+                    <div className="text-center text-sm text-gray-600 mt-1">{experimentData.duration} dies</div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Participants mínims</label>
+                    <input
+                      type="number"
+                      min="100"
+                      max="50000"
+                      value={experimentData.participants}
+                      onChange={(e) => setExperimentData({...experimentData, participants: Number(e.target.value)})}
+                      className="w-full p-3 border rounded-lg"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Mètriques a Mesurar</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Satisfacció usuari', 'Taxa de conversió', 'Temps de tasca', 'Taxa d\'error', 'Accessibilitat', 'Rendiment'].map(metric => (
+                      <label key={metric} className="flex items-center gap-2">
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-sm">{metric}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {wizardStep === 5 && (
+              <div className="space-y-6">
+                <div className="p-6 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium mb-4">Revisió de l'Experiment</h4>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <h5 className="font-medium mb-2">Configuració</h5>
+                      <ul className="text-sm space-y-1">
+                        <li><strong>Nom:</strong> {experimentData.name || 'Sense nom'}</li>
+                        <li><strong>Tipus:</strong> {experimentData.type.toUpperCase()}</li>
+                        <li><strong>Duració:</strong> {experimentData.duration} dies</li>
+                        <li><strong>Participants:</strong> {experimentData.participants.toLocaleString()}</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="font-medium mb-2">Metodologia</h5>
+                      <p className="text-sm text-gray-600">
+                        Disseny experimental aleatoritzat amb distribució equitativa entre variants.
+                        Anàlisi estadístic amb confiança del {experimentData.confidenceLevel}%.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium text-blue-800">Consideracions Ètiques</span>
+                  </div>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Consentiment informat, anonimització de dades, compliment del GDPR
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="p-6 border-t border-gray-200 flex justify-between">
+            <button
+              onClick={() => wizardStep > 1 ? setWizardStep(wizardStep - 1) : setShowExperimentWizardModal(false)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              {wizardStep > 1 ? 'Anterior' : 'Cancel·lar'}
+            </button>
+            
+            <button
+              onClick={() => {
+                if (wizardStep < 5) {
+                  setWizardStep(wizardStep + 1);
+                } else {
+                  // Crear experiment
+                  const newExperiment = {
+                    ...advancedExperiments[0],
+                    id: `exp_${Date.now()}`,
+                    name: experimentData.name || 'Nou Experiment',
+                    hypothesis: experimentData.hypothesis,
+                    status: 'draft',
+                    progress: 0,
+                    participants: experimentData.participants,
+                    startDate: new Date(),
+                    endDate: new Date(Date.now() + experimentData.duration * 24 * 60 * 60 * 1000)
+                  };
+                  console.log('Nou experiment creat:', newExperiment);
+                  setShowExperimentWizardModal(false);
+                  setWizardStep(1);
+                  alert(`Experiment "${newExperiment.name}" creat correctament!`);
+                }
+              }}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              {wizardStep < 5 ? 'Següent' : 'Crear Experiment'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Detalls d'Experiment
+  const ExperimentDetailsModal = () => {
+    if (!showExperimentDetailsModal || !selectedExperiment) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">{selectedExperiment.name}</h2>
+                <p className="text-gray-600 mt-1">{selectedExperiment.hypothesis}</p>
+              </div>
+              <button onClick={() => setShowExperimentDetailsModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Informació Principal */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Estado y Progreso */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Estat de l'Experiment</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedExperiment.status === 'running' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {selectedExperiment.status.charAt(0).toUpperCase() + selectedExperiment.status.slice(1)}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      Progrés: {selectedExperiment.progress}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-blue-500 h-3 rounded-full transition-all" 
+                      style={{ width: `${selectedExperiment.progress}%` }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Variants Performance */}
+                <div>
+                  <h3 className="font-semibold mb-3">Rendiment de Variants</h3>
+                  <div className="space-y-4">
+                    {Object.entries(selectedExperiment.variants).map(([key, variant]: [string, any]) => (
+                      <div key={key} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{variant.name}</h4>
+                          <span className="text-sm text-gray-600">{variant.percentage}% tràfic</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 mt-3">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-blue-600">
+                              {key === 'control' ? '7.2' : key === 'variantA' ? '7.8' : '8.1'}
+                            </p>
+                            <p className="text-xs text-gray-600">Satisfacció</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-green-600">
+                              {key === 'control' ? '72%' : key === 'variantA' ? '78%' : '85%'}
+                            </p>
+                            <p className="text-xs text-gray-600">Conversió</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-purple-600">
+                              {key === 'control' ? '4.5m' : key === 'variantA' ? '4.1m' : '3.8m'}
+                            </p>
+                            <p className="text-xs text-gray-600">Temps tasca</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Timeline */}
+                <div>
+                  <h3 className="font-semibold mb-3">Cronologia</h3>
+                  <div className="space-y-3">
+                    {selectedExperiment.versions.map((version: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{version.version}</span>
+                            <span className="text-sm text-gray-500">{version.date.toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-sm text-gray-600">{version.changes}</p>
+                          <p className="text-xs text-gray-500">per {version.author}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Panel Lateral */}
+              <div className="space-y-6">
+                {/* Mètriques Clau */}
+                <div>
+                  <h3 className="font-semibold mb-3">Mètriques Clau</h3>
+                  <div className="space-y-4">
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-600">Mètrica Primària</p>
+                      <p className="font-bold text-lg">{selectedExperiment.metrics.primary.current}</p>
+                      <p className="text-xs text-gray-600">Target: {selectedExperiment.metrics.primary.target}</p>
+                    </div>
+                    
+                    {selectedExperiment.metrics.secondary.map((metric: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600 capitalize">{metric.name.replace('_', ' ')}</p>
+                        <p className="font-bold">{metric.current}</p>
+                        <p className="text-xs text-gray-500">Baseline: {metric.baseline}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Colaboradors */}
+                <div>
+                  <h3 className="font-semibold mb-3">Col·laboradors</h3>
+                  <div className="space-y-2">
+                    {selectedExperiment.collaborators.map((collaborator: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm">{collaborator}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Accions */}
+                <div>
+                  <h3 className="font-semibold mb-3">Accions</h3>
+                  <div className="space-y-2">
+                    <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm">
+                      Pausar Experiment
+                    </button>
+                    <button 
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                      onClick={() => {
+                        setSelectedExperiment(selectedExperiment);
+                        setShowStatisticalAnalysisModal(true);
+                      }}
+                    >
+                      Veure Anàlisi
+                    </button>
+                    <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                      Exportar Dades
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal d'Anàlisi Estadístic Avançat
+  const StatisticalAnalysisModal = () => {
+    if (!showStatisticalAnalysisModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <BarChart className="w-6 h-6 text-blue-500" />
+                Anàlisi Estadístic Avançat
+              </h2>
+              <button onClick={() => setShowStatisticalAnalysisModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Gràfics Principals */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Significancia Estadistica */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="font-semibold mb-4">Significança Estadística</h3>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <p className="text-2xl font-bold text-green-600">87%</p>
+                      <p className="text-sm text-green-600">Confiança</p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-600">0.03</p>
+                      <p className="text-sm text-blue-600">p-value</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <p className="text-2xl font-bold text-purple-600">2.3</p>
+                      <p className="text-sm text-purple-600">Effect Size</p>
+                    </div>
+                  </div>
+                  
+                  {/* Gràfic simulat de distribució */}
+                  <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <BarChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">Gràfic de Distribució Bayesiana</p>
+                      <p className="text-xs text-gray-400">Visualització de probabilitats posteriors</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Evolució Temporal */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="font-semibold mb-4">Evolució Temporal de Mètriques</h3>
+                  <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">Gràfic de Sèries Temporals</p>
+                      <p className="text-xs text-gray-400">Evolució de conversió per variant</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="p-3 bg-blue-50 rounded">
+                      <p className="text-sm text-blue-600">Tendència Variant A</p>
+                      <p className="font-bold text-blue-700">+12% millora</p>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded">
+                      <p className="text-sm text-green-600">Tendència Variant B</p>
+                      <p className="font-bold text-green-700">+18% millora</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Anàlisi de Cohorts */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="font-semibold mb-4">Anàlisi de Cohorts</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Cohort</th>
+                          <th className="text-right p-2">Dia 1</th>
+                          <th className="text-right p-2">Dia 7</th>
+                          <th className="text-right p-2">Dia 14</th>
+                          <th className="text-right p-2">Dia 30</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="p-2 font-medium">Control</td>
+                          <td className="text-right p-2">72%</td>
+                          <td className="text-right p-2">68%</td>
+                          <td className="text-right p-2">65%</td>
+                          <td className="text-right p-2">62%</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="p-2 font-medium">Variant A</td>
+                          <td className="text-right p-2">78%</td>
+                          <td className="text-right p-2">76%</td>
+                          <td className="text-right p-2">74%</td>
+                          <td className="text-right p-2">71%</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2 font-medium">Variant B</td>
+                          <td className="text-right p-2">85%</td>
+                          <td className="text-right p-2">82%</td>
+                          <td className="text-right p-2">80%</td>
+                          <td className="text-right p-2">77%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Panel Lateral */}
+              <div className="space-y-6">
+                {/* Resum Estadístic */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Resum Estadístic</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>Mètode:</span>
+                      <span className="font-medium">Bayesià</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Participants:</span>
+                      <span className="font-medium">2,500</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Conversions:</span>
+                      <span className="font-medium">1,847</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Duració:</span>
+                      <span className="font-medium">15 dies</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Test Power */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 text-blue-800">Power del Test</h3>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600 mb-1">94%</div>
+                    <p className="text-sm text-blue-600">Probabilitat de detectar efecte</p>
+                  </div>
+                  <div className="mt-4 text-xs text-blue-700">
+                    <p>• Alpha level: 0.05</p>
+                    <p>• Effect size: Medium (0.3)</p>
+                    <p>• Sample size: Adequate</p>
+                  </div>
+                </div>
+                
+                {/* Recomanacions */}
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 text-green-800">Recomanacions IA</h3>
+                  <div className="space-y-2 text-sm text-green-700">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 mt-0.5" />
+                      <span>Variant B mostra millor rendiment</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 mt-0.5" />
+                      <span>Significança estadística assolida</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 mt-0.5 text-yellow-600" />
+                      <span className="text-yellow-700">Necessari més temps per cohort</span>
+                    </div>
+                  </div>
+                  
+                  <button className="w-full mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm">
+                    Implementar Variant B
+                  </button>
+                </div>
+                
+                {/* Exportar */}
+                <div>
+                  <h3 className="font-semibold mb-3">Exportar Anàlisi</h3>
+                  <div className="space-y-2">
+                    <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                      📊 Reporte Excel
+                    </button>
+                    <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                      📈 Gràfics PDF
+                    </button>
+                    <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
+                      💾 Dades Raw (CSV)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Comparació Side-by-Side
+  const ComparisonModal = () => {
+    if (!showComparisonModal) return null;
+    
+    const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Comparació Side-by-Side d'Experiments</h2>
+              <button onClick={() => setShowComparisonModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            {/* Selector d'experiments */}
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3">Selecciona Experiments per Comparar</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {advancedExperiments.map(exp => (
+                  <label key={exp.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedExperiments.includes(exp.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedExperiments([...selectedExperiments, exp.id]);
+                        } else {
+                          setSelectedExperiments(selectedExperiments.filter(id => id !== exp.id));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <div>
+                      <p className="font-medium">{exp.name}</p>
+                      <p className="text-sm text-gray-600">{exp.status} • {exp.progress}%</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            
+            {/* Comparació */}
+            {selectedExperiments.length >= 2 && (
+              <div className="space-y-6">
+                {/* Mètriques Generals */}
+                <div>
+                  <h3 className="font-semibold mb-4">Comparació de Mètriques</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-3">Mètrica</th>
+                          {selectedExperiments.map(expId => {
+                            const exp = advancedExperiments.find(e => e.id === expId);
+                            return (
+                              <th key={expId} className="text-center p-3">
+                                {exp?.name}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="p-3 font-medium">Participants</td>
+                          {selectedExperiments.map(expId => {
+                            const exp = advancedExperiments.find(e => e.id === expId);
+                            return (
+                              <td key={expId} className="text-center p-3">
+                                {exp?.participants.toLocaleString()}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr className="border-b">
+                          <td className="p-3 font-medium">Progrés</td>
+                          {selectedExperiments.map(expId => {
+                            const exp = advancedExperiments.find(e => e.id === expId);
+                            return (
+                              <td key={expId} className="text-center p-3">
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-blue-500 h-2 rounded-full" 
+                                      style={{ width: `${exp?.progress}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-sm">{exp?.progress}%</span>
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr className="border-b">
+                          <td className="p-3 font-medium">Significança</td>
+                          {selectedExperiments.map(expId => {
+                            const exp = advancedExperiments.find(e => e.id === expId);
+                            return (
+                              <td key={expId} className="text-center p-3">
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  (exp?.statisticalSignificance || 0) > 0.8 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {((exp?.statisticalSignificance || 0) * 100).toFixed(1)}%
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-medium">Mètrica Primària</td>
+                          {selectedExperiments.map(expId => {
+                            const exp = advancedExperiments.find(e => e.id === expId);
+                            return (
+                              <td key={expId} className="text-center p-3 font-semibold text-blue-600">
+                                {exp?.metrics.primary.current}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                {/* Gràfic de Comparació */}
+                <div>
+                  <h3 className="font-semibold mb-4">Visualització Comparativa</h3>
+                  <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <BarChart className="w-16 h-16 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 font-medium">Gràfic Comparatiu de Rendiment</p>
+                      <p className="text-sm text-gray-400">Comparació de mètriques clau entre experiments</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Recomanacions */}
+                <div className="bg-blue-50 rounded-lg p-6">
+                  <h3 className="font-semibold mb-3 text-blue-800">Anàlisi Comparatiu</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Millor Rendiment:</h4>
+                      <p className="text-sm">L'experiment amb millor significança estadística és el que mostra major potencial d'impacte.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Recomanació:</h4>
+                      <p className="text-sm">Considera implementar les millors pràctiques de l'experiment líder en els altres tests.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {selectedExperiments.length < 2 && (
+              <div className="text-center py-12">
+                <BarChart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Selecciona almenys 2 experiments per veure la comparació</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Col·laboració amb Versionat
+  const CollaborationModal = () => {
+    if (!showCollaborationModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Users className="w-6 h-6 text-purple-500" />
+                Sistema de Col·laboració amb Versionat
+              </h2>
+              <button onClick={() => setShowCollaborationModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Team Members */}
+              <div>
+                <h3 className="font-semibold mb-4">Equip de Treball</h3>
+                <div className="space-y-3">
+                  {advancedExperiments[0].collaborators.map((collab: string, idx: number) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        {collab.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{collab}</p>
+                        <p className="text-sm text-gray-600">
+                          {idx === 0 ? 'Lead Researcher' : idx === 1 ? 'Data Analyst' : 'UX Specialist'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <p className="text-xs text-gray-500">Actiu</p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2">
+                    <Plus className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-600">Afegir Col·laborador</span>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Version History */}
+              <div>
+                <h3 className="font-semibold mb-4">Historial de Versions</h3>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {advancedExperiments[0].versions.map((version: any, idx: number) => (
+                    <div key={idx} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{version.version}</span>
+                        <span className="text-sm text-gray-500">{version.date.toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{version.changes}</p>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">per {version.author}</span>
+                        <div className="flex gap-1">
+                          <button className="px-2 py-1 bg-blue-500 text-white rounded text-xs">Veure</button>
+                          <button className="px-2 py-1 bg-gray-500 text-white rounded text-xs">Restaurar</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Activity Feed */}
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="font-semibold mb-4">Activitat Recent</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">MG</div>
+                  <div>
+                    <p className="text-sm"><strong>Maria García</strong> ha actualitzat els paràmetres del test</p>
+                    <p className="text-xs text-gray-500">Fa 2 hores</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">JP</div>
+                  <div>
+                    <p className="text-sm"><strong>Joan Puig</strong> ha comentat els resultats preliminars</p>
+                    <p className="text-xs text-gray-500">Fa 4 hores</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm">AM</div>
+                  <div>
+                    <p className="text-sm"><strong>Anna Martín</strong> ha aprovat la configuració inicial</p>
+                    <p className="text-xs text-gray-500">Fa 1 dia</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Templates
+  const TemplatesModal = () => {
+    if (!showTemplatesModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <BookOpen className="w-6 h-6 text-orange-500" />
+                Templates per Sector Públic
+              </h2>
+              <button onClick={() => setShowTemplatesModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {experimentTemplates.map(template => (
+                <div key={template.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-lg">{template.name}</h3>
+                      <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded mt-1">
+                        {template.category}
+                      </span>
+                    </div>
+                    <button 
+                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                      onClick={() => {
+                        setSelectedExperimentTemplate(template);
+                        setShowTemplatesModal(false);
+                        setShowExperimentWizardModal(true);
+                      }}
+                    >
+                      Usar
+                    </button>
+                  </div>
+                  
+                  <p className="text-gray-600 mb-4">{template.description}</p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium mb-1">Hipòtesi:</p>
+                      <p className="text-sm text-gray-600">{template.hypothesis}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="font-medium mb-1">Mètriques:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {template.metrics.map(metric => (
+                          <span key={metric} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                            {metric.replace('_', ' ')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <p className="font-medium">Duració</p>
+                        <p className="text-gray-600">{template.duration} dies</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Mostra</p>
+                        <p className="text-gray-600">{template.sampleSize.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Variants</p>
+                        <p className="text-gray-600">{template.variants.join(', ')}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-3 border-t">
+                      <p className="text-xs text-gray-500">{template.methodology}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-medium mb-2 text-blue-800">Crear Template Personalitzat</h4>
+              <p className="text-sm text-blue-700 mb-3">
+                Crea templates personalitzats basats en els teus experiments exitosos
+              </p>
+              <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                + Nou Template
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Documentació Automàtica
+  const DocumentationModal = () => {
+    if (!showDocumentationModal || !selectedExperiment) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <FileText className="w-6 h-6 text-green-500" />
+                Documentació Automàtica de Metodologia
+              </h2>
+              <button onClick={() => setShowDocumentationModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="space-y-6">
+              {/* Metodologia */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="font-semibold mb-3">Metodologia Experimental</h3>
+                <p className="text-gray-700">{selectedExperiment.documentation.methodology}</p>
+              </div>
+              
+              {/* Tools & Technologies */}
+              <div>
+                <h3 className="font-semibold mb-3">Eines i Tecnologies</h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                  {selectedExperiment.documentation.tools.map((tool: string, idx: number) => (
+                    <div key={idx} className="p-2 bg-blue-100 text-blue-800 rounded text-center text-sm">
+                      {tool}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Data Collection */}
+              <div>
+                <h3 className="font-semibold mb-3">Recol·lecció de Dades</h3>
+                <p className="text-gray-700">{selectedExperiment.documentation.dataCollection}</p>
+              </div>
+              
+              {/* Quality Controls */}
+              <div>
+                <h3 className="font-semibold mb-3">Controls de Qualitat</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {selectedExperiment.documentation.qualityControls.map((control: string, idx: number) => (
+                    <li key={idx} className="text-gray-700">{control}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              {/* Ethical Considerations */}
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="font-semibold mb-3 text-green-800">Consideracions Ètiques</h3>
+                <p className="text-green-700">{selectedExperiment.documentation.ethicalConsiderations}</p>
+              </div>
+              
+              {/* Export Options */}
+              <div className="pt-6 border-t">
+                <h3 className="font-semibold mb-3">Exportar Documentació</h3>
+                <div className="flex gap-3">
+                  <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2">
+                    📄 PDF Report
+                  </button>
+                  <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2">
+                    📝 Word Document
+                  </button>
+                  <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2">
+                    📊 Methodology Sheet
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal de Reportes amb Recomanacions
+  const ReportsModal = () => {
+    if (!showReportsModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <FileText className="w-6 h-6 text-orange-500" />
+                Reportes amb Recomanacions Basades en IA
+              </h2>
+              <button onClick={() => setShowReportsModal(false)} className="p-2 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Report Types */}
+              <div className="lg:col-span-2 space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-4">Tipus de Reportes Disponibles</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <h4 className="font-medium mb-2">Reporte Executiu</h4>
+                      <p className="text-sm text-gray-600 mb-3">Resum per directius amb recomanacions estratègiques</p>
+                      <button className="w-full px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Generar
+                      </button>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <h4 className="font-medium mb-2">Anàlisi Tècnic</h4>
+                      <p className="text-sm text-gray-600 mb-3">Detalls estadístics i metodològics complets</p>
+                      <button className="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        Generar
+                      </button>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <h4 className="font-medium mb-2">Dashboard Interactiu</h4>
+                      <p className="text-sm text-gray-600 mb-3">Visualització en temps real per seguiment</p>
+                      <button className="w-full px-3 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                        Crear
+                      </button>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <h4 className="font-medium mb-2">Comparatiu Multi-experiment</h4>
+                      <p className="text-sm text-gray-600 mb-3">Anàlisi transversal amb benchmarking</p>
+                      <button className="w-full px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+                        Generar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Recent Reports */}
+                <div>
+                  <h3 className="font-semibold mb-4">Reportes Recents</h3>
+                  <div className="space-y-3">
+                    <div className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">Reporte Executiu Q3 2024</h4>
+                        <span className="text-xs text-gray-500">28 ago 2024</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">Anàlisi dels experiments d'optimització d'interfície ciutadana</p>
+                      <div className="flex gap-2">
+                        <button className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm">Veure</button>
+                        <button className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm">Descarregar</button>
+                        <button className="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm">Compartir</button>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">Anàlisi Tècnic - Test A/B Formularis</h4>
+                        <span className="text-xs text-gray-500">25 ago 2024</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">Detalls estadístics del test multivariant en formularis</p>
+                      <div className="flex gap-2">
+                        <button className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm">Veure</button>
+                        <button className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm">Descarregar</button>
+                        <button className="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm">Compartir</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* AI Recommendations Panel */}
+              <div>
+                <h3 className="font-semibold mb-4">Recomanacions IA</h3>
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="font-medium text-green-800">Acció Recomanada</span>
+                    </div>
+                    <p className="text-sm text-green-700">
+                      Implementa la Variant B en el 100% del tràfic. Millora projectada del 23% en satisfacció.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-5 h-5 text-blue-600" />
+                      <span className="font-medium text-blue-800">Oportunitat</span>
+                    </div>
+                    <p className="text-sm text-blue-700">
+                      Considera aplicar la mateixa metodologia al procés de registre. Impacte potencial estimat: +15%.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-yellow-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                      <span className="font-medium text-yellow-800">Atenció</span>
+                    </div>
+                    <p className="text-sm text-yellow-700">
+                      El segment d'usuaris +65 anys mostra patrons diferents. Recomanem test específic.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="w-5 h-5 text-purple-600" />
+                      <span className="font-medium text-purple-800">Tendència</span>
+                    </div>
+                    <p className="text-sm text-purple-700">
+                      L'adopció mobile està creixent. Prioritza optimització per dispositius mòbils.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <h4 className="font-medium mb-3">Mètriques de Confiança</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Precisió del Model</span>
+                        <span>94%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '94%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Confiança Estadística</span>
+                        <span>87%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '87%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const CollaborativeModal = () => showCollaborativeModal ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Sistema Colaborativo con Aprobación</h2>
+          <button onClick={() => setShowCollaborativeModal(false)} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="text-center py-8">
+          <Users className="w-16 h-16 text-teal-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Flujo de Trabajo para Prompts Críticos</h3>
+          <p className="text-gray-600 mb-6">Sistema de aprobación para prompts del sector público</p>
+          <div className="space-y-3">
+            <div className="p-3 bg-yellow-50 rounded-lg">
+              <p className="font-medium text-yellow-800">3 prompts pendientes de aprobación</p>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <p className="font-medium text-green-800">12 prompts aprobados este mes</p>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg">
+              <p className="font-medium text-red-800">2 prompts rechazados</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen bg-gray-50 ${showAIAssistant ? 'mr-96' : ''} transition-all duration-300`}>
       {/* Header amb gradient */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
         <div className="px-6 py-6">
@@ -8166,8 +11255,12 @@ export default function DepartamentIA() {
                 </div>
               </div>
               <button
-                onClick={() => setShowAIAssistant(!showAIAssistant)}
-                className="bg-white/20 backdrop-blur rounded-lg p-2 hover:bg-white/30 transition-colors"
+                onClick={toggleAIAssistant}
+                className={`p-3 rounded-full transition-all duration-300 ${
+                  showAIAssistant 
+                    ? 'bg-white/25 text-white' 
+                    : 'bg-white/10 hover:bg-white/20 text-white/80'
+                }`}
               >
                 <Bot className="w-6 h-6" />
               </button>
@@ -8231,17 +11324,65 @@ export default function DepartamentIA() {
 
       {/* Contenido */}
       <div className="p-6">
-        {activeTab === 'dashboard' && renderDashboard()}
-        {activeTab === 'models' && renderModels()}
+        {activeTab === 'dashboard' && (
+          <Dashboard 
+            models={models} 
+            experiments={experiments.slice(0, 3)}
+          />
+        )}
+        {activeTab === 'models' && (
+          <Models 
+            datasets={datasets}
+          />
+        )}
         {activeTab === 'entrenament' && renderEntrenament()}
         {activeTab === 'metriques' && renderMetriques()}
         {activeTab === 'compliance' && renderCompliance()}
         {activeTab === 'seguretat' && renderSeguretat()}
-        {activeTab === 'prompts' && renderPrompts()}
-        {activeTab === 'experiments' && renderExperiments()}
+        {activeTab === 'prompts' && (
+          <Prompts
+            promptCategories={promptCategories}
+            abTests={abTests}
+            promptVariants={promptVariants}
+            promptAnalytics={promptAnalytics}
+            userProfiles={userProfiles}
+            setShowPromptCategoriesModal={setShowPromptCategoriesModal}
+            setShowAbTestingModal={setShowAbTestingModal}
+            setShowPromptAnalyticsModal={setShowPromptAnalyticsModal}
+            setShowAdaptivePromptsModal={setShowAdaptivePromptsModal}
+            setShowVariantGeneratorModal={setShowVariantGeneratorModal}
+            setShowRobustnessTestModal={setShowRobustnessTestModal}
+            setShowUsagePatternsModal={setShowUsagePatternsModal}
+            setShowLowPerformanceModal={setShowLowPerformanceModal}
+            setShowMultilingualModal={setShowMultilingualModal}
+            setShowCollaborativeModal={setShowCollaborativeModal}
+            setSelectedPromptCategory={setSelectedPromptCategory}
+            setSelectedAbTest={setSelectedAbTest}
+          />
+        )}
+        {activeTab === 'experiments' && (
+          <Experiments
+            advancedExperiments={advancedExperiments}
+            experimentTemplates={experimentTemplates}
+            experimentFilter={experimentFilter}
+            setExperimentFilter={setExperimentFilter}
+            experimentTypeFilter={experimentTypeFilter}
+            setExperimentTypeFilter={setExperimentTypeFilter}
+            selectedExperiment={selectedExperiment}
+            setSelectedExperiment={setSelectedExperiment}
+            setShowExperimentWizardModal={setShowExperimentWizardModal}
+            setShowExperimentDetailsModal={setShowExperimentDetailsModal}
+            setShowStatisticalAnalysisModal={setShowStatisticalAnalysisModal}
+            setShowComparisonModal={setShowComparisonModal}
+            setShowCollaborationModal={setShowCollaborationModal}
+            setShowTemplatesModal={setShowTemplatesModal}
+            setShowDocumentationModal={setShowDocumentationModal}
+            setShowReportsModal={setShowReportsModal}
+          />
+        )}
         {activeTab === 'benchmarks' && renderBenchmarks()}
-        {activeTab === 'investigacio' && renderInvestigacio()}
-        {activeTab === 'analytics' && renderAnalytics()}
+        {activeTab === 'investigacio' && <Research />}
+        {activeTab === 'analytics' && <Analytics />}
         {activeTab === 'configuracio' && renderConfiguracio()}
       </div>
 
@@ -9715,7 +12856,7 @@ export default function DepartamentIA() {
                 <div>
                   <h4 className="font-medium mb-3">Distribució per Comunitat</h4>
                   <div className="space-y-2">
-                    {Object.entries(selectedAgent.communityBreakdown).map(([community, percentage]) => (
+                    {(Object.entries(selectedAgent.communityBreakdown) as [string, number][]).map(([community, percentage]) => (
                       <div key={community} className="flex items-center gap-3">
                         <span className="w-20 text-sm">{community}</span>
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
@@ -9923,7 +13064,7 @@ export default function DepartamentIA() {
                 <div>
                   <h4 className="font-medium mb-3">Distribució per Tipus d'Usuari</h4>
                   <div className="space-y-2">
-                    {Object.entries(selectedCommunity.userTypes).map(([type, percentage]) => (
+                    {(Object.entries(selectedCommunity.userTypes) as [string, number][]).map(([type, percentage]) => (
                       <div key={type} className="flex items-center gap-3">
                         <span className="w-24 text-sm capitalize">{type}</span>
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
@@ -9942,7 +13083,7 @@ export default function DepartamentIA() {
                 <div>
                   <h4 className="font-medium mb-3">Agents Més Utilitzats</h4>
                   <div className="space-y-2">
-                    {selectedCommunity.topAgents.map((agent, idx) => (
+                    {selectedCommunity.topAgents.map((agent: string, idx: number) => (
                       <div key={idx} className="flex items-center justify-between border rounded p-3">
                         <span className="font-medium">{agent}</span>
                         <div className="text-right text-sm">
@@ -10566,6 +13707,121 @@ export default function DepartamentIA() {
       <RedTeamModal />
       <SecurityAuditModal />
       <AccessControlModal />
+
+      {/* Modales del sistema de gestión empresarial de prompts */}
+      <PromptCategoriesModal />
+      <AbTestingModal />
+      <PromptAnalyticsModal />
+      <AdaptivePromptsModal />
+      <VariantGeneratorModal />
+      <RobustnessTestModal />
+      <UsagePatternsModal />
+      <LowPerformanceModal />
+      <MultilingualModal />
+      {/* Modales del Laboratorio R&D de Experimentos */}
+      <ExperimentWizardModal />
+      <ExperimentDetailsModal />
+      <StatisticalAnalysisModal />
+      <ComparisonModal />
+      <CollaborationModal />
+      <TemplatesModal />
+      <DocumentationModal />
+      <ReportsModal />
+      
+      <CollaborativeModal />
+
+      {/* Panel Assistant IA */}
+      {showAIAssistant && (
+        <div className="fixed right-0 top-0 h-full w-96 bg-white border-l border-gray-200 shadow-lg z-50">
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
+                    <Bot className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Assistant IA R&D</h3>
+                    <p className="text-xs text-gray-600">Especialitzat en investigació i desenvolupament IA</p>
+                  </div>
+                </div>
+                <button
+                  onClick={toggleAIAssistant}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 p-4 overflow-y-auto">
+              <div className="space-y-4">
+                <div className="p-3 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg">
+                  <p className="text-sm font-medium text-gray-900">Hola! Soc el teu assistant especialitzat en IA.</p>
+                  <p className="text-xs text-gray-700 mt-2">Puc ajudar-te amb:</p>
+                  <ul className="text-xs mt-2 space-y-1 text-gray-700">
+                    <li>• Optimització de models i hyperparàmetres</li>
+                    <li>• Anàlisi de mètriques de rendiment</li>
+                    <li>• Disseny d'experiments A/B</li>
+                    <li>• Gestió de datasets i preprocessing</li>
+                    <li>• Auditories de biaixos i ètica IA</li>
+                    <li>• Recomanacions de research papers</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="text-xs font-medium text-blue-700 mb-1">🔬 Experiment</div>
+                    <div className="text-sm text-blue-800">
+                      El test A/B del model CatGPT-4 v2.2.0 mostra una millora del +2.3% en precisió. Recomanació: desplegar a producció.
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="text-xs font-medium text-amber-700 mb-1">⚖️ Bias Alert</div>
+                    <div className="text-sm text-amber-800">
+                      Detectat biaix de gènere lleugerament elevat (1.2%) en el model de classificació. Revisar dataset d'entrenament.
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-xs font-medium text-green-700 mb-1">📈 Performance</div>
+                    <div className="text-sm text-green-800">
+                      Model CatGPT-4 funcionant òptimament: 94.5% accuracy, 120ms latency. Tots els KPIs dins del rang objectiu.
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <div className="text-xs font-medium text-purple-700 mb-1">📚 Research</div>
+                    <div className="text-sm text-purple-800">
+                      Nou paper interessant sobre "Attention Mechanisms in Legal NLP". Pot millorar el rendiment del model jurídic.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={aiMessage}
+                  onChange={(e) => setAiMessage(e.target.value)}
+                  placeholder="Pregunta sobre IA, models o experiments..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  onKeyPress={(e) => e.key === 'Enter' && sendAIMessage()}
+                />
+                <button
+                  onClick={sendAIMessage}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

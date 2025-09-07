@@ -435,18 +435,18 @@ export default function SystemStatusGridDepartmental({ className = '' }: SystemS
               {/* Accions */}
               <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                 <button
-                  onClick={() => window.location.href = '/admin/empreses'}
+                  onClick={() => window.location.href = '/admin/departament-comercial'}
                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
                   <Building2 className="w-4 h-4" />
-                  Gestionar Empreses
+                  Dashboard Comercial
                 </button>
                 <button
-                  onClick={() => openModal('salesPipeline')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                  onClick={() => window.location.href = '/admin/departament-marketing'}
+                  className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
-                  <Briefcase className="w-4 h-4" />
-                  Pipeline Vendes
+                  <Target className="w-4 h-4" />
+                  Marketing Enterprise
                 </button>
               </div>
             </div>
@@ -538,11 +538,11 @@ export default function SystemStatusGridDepartmental({ className = '' }: SystemS
               {/* Accions */}
               <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                 <button
-                  onClick={() => window.location.href = '/admin/marketing'}
-                  className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                  onClick={() => window.location.href = '/admin/departament-marketing'}
+                  className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
-                  <Megaphone className="w-4 h-4" />
-                  Campanyes
+                  <Target className="w-4 h-4" />
+                  Marketing Enterprise
                 </button>
                 <button
                   onClick={() => openModal('seoAnalytics')}
@@ -641,11 +641,11 @@ export default function SystemStatusGridDepartmental({ className = '' }: SystemS
               {/* Accions */}
               <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                 <button
-                  onClick={() => window.location.href = '/admin/facturacio'}
+                  onClick={() => window.location.href = '/admin/departament-financer'}
                   className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
-                  <CreditCard className="w-4 h-4" />
-                  Facturació
+                  <Euro className="w-4 h-4" />
+                  Dashboard Financer
                 </button>
                 <button
                   onClick={() => openModal('financialReports')}
@@ -744,11 +744,11 @@ export default function SystemStatusGridDepartmental({ className = '' }: SystemS
               {/* Accions */}
               <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                 <button
-                  onClick={() => window.location.href = '/admin/legal'}
+                  onClick={() => window.location.href = '/admin/departament-juridic'}
                   className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
                   <Scale className="w-4 h-4" />
-                  Compliance
+                  Dashboard Jurídic
                 </button>
                 <button
                   onClick={() => openModal('moderationQueue')}
